@@ -1,0 +1,12 @@
+django==2.0.7
+djangorestframework
+django-filter
+django-rest-swagger
+djangorestframework-jwt
+django-cors-headers
+cryptography
+redis
+pymysql
+celery==3.1.22
+django-celery
+celery-with-redis
