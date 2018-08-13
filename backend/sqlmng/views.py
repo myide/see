@@ -13,6 +13,9 @@ from .models import *
 import re
 
 class InceptionMainView(PromptMxins, ActionMxins, BaseView):
+    '''
+        查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
+    '''
     serializer_class = InceptionSerializer
     permission_classes = [AuthOrReadOnly]
     search_fields = ['commiter', 'sql_content', 'env', 'treater', 'remark']
@@ -89,6 +92,9 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         return Response(self.ret)
 
 class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
+    '''
+        审核 sql 的各类情形处理
+    '''
     queryset = Inceptsql.objects.all()
     serializer_class = InceptionSerializer
     forbidden_word_list = ['use ', 'drop ']
@@ -119,6 +125,9 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
         return Response(self.ret)
 
 class SelectDataView(AppellationMixins, BaseView):
+    '''
+        根据前端的选择&用户身份返回check sql时需要的执行人，数据库数据
+    '''
     queryset = Dbconf.objects.all()
     serializer_class = DbSerializer
     serializer_user = UserSerializer
@@ -138,6 +147,9 @@ class SelectDataView(AppellationMixins, BaseView):
         return Response(self.ret)
 
 class DbViewSet(BaseView):
+    '''
+        目标数据库的CURD
+    '''
     queryset = Dbconf.objects.all()
     serializer_class = DbSerializer
     permission_classes = [IsSuperUser]
