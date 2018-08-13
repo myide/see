@@ -5,7 +5,7 @@
     <Card>
       <Row>  
         <Col span="4">
-          <Input icon="search" v-model="getParams.search" placeholder="搜索" @on-change="handleGetGroupList" @on-click="handleGetGroupList" @on-enter="handleGetGroupList" />
+          <Input icon="search" v-model="getParams.search" placeholder="搜索" @on-click="handleGetGroupList" @on-enter="handleGetGroupList" />
         </Col>
 
         <Col span="10">
@@ -398,7 +398,7 @@
       },
 
       handleGetPermissonList () {
-        GetPermissonList(this.getParams)
+        GetPermissonList({})
         .then(response => {
           let permissonlist = response.data.results
           this.permsFormat(permissonlist)

@@ -3,7 +3,7 @@
       <Card>
       <Row>  
         <Col span="4">
-          <Input icon="search" v-model="getParams.search" placeholder="搜索" @on-change="handleGetDbList" @on-click="handleGetDbList" @on-enter="handleGetDbList" />
+          <Input icon="search" v-model="getParams.search" placeholder="搜索" @on-click="handleGetDbList" @on-enter="handleGetDbList" />
         </Col>
 
         <Col span="10">
@@ -259,7 +259,7 @@
       },
 
       sizeChange(size){
-        this.getParams.pageSize = size
+        this.getParams.pagesize = size
         this.handleGetDbList()
       },
 

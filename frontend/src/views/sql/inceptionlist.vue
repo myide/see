@@ -298,7 +298,7 @@
       },
 
       sizeChange(size){
-        this.getParams.pageSize = size
+        this.getParams.pagesize = size
         this.handleGetSqlList()
       },
 
