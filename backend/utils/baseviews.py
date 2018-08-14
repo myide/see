@@ -27,8 +27,3 @@ class BaseView(ReturnFormatMixin, viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = []
 
-    def perform_create(self, serializer):
-        serializer.create(self.request.data)
-
-    def perform_update(self, serializer):
-        serializer.update(self.get_object(), self.request.data)
