@@ -14,7 +14,7 @@
                 <div slot="top" class="logo-con">
                     <div v-show="!shrink">
                         <img src="../images/mysql.png" key="max-logo" />
-                        <p style="color:white"><b> see SQL上线平台</b></p>
+                        <p style="color:white"><b> See SQL上线平台</b></p>
                     </div>
                     <img v-show="shrink" src="../images/logo-min.jpg" key="min-logo" />
                 </div>

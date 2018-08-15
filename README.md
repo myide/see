@@ -1,5 +1,5 @@
 
-# see SQL审核平台
+# See SQL审核平台
 
 ![](https://img.shields.io/badge/build-release-brightgreen.svg)  
 ![](https://img.shields.io/badge/version-v1.0.0-brightgreen.svg)  
