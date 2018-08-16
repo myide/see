@@ -33,10 +33,12 @@
 ## Environment 环境
 
 - Python 3.6
-
+    - Django 2.0
+    - Django Rest Framework 3.8
+    
 - Vue.js 2.9
-
-- Django 2.0
+    - iview 2.8
+    - iciew-admin 1.3
 
 ## Install 安装及使用日志
 待更新
