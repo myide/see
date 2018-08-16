@@ -38,7 +38,7 @@
     
 - Vue.js 2.9
     - iview 2.8
-    - iciew-admin 1.3
+    - iview-admin 1.3
 
 ## Install 安装及使用日志
 待更新
