@@ -5,9 +5,9 @@ from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
 from utils.basemixins import AppellationMixins
 from utils.permissions import AuthOrReadOnly, IsSuperUser
-from utils import inception
-from .mixins import PromptMxins, ActionMxins
+from utils.inception import Inception
 from account.serializers import UserSerializer
+from .mixins import PromptMxins, ActionMxins
 from .serializers import *
 from .models import *
 import re
@@ -29,7 +29,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
 
     def get_queryset(self):
         userobj = self.request.user
-        if userobj.is_superuser: 
+        if userobj.is_superuser:
             return self.filter_date(Inceptsql.objects.all())
         query_set = userobj.groups.first().inceptsql_set.all() if userobj.role == self.dev_spm else userobj.inceptsql_set.all()
         return self.filter_date(query_set)
@@ -49,7 +49,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
             sqlobj.rollback_db = success_sql[8]
             affected_rows += success_sql[6]
             execute_time += float(success_sql[9])
-            opids.append(success_sql[7].replace("'", "")) 
+            opids.append(success_sql[7].replace("'", ""))
         if exception_sqls:
             sqlobj.status = 2
             sqlobj.execute_errors = exception_sqls
@@ -57,7 +57,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         sqlobj.rollback_opid = opids
         sqlobj.exe_affected_rows = affected_rows
         self.ret['data']['affected_rows'] = affected_rows
-        self.ret['data']['execute_time'] = '%.3f' % execute_time 
+        self.ret['data']['execute_time'] = '%.3f' % execute_time
         self.ret['msg'] = exception_sqls
         self.mail(sqlobj, self.action_type)
         self.replace_remark(sqlobj)
@@ -75,19 +75,17 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         sqlobj = self.get_object()
         dbobj = sqlobj.db
         rollback_opid_list = sqlobj.rollback_opid
-        rollback_db = sqlobj.rollback_db 
-        back_sqls = '' 
+        rollback_db = sqlobj.rollback_db
+        back_sqls = ''
         for opid in eval(rollback_opid_list)[1:]:
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
-            back_table = inception.get_rollback(back_source, rollback_db)[0][0]
-            back_content = 'select rollback_statement from {}.{} where opid_time = "{}" '.format(rollback_db, back_table, opid)
-            per_rollback = inception.get_rollback(back_content) 
-            for i in per_rollback: 
-                back_sqls += i[0]
+            back_table = Inception(back_source, rollback_db).get_back_table()
+            back_content = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
+            back_sqls += Inception(back_content, rollback_db).get_back_sql()
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)
-        execute_results = inception.table_structure(db_addr, dbobj.name, back_sqls).get('result')
+        execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
         sqlobj.status = -3
-        sqlobj.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1 
+        sqlobj.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1
         self.replace_remark(sqlobj)
         return Response(self.ret)
 
@@ -131,18 +129,18 @@ class SelectDataView(AppellationMixins, BaseView):
     queryset = Dbconf.objects.all()
     serializer_class = DbSerializer
     serializer_user = UserSerializer
-    def create(self, request): 
+    def create(self, request):
         env = request.data.get('env')
         qs = self.queryset.filter(env = env)
         self.ret['data']['dbs'] = self.serializer_class(qs, many = True).data
         userobj = request.user
         user_data = self.serializer_user(userobj).data
         self.ret['data']['commiter'] = user_data
-        if userobj.is_superuser or env == self.env_test or userobj.role != self.dev: 
+        if userobj.is_superuser or env == self.env_test or userobj.role != self.dev:
             treaters = [user_data]
         else:
             group = userobj.groups.first()
-            treaters = UserSerializer(group.user_set.filter(role = self.dev_mng), many = True).data if group else []
+            treaters = self.serializer_user(group.user_set.filter(role = self.dev_mng), many = True).data if group else []
         self.ret['data']['treaters'] = treaters
         return Response(self.ret)
 

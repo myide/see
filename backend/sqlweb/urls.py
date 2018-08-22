@@ -31,5 +31,6 @@ urlpatterns = [
     path('api/api-token-auth/', obtain_jwt_token),
     path('api/sqlmng/', include('sqlmng.urls')),
     path('api/account/', include('account.urls')),
+    path('api/dashboard/', include('dashboard.urls')),
 ]
 

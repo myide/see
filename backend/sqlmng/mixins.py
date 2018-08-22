@@ -3,7 +3,7 @@ from rest_framework.exceptions import ParseError
 from utils.tasks import send_mail
 from utils.basemixins import AppellationMixins
 from utils.dbcrypt import prpcrypt
-from utils import inception
+from utils.inception import Inception
 from .models import *
 import re
 
@@ -49,7 +49,7 @@ class ActionMxins(AppellationMixins, object):
     def check_execute_sql(self, db_id, sql_content):
         dbobj = Dbconf.objects.get(id = db_id)
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)  # 根据数据库名 匹配其地址信息，"--check=1;" 只审核
-        sql_review = inception.table_structure(db_addr, dbobj.name, sql_content)  # 审核
+        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr)  # 审核
         result, status = sql_review.get('result'), sql_review.get('status')
         # 判断检测错误，有则返回
         if status == -1 or len(result) == 1:  # 兼容2种版本的抛错
