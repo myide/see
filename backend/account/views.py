@@ -32,3 +32,6 @@ class UserViewSet(BaseView):
     serializer_class = UserSerializer
     permission_classes = [IsSuperUser]
     search_fields = ['username']
+
+    def perform_update(self, serializer):
+        serializer.update(self.get_object(), self.request.data)
