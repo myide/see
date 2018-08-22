@@ -14,7 +14,7 @@
                 <div slot="top" class="logo-con">
                     <div v-show="!shrink">
                         <img src="../images/mysql.png" key="max-logo" />
-                        <p style="color:white"><b> See SQL上线平台</b></p>
+                        <p style="color:white"><b> 51reboot SQL上线平台</b></p>
                     </div>
                     <img v-show="shrink" src="../images/logo-min.jpg" key="min-logo" />
                 </div>
@@ -33,6 +33,8 @@
                     </div>
                 </div>
                 <div class="header-avator-con">
+                    <tt></tt>
+                    <span><a target="_blank" href="https://github.com/chenkun1998/see"><b>Github</b></a></span>
                     <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
                     <lock-screen></lock-screen>
                     <message-tip v-model="mesCount"></message-tip>
@@ -78,7 +80,7 @@
     import themeSwitch from './main-components/theme-switch/theme-switch.vue';
     import Cookies from 'js-cookie';
     import util from '@/libs/util.js';
-    
+
     export default {
         components: {
             shrinkableMenu,
@@ -87,7 +89,7 @@
             fullScreen,
             lockScreen,
             messageTip,
-            themeSwitch
+            themeSwitch,
         },
         data () {
             return {

@@ -217,12 +217,13 @@
             SqlAction(id, action)
             .then(response => {
               console.log(response)
-              let status = response.data.status
+              const status = response.data.status
+              const data = response.data.data
               if (status == 0) {
                 if (action == 'execute') {
-                  this.alertSuccess('执行成功', id, response.data.execute_time, response.data.affected_rows)
+                  this.alertSuccess('执行成功', id, data.execute_time, data.affected_rows)
                 } else if (action == 'rollback') {
-                  this.alertSuccess('回滚成功', id, '', response.data.affected_rows)
+                  this.alertSuccess('回滚成功', id, '', data.affected_rows)
                 }
                 this.handleGetSqlDetail()
               } else {

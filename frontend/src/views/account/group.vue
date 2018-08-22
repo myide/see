@@ -87,9 +87,9 @@
         :title="showContent.title">
         <div class="modalcontent">
           <div v-for="item in showContent.data" :value="item.id" :key="item.id">
-            <p v-if="item.role == 'dev'"> {{ item.name }} ( 研发 ) </p>
-            <p v-else-if="item.role == 'devmng'"> {{ item.name }} ( 研发经理 ) </p>
-            <p v-else-if="item.role == 'devboss'"> {{ item.name }} ( 研发总监 ) </p>
+            <p v-if="item.role == 'developer'"> {{ item.name }} ( 研发 ) </p>
+            <p v-else-if="item.role == 'developer_manager'"> {{ item.name }} ( 研发经理 ) </p>
+            <p v-else-if="item.role == 'developer_supremo'"> {{ item.name }} ( 研发总监 ) </p>
             <p v-else> {{ item.name }} </p>
           </div>
         </div>

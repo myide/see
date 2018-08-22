@@ -89,13 +89,12 @@
             key: 'env',
             width: 60,
             render: (h, params) => {
-              let env = params.row.env
-              if (env == 'test') {
-                var desc = '测试'
-              } else if (env == 'prd'){
-                var desc = '生产'
+              const envMap = {
+                'test':'测试',
+                'prd':'生产'
               }
-              return h('span', {}, desc)
+              const env = params.row.env
+              return h('span', {}, envMap[env])
             }
           },
 

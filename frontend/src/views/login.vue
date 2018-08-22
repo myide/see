@@ -95,7 +95,7 @@ export default {
                 localStorage.setItem('user', user)
                 // 跳转到首页
                 this.$router.push({
-                    name: 'home_index'
+                    name: 'otherRouter'
                 }); 
                 // 显示提示信息
                 this.$Message.success({

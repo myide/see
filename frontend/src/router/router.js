@@ -15,7 +15,7 @@ export const loginRouter = {
 export const otherRouter = {
     path: '/',
     name: 'otherRouter',
-    redirect: '/home',
+    redirect: '/pandect/dashboard',
     component: Main,
     children: [{
             path: 'home',
@@ -62,27 +62,19 @@ export const appRouter = [{
 
     {
         path: '/pandect',
-        icon: 'social-tumblr',
+        icon: 'eye',
         title: '总览',
-        name: 'Test',
+        name: 'pandect',
         component: Main,
         children: [{
-                path: 'aa',
-                title: '测试页aa',
-                name: 'aa',
+                path: 'dashboard',
+                title: 'Dashboard',
+                name: 'dashboard',
                 component: () =>
-                    import ('@/views/test/aa.vue')
-            },
-            {
-                path: 'bb',
-                title: '测试页bb',
-                name: 'bb',
-                component: () =>
-                    import ('@/views/test/bb.vue')
+                    import ('@/views/pandect/dashboard.vue')
             },
         ]
     },
-
     {
         path: '/sqlmng',
         icon: 'shuffle',
