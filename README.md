@@ -45,6 +45,10 @@
 
 ## Snapshot 界面展示
 
+- Dashboard审计
+
+![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/dashboard.png)
+
 - SQL审核
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/check.png)
