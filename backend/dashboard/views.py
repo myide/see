@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 from django.db.models import Count, Q
 from rest_framework.response import Response
 from utils.baseviews import MaxSizePagination, BaseView
-from utils.inception import Inception
 from sqlmng.models import Inceptsql
 from sqlmng.serializers import *
 from account.serializers import *
+from utils.inception import Inception
 import datetime
 # Create your views here.
 
@@ -20,8 +20,14 @@ class ChartViewSet(BaseView):
     serializer_group = GroupSerializer
     serializer_class = InceptionSerializer
 
-    def get_status_data(self):
-        return self.queryset.values('status').annotate(num = Count('status')).order_by()
+    def get_user_info(self):
+        user_obj = self.request.user
+        user_info = {}
+        user_info['username'] = user_obj.username
+        user_info['date_joined'] = user_obj.date_joined
+        user_info['group'] = user_obj.groups.first().name if user_obj.groups.first() else None
+        user_info['identity'] = 'superuser' if user_obj.is_superuser else user_obj.role
+        return user_info
 
     def get_count_data(self):
         count_data = {}
@@ -30,6 +36,9 @@ class ChartViewSet(BaseView):
         count_data['user_total'] = self.serializer_user.Meta.model.objects.all().count()
         count_data['group_total'] = self.serializer_group.Meta.model.objects.all().count()
         return count_data
+
+    def get_status_data(self):
+        return self.queryset.values('status').annotate(num = Count('status')).order_by()
 
     def get_trend_data(self):
         date_range = range(14)
@@ -49,15 +58,6 @@ class ChartViewSet(BaseView):
         qs_today = self.queryset.filter(createtime__startswith = date)
         return self.serializer_class(qs_today, many = True).data
 
-    def get_user_info(self):
-        user_obj = self.request.user
-        user_info = {}
-        user_info['username'] = user_obj.username
-        user_info['date_joined'] = user_obj.date_joined
-        user_info['group'] = user_obj.groups.first().name if user_obj.groups.first() else None
-        user_info['identity'] = 'superuser' if user_obj.is_superuser else user_obj.role
-        return user_info
-
     def get_type_data(self):
         index_list = Inception('desc inception.statistic').get_index_list()
         index_data = []
@@ -67,8 +67,8 @@ class ChartViewSet(BaseView):
                   'GROUP BY `statistic`.`{}` ORDER BY NULL;'\
                 .format(index, index, index, index)
             records = Inception(sql, 'inception').manual()
-            total_execute_counts = 0
-            total_execute_times = 0
+            total_execute_counts = 0  # 执行的sql语句条数
+            total_execute_times = 0  # 执行次数
             if records:
                 for record in records:
                     total_execute_counts += record[0] * record[1]
@@ -82,10 +82,10 @@ class ChartViewSet(BaseView):
         return index_data
 
     def list(self, request, *args, **kwargs):
-        self.ret['data']['sql_status_data'] = self.get_status_data()
-        self.ret['data']['sql_type_data'] = self.get_type_data()
+        self.ret['data']['user_info'] = self.get_user_info()
         self.ret['data']['count_data'] = self.get_count_data()
+        self.ret['data']['sql_status_data'] = self.get_status_data()
         self.ret['data']['sql_trend_data'] = self.get_trend_data()
         self.ret['data']['sql_today_data'] = self.get_today_data()
-        self.ret['data']['user_info'] = self.get_user_info()
+        self.ret['data']['sql_type_data'] = self.get_type_data()
         return Response(self.ret)
