@@ -470,7 +470,7 @@
           CreateUser(data)
           .then(response => {
             let httpstatus = response.status
-            if (httpstatus = 201) {
+            if (httpstatus == 201) {
               let title = '服务器提示'
               let msg = '用户 ' + response.data.username + ' 创建成功'
               this.notice(title, msg)
@@ -496,7 +496,7 @@
           .then(response => {
             console.log(response)
             let httpstatus = response.status
-            if (httpstatus = 200) {
+            if (httpstatus == 200) {
               let title = '服务器提示'
               let msg = '用户 ' + response.data.username + ' 修改成功'
               this.notice(title, msg)
@@ -514,7 +514,7 @@
         .then(response => {
           console.log(response)
           let httpstatus = response.status
-          if (httpstatus = 204) {
+          if (httpstatus == 204) {
             let title = '服务器提示'
             let msg = '用户 ' + this.deletedata.username + ' 删除成功'
             this.notice(title, msg)

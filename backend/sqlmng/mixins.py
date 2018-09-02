@@ -13,14 +13,24 @@ class PromptMxins(object):
     exception_sqls = 'SQL语法错误 '
     not_exists_group = '用户的组不存在 '
     executed = 'SQL已执行过'
+    approve_warning = '此工单无需重复审批'
 
 class ActionMxins(AppellationMixins, object):
 
     action_desc_map = {
         'execute': '代执行',
         'reject': '代放弃',
-        'rollback': '代回滚'
+        'rollback': '代回滚',
+        'approve':'代审批通过',
+        'disapprove': '代审批驳回',
     }
+
+    @property
+    def is_manual_review(self):
+        instance = Strategy.objects.first()
+        if not instance:
+            instance = Strategy.objects.create()
+        return instance.is_manual_review
 
     def get_db_addr(self, user, password, host, port, actiontype):
         pc = prpcrypt()
@@ -29,30 +39,28 @@ class ActionMxins(AppellationMixins, object):
         return dbaddr
 
     def mail(self, sqlobj, mailtype):
-        if sqlobj.env == self.env_prd:  # 线上环境，发邮件提醒
+        if sqlobj.env == self.env_prd: 
             username = self.request.user.username
-            treater = sqlobj.treater  # 执行人
-            commiter = sqlobj.commiter  # 提交人
+            treater = sqlobj.treater 
+            commiter = sqlobj.commiter
             mailto_users = [treater, commiter]
-            mailto_users = list(set(mailto_users))  # 去重（避免提交人和执行人是同一人，每次收2封邮件的bug）
+            mailto_users = list(set(mailto_users)) 
             mailto_list = [u.email for u in User.objects.filter(username__in = mailto_users)]
-            # 发送邮件，并判断结果
             send_mail.delay(mailto_list, username, sqlobj.id, sqlobj.remark, mailtype, sqlobj.sql_content, sqlobj.db.name)
 
     def replace_remark(self, sqlobj):
         username = self.request.user.username
         uri = self.request.META['PATH_INFO'].split('/')[-2]
-        if username != sqlobj.treater:  # 如果是dba或总监代执行的
+        if username != sqlobj.treater: 
             sqlobj.remark +=  '   [' + username + self.action_desc_map.get(uri) + ']'
         sqlobj.save()
 
     def check_execute_sql(self, db_id, sql_content):
         dbobj = Dbconf.objects.get(id = db_id)
-        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)  # 根据数据库名 匹配其地址信息，"--check=1;" 只审核
-        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr)  # 审核
+        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type) 
+        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr) 
         result, status = sql_review.get('result'), sql_review.get('status')
-        # 判断检测错误，有则返回
-        if status == -1 or len(result) == 1:  # 兼容2种版本的抛错
+        if status == -1 or len(result) == 1: 
             raise ParseError({self.connect_error: result})
         success_sqls = []
         exception_sqls = []

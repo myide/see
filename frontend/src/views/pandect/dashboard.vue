@@ -45,7 +45,7 @@
                 </Row>
             </Col>
             <Col :md="24" :lg="16">
-                <Row :gutter="5">
+                <Row :gutter="5" v-if="flag">
                     <Col :xs="24" :sm="12" :md="6" :style="{marginBottom: '10px'}">
                         <infor-card
                             id-name="user_created_count"
@@ -135,8 +135,8 @@ import inforCard from './components/inforCard.vue';
 import toDoListItem from './components/toDoListItem.vue';
 //import countUp from './components/countUp.vue';
 //import userFlow from './components/userFlow.vue'
-import { GetChartData } from '@/api/dashboard/chart'
-  import {Tag} from 'iview';
+import {GetChartData} from '@/api/dashboard/chart'
+import {Tag} from 'iview';
 
 export default {
     name: 'home',
@@ -165,7 +165,7 @@ export default {
                     key: 'id',
                     width: 80,
                     render: (h, params) => {
-                    return h('router-link', {props:{to:'/inceptionsql/'+params.row.id}}, params.row.id)
+                        return h('router-link', {props:{to:'/inceptionsql/'+params.row.id}}, params.row.id)
                     }
                 },
                 {
@@ -173,12 +173,12 @@ export default {
                     key: 'env',
                     width: 80,
                     render: (h, params) => {
-                    const envMap = {
-                        'test':'测试',
-                        'prd':'生产'
-                    }
-                    const env = params.row.env
-                    return h('span', {}, envMap[env])
+                        const envMap = {
+                            'test':'测试',
+                            'prd':'生产'
+                        }
+                        const env = params.row.env
+                        return h('span', {}, envMap[env])
                     }
                 },   
                 {
@@ -199,7 +199,6 @@ export default {
                         } else if (status == 2) {
                             return h('div', [h(Tag,{props:{color:'red'}}, '执行失败')])
                         }
-
                     }
                 },
           ],
@@ -240,6 +239,7 @@ export default {
                 console.log(res)
                 if (res.data.status == 0) {
                     this.count = res.data.data.count_data
+                    console.log(this.count)
                     // status chart
                     this.sqlStatusChart = res.data.data.sql_status_data
                     // actionType chart
@@ -255,10 +255,9 @@ export default {
 
             })
             .catch(error => {
-            console.log(error)
+                console.log(error)
             })
       },
-
 
 
     }

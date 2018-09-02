@@ -1,6 +1,13 @@
+<style scoped>
+    .parm_check_element {
+      width: 200px;
+      margin-left: 10px;
+    }
+</style>
+
 <template>
   <div>
-      <Card>
+    <Card>
       <Row>            
         <Col span="12">
             <Alert show-icon>输入要上线的SQL语句</Alert>
@@ -8,7 +15,7 @@
             <div>
               <Form class="step-form" ref="checkContent" :model="checkData" :rules="ruleCheckData" :label-width="100">
                 <FormItem label="SQL" prop="sql_content">
-                  <Input v-model="checkData.sql_content" type="textarea" :autosize="{minRows: 10,maxRows: 20}" placeholder="请输入SQL" />
+                  <editor v-model="checkData.sql_content" @init="editorInit" @setCompletions="setCompletions"></editor>
                 </FormItem>
                 <FormItem label="备注">
                   <Input v-model="checkData.remark" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入备注" />
@@ -47,18 +54,34 @@
                     </RadioGroup>
                   </FormItem>
                   <FormItem label="数据库" prop="db">
-                    <Select v-model="checkData.db" style="width:200px; margin-left:10px">
+                    <Select v-model="checkData.db" class="parm_check_element" filterable>
                         <Option v-for="item in dbList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
-                  <FormItem label="执行人" prop="treater">
-                    <Select v-model="checkData.treater" @on-change="selectTreater" label-in-value style="width:200px; margin-left:10px">
-                        <Option v-for="item in transactorList" :value="item.value" :key="item.label">{{ item.label }}</Option>
-                    </Select>
+                  <FormItem label="工单处理人" prop="treater">
+                      <Input v-model="checkData.treater_username" class="parm_check_element" :readonly="readonly" />
                   </FormItem>
                 </Form>
               </div>
-
+              <div>
+                <Alert type="warning" show-icon closable>
+                    <p><b>Tips</b></p>
+                <template slot="desc">
+                  <p>
+                    <b>1</b>.  您可以在<router-link to='/sqlmng/settings'><b>设置</b></router-link>里指定常用的数据库&工单处理人，之后只显示这些数据供您选择。
+                  </p>
+                  <p>
+                    <b>2</b>.  关于流程
+                  </p>
+                  <p style="margin-left:20px">
+                    <b>2.1</b>. 若管理员没有设置流程，工单将按 提交人 --- 执行人 的流程进行处理。
+                  </p>
+                  <p style="margin-left:20px">
+                    <b>2.2</b>. 若管理员有设置流程，工单将按 提交人 --- 审批人 --- 执行人 的流程进行处理。
+                  </p>
+                </template>
+                </Alert>
+              </div>
             </div>
         </Col>
       </Row>
@@ -68,12 +91,17 @@
   </div>
 </template>
 <script>
-  import { GetSelectData, CheckSql } from '@/api/sql/check'
-
+  import { GetPersonalSettings, CheckSql } from '@/api/sql/check'
+  import editor from '../my-components/sql/editor'
+  
   export default {
+    components: {editor},
     data () {
       return {
-        checkData: {
+        readonly:true,
+        wordList:[],
+        checkData:{
+          treater_username:'',
           sql_content:'',
           remark:'',
           env:'prd',
@@ -82,16 +110,14 @@
           commiter:'',
           users:[]
         },
-        treaters:[],
         commiter:{},
-        ruleCheckData: {
-          sql_content: [{ required: true, message: '请填写SQL', trigger: 'blur' }],
-          treater:  [{ required: true, message: '请选择执行人', trigger: 'change', type: 'number' }],
+        ruleCheckData:{
+          sql_content:[{ required: true, message: '请输入SQL', trigger: 'blur' }],
+          treater:[{ required: true, message: '请选择执行人', trigger: 'change', type: 'number' }],
           db: [{ required: true, message: '请选择数据库', trigger: 'change', type: 'number' }],
         },
-        dbList: [],
-        transactorList: [],
-        keyMap: {
+        dbList:[],
+        keyMap:{
           'sql_content':'SQL',
           'env':'环境',
           'db':'数据库',
@@ -101,10 +127,33 @@
     },
 
     created () {
+      this.getWordList()
       this.handleSelect(this.checkData.env)
     },
 
     methods: {
+
+      getWordList () {
+        for (let i of this.util.highlight.split('|')) {
+          this.wordList.push({'vl': i, 'meta': '关键字'})
+        }
+      },
+
+      setCompletions (editor, session, pos, prefix, callback) {
+        callback(null, this.wordList.map(function (word) {
+          return {
+            caption: word.vl,
+            value: word.vl,
+            meta: word.meta
+          }
+        }))
+      },
+
+      editorInit: function () {               
+        require('brace/mode/mysql')    //language
+        require('brace/theme/xcode')
+      },
+
       renderFunc (treater) {
         this.$Notice.success({
           title: 'SQL审核通过',
@@ -131,41 +180,29 @@
         this.checkData.sql_content = ''
       },
 
-      selectTreater (data) {
-        const treaterId = data.value
-        this.checkData.users = [this.commiter.id, treaterId]
-      },
-
-      getTreaterName (id) { 
-        for (let i in this.treaters) {
-          let item = this.treaters[i]
-          if (item.id == id) {
-            return item.username
-          } 
+      setTreater (treater) {
+        if (JSON.stringify(treater) != "{}") {
+          this.checkData.treater = treater.id
+          this.checkData.treater_username = treater.username
         }
       },
 
       handleSelect (e) {
-        GetSelectData({env:e})
+        GetPersonalSettings({env:e})
         .then(response => {
           console.log(response)
-          const dbs = response.data.data.dbs
-          const treaters = response.data.data.treaters
-          this.treaters = treaters 
-          this.commiter = response.data.data.commiter
-          this.checkData.commiter = response.data.data.commiter.username
+          const data = response.data.results[0]
+          const dbs = data.db_list
+          const commiter = data.commiter
+          const treater = data.leader
+          this.setTreater(treater)
+          this.checkData.commiter = commiter.username
+          this.checkData.users = [commiter.id, treater.id]
           this.dbList = []
           dbs.map( (item) => {
             this.dbList.push({
               value:item.id,
               label:item.name
-            })
-          })
-          this.transactorList = []
-          treaters.map( (item) => {
-            this.transactorList.push({
-              value:item.id,
-              label:item.username,
             })
           })
         })
@@ -183,14 +220,13 @@
             if (!valid) {
               return
             }
-            this.checkData.treater_username = this.getTreaterName(this.checkData.treater)
             CheckSql(this.checkData)
             .then(response => {
               console.log(response)
               let status = response.data.status
               let msg = response.data.msg
               if (status == 0){
-                this.renderFunc(this.getTreaterName(this.checkData.treater))
+                this.renderFunc(this.checkData.treater_username)
               } else if (status == -1 || status == -2){
                 this.warning('SQL审核不通过', msg)
               } 
@@ -206,7 +242,5 @@
 
     },
 
-
   }
 </script>
-

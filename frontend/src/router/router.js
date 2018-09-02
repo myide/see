@@ -36,7 +36,7 @@ export const otherRouter = {
             title: 'sql详情',
             name: 'inceptiondetail',
             component: () =>
-                import ('@/views/sql/inceptiondetail.vue'),
+                import ('@/views/sql/inceptionDetail.vue'),
         }, // 用户展示图书详情
 
     ]
@@ -59,14 +59,14 @@ export const appRouter = [{
                 import ('@/views/access/access-test.vue')
         }]
     },
-
     {
         path: '/pandect',
         icon: 'eye',
         title: '总览',
         name: 'pandect',
         component: Main,
-        children: [{
+        children: [
+            {
                 path: 'dashboard',
                 title: 'Dashboard',
                 name: 'dashboard',
@@ -76,24 +76,65 @@ export const appRouter = [{
         ]
     },
     {
+        path: '/sqlquery',
+        icon: 'cube',
+        title: '查询优化',
+        name: 'sqlquery',
+        component: Main,
+        children: [
+            {
+                path: 'optimize',
+                title: '查询优化',
+                name: 'optimize',
+                component: () =>
+                    import ('@/views/sql/optimize.vue')
+            },
+        ]
+    },
+    {
         path: '/sqlmng',
         icon: 'shuffle',
-        title: 'SQL上线',
-        name: 'sq',
+        title: 'SQL工单',
+        name: 'sqlmng',
         component: Main,
-        children: [{
+        children: [
+            {
                 path: 'check',
-                title: 'sql审核',
+                title: '工单审核',
                 name: 'check',
                 component: () =>
                     import ('@/views/sql/check.vue')
             },
             {
-                path: 'inceptionlist',
-                title: 'sql处理',
-                name: 'inceptionlist',
+                path: 'inceptionList',
+                title: '工单处理',
+                name: 'inceptionList',
                 component: () =>
-                    import ('@/views/sql/inceptionlist.vue')
+                    import ('@/views/sql/inceptionList.vue')
+            },
+            {
+                path: 'settings',
+                title: '设置',
+                name: 'personalSettings',
+                component: () =>
+                    import ('@/views/sql/personalSettings.vue')
+            },
+        ]
+    },
+
+    {
+        path: '/settings',
+        icon: 'settings',
+        title: '平台设置',
+        name: 'settings',
+        component: Main,
+        children: [
+            {
+                path: 'platform',
+                title: '流程',
+                name: 'platform',
+                component: () =>
+                    import ('@/views/sql/platformSettings.vue')
             },
             {
                 path: 'dblist',
@@ -105,14 +146,14 @@ export const appRouter = [{
         ]
     },
 
-
     {
         path: '/accountmng',
         icon: 'person',
         title: '用户管理',
-        name: 'am',
+        name: 'accountmng',
         component: Main,
-        children: [{
+        children: [
+            {
                 path: 'user',
                 title: '用户',
                 name: 'user',

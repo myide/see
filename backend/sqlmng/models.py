@@ -8,24 +8,21 @@ from utils.basemodels import Basemodel
 # Create your models here.
 
 class Dbconf(Basemodel):
-
     GENDER_CHOICES = (
         ('prd', u'生产环境'),
         ('test', u'测试环境')
     )
-
-    user = models.CharField(max_length = 128)
-    password = models.CharField(max_length = 128)
-    host = models.CharField(max_length = 16)
-    port = models.CharField(max_length = 5)
-    env = models.CharField(max_length = 20, choices = GENDER_CHOICES)
-
+    related_user = models.ManyToManyField(User, null=True, blank=True)
+    user = models.CharField(max_length=128)
+    password = models.CharField(max_length=128)
+    host = models.CharField(max_length=16)
+    port = models.CharField(max_length=5)
+    env = models.CharField(max_length=20, choices=GENDER_CHOICES)
     class Meta:
         unique_together = ('name', 'host', 'env')
 
 class Inceptsql(Basemodel):
-
-    SQL_STATUS = (
+    STATUS = (
         (-3, u'已回滚'),
         (-2, u'已暂停'),
         (-1, u'待执行'),
@@ -33,23 +30,39 @@ class Inceptsql(Basemodel):
         (1, u'已放弃'),
         (2, u'执行失败'),
     )
-
     ENV = (
         ('prd', u'生产环境'),
         ('test', u'测试环境')
     )
-
     users = models.ManyToManyField(User)
-    group = models.ForeignKey(Group, null = True, blank = True, on_delete = models.CASCADE)
-    db = models.ForeignKey(Dbconf, on_delete = models.CASCADE)
-    commiter = models.CharField(max_length = 20, null = True, blank = True)
+    group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
+    db = models.ForeignKey(Dbconf, on_delete=models.CASCADE)
+    handleable = models.BooleanField(default=False)
+    commiter = models.CharField(max_length=20, null=True, blank=True)
     sql_content = models.TextField()
-    env = models.CharField(max_length = 20, choices = ENV)
-    treater = models.CharField(max_length = 20)
-    status = models.IntegerField(default = -1, choices = SQL_STATUS)
-    execute_errors = models.TextField(default = '', null = True, blank = True)
-    #execute_time = models.CharField(max_length = 11)
-    exe_affected_rows = models.CharField(max_length = 10, null = True, blank = True)
-    roll_affected_rows = models.CharField(max_length = 10, null = True, blank = True)
-    rollback_opid = models.TextField(blank = True, null = True)
-    rollback_db = models.CharField(max_length = 100, null = True, blank = True)
+    env = models.CharField(max_length=20, choices=ENV)
+    treater = models.CharField(max_length=20)
+    status = models.IntegerField(default=-1, choices=STATUS)
+    execute_errors = models.TextField(default='', null=True, blank=True)
+    exe_affected_rows = models.CharField(max_length=10, null=True, blank=True)
+    roll_affected_rows = models.CharField(max_length=10, null=True, blank=True)
+    rollback_opid = models.TextField(null=True, blank=True)
+    rollback_db = models.CharField(max_length=100, null=True, blank=True)
+
+class Step(Basemodel):
+    STATUS = (
+        (0, u'待处理'),
+        (1, u'通过'),
+        (2, u'驳回'),
+    )
+    work_order = models.ForeignKey(Inceptsql, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    status = models.IntegerField(default=0, choices=STATUS)
+
+class Strategy(Basemodel):
+    users = models.ManyToManyField(User, null=True, blank=True)
+    is_manual_review = models.BooleanField(default=False)
+
+class ForbiddenWords(Basemodel):
+    forbidden_words = models.TextField(null=True, blank=True)
+

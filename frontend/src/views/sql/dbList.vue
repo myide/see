@@ -105,11 +105,11 @@
   </div>
 </template>
 <script>
-  import {Button, Table, Modal, Message} from 'iview';
+  import {Button, Table, Modal, Message, Tag} from 'iview';
   import {GetDbList, UpdateDb, CreateDb, DeleteDb} from '@/api/sql/dbs'
 
   export default {
-    components: {Button, Table, Modal, Message},
+    components: {Button, Table, Modal, Message, Tag},
     data () {
       return {
         spinShow: false,
@@ -169,15 +169,16 @@
               key: 'user'
           },
           {
-              title: '环境',
-              key: 'env',
-              render: (h, params) => {
-                const envMap = {
-                  'test':'测试',
-                  'prd':'生产'
-                }
-                let env = params.row.env
-                return h('span', {}, envMap[env])
+            title: '环境',
+            key: 'env',
+            width: 120,
+            render: (h, params) => {
+              const envMap = {
+                'test':{color:'gray', desc:'测试'},
+                'prd':{color:'orange', desc:'生产'}
+              }
+              const env = params.row.env
+              return h(Tag, {props:{type:'dot', color:envMap[env]['color']}}, envMap[env]['desc'])
             }
           },
           {

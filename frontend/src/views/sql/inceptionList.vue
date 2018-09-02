@@ -1,6 +1,15 @@
+<style scoped>
+    .time{
+        font-size: 14px;
+        font-weight: bold;
+    }
+    .content{
+        padding-left: 5px;
+    }
+</style>
+
 <template>
     <div>
-
         <div>
           <Card>
             <Row>
@@ -32,21 +41,59 @@
             </div>
         </Modal>  
 
+        <Modal
+            v-model="stepsModal"
+            width="400"
+            :title="stepsModalTitle"
+            @on-cancel="cancel">
+            <div>
+              <Scroll height=450>
+                <Timeline>
+                  <TimelineItem v-for="(item, index) in steps" :value="item.value" :key="index" :color="getColor(item.status)">
+                    <p class="time">{{ item.updatetime | formatTime }}</p>
+                    <p class="content">{{ item.username }} <Tag :color="stepStatusMap[item.status]['color']" style="margin-left:10px">{{ stepStatusMap[item.status]['desc'] }}</Tag> </p>
+                  </TimelineItem>
+                </Timeline>
+              </Scroll>
+            </div>
+        </Modal>  
+
      </div>
 </template>
 <script>
+  import {GetStrategyList} from '@/api/sql/strategy'
   import {GetSqlList, SqlAction} from '@/api/sql/inception'
   import {getSqlContent} from '@/utils/sql/inception'
   import {addDate} from '@/utils/base/date'
+  import {handleBadgeData} from '@/utils/sql/inception'
   import baseData from '@/utils/sql/data'
 
-  import {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip} from 'iview';
+  import {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip, Badge} from 'iview';
 
   export default {
-    components: {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip},
+    components: {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip, Badge},
+    filters:{
+      formatTime:function(value){
+        if(value != '') {
+          return value.slice(0,19).replace('T',' ')
+        }
+      },
+    },
+    computed:{
+
+    },
     data () {
       return {
         spinShow:false,
+        steps:[],
+        stepsModal:false,
+        stepsModalTitle:'',
+        stepStatusMap:{
+          0:{color:'gray', desc:'待处理'},
+          1:{color:'green', desc:'通过'},
+          2:{color:'red', desc:'驳回'}
+        },
+        strategy:{is_manual_review:false},
         total:1,
         getParams:{
           page:1,
@@ -87,14 +134,14 @@
           {
             title: '环境',
             key: 'env',
-            width: 60,
+            width: 120,
             render: (h, params) => {
               const envMap = {
-                'test':'测试',
-                'prd':'生产'
+                'test':{color:'gray', desc:'测试'},
+                'prd':{color:'orange', desc:'生产'}
               }
               const env = params.row.env
-              return h('span', {}, envMap[env])
+              return h(Tag, {props:{type:'dot', color:envMap[env]['color']}}, envMap[env]['desc'])
             }
           },
 
@@ -112,7 +159,6 @@
                 h('span', {}, params.row.sql_content.slice(0,20) + '...'),
                 h('Button', {
                   props: {
-                    type: 'info',
                     size: 'small',
                   },
                   style: {float:'right'},
@@ -122,16 +168,45 @@
                       this.sqlContentModal = true
                     }
                   }
-                }, '查看')
+                }, '语句')
               ])
             }
           },
 
           {
-            title: '语法检查',
+            title: '流程',
             key: '',
             render: (h, params) => {
-              return h('div', [h(Icon,{props:{type:'checkmark'}},)])
+              const statusMap = {
+                1:'success',
+                2:'warning'
+              }
+              const steps = params.row.steps
+              let badgeData = handleBadgeData(steps)
+              if (steps.length > 0) {
+                var subElement = 
+                [
+                  h(Button, {
+                      props: {
+                        size: 'small',
+                        ghost: true
+                      },
+                      style: {},
+                      on: {
+                        click: () => {
+                          this.stepsModalTitle = '工单流程' + '（ID: ' + params.row.id + '）'
+                          this.steps = steps
+                          this.stepsModal = true
+                        }
+                      }
+                    }, '流程'),
+                  h(Badge, {props:{count:badgeData.count, type:statusMap[badgeData.badgeStatus] }},[])
+                ]
+
+              } else {
+                subElement = []
+              }
+              return h('div', {}, subElement)
             }
           },
 
@@ -155,7 +230,7 @@
           },
 
           {
-            title: '状态',
+            title: '操作状态',
             key: '',
             width: 100,
             render: (h, params) => {
@@ -188,6 +263,7 @@
             width: 150,
             align: 'center',
             render: (h, params) => {
+              const id = params.row.id
               let status = params.row.status
               let popcss = {
                 width:170,
@@ -195,9 +271,14 @@
               }
               
               if (status == -1){
-                var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 此SQL？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) , h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'放弃 此SQL？'}, on:{'on-ok': () => {this.handleAction('reject', params)} } }, [h(DropdownItem, {}, '放弃')] )]
+                var ddItem = [ 
+                  h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) ]) , 
+                  h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'放弃 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('reject', params)} } }, [h(DropdownItem, {}, '放弃')] ) ]),
+                  h('div' , {style:{display: this.strategy.is_manual_review != true || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
+                  h('div' , {style:{display: this.strategy.is_manual_review != true || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
+                ]
               } else if (status == 0){
-                var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'回滚 此SQL？'}, on:{'on-ok': () => {this.handleAction('rollback', params)} } }, [h(DropdownItem, {}, '回滚')] ) ]
+                var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'回滚 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('rollback', params)} } }, [h(DropdownItem, {}, '回滚')] ) ]
               } else {
                 var ddItem = []
               }
@@ -226,9 +307,13 @@
 
     created () {
       this.handleGetSqlList()
+      this.handleGetStrategyList()
     },
 
     methods: {
+      getColor(status){
+        return this.stepStatusMap[status]['color']
+      },
 
       alertSuccess (title, sqlid, execute_time, affected_rows) {
         this.$Notice.success({
@@ -256,6 +341,11 @@
         });
       },
 
+      getDatetime () {
+        let date = this.userInfo.date_joined || ''
+        return date.slice(0,19).replace('T',' ')
+      },
+
       handleGetSqlList () {
         this.spinShow = true
         GetSqlList(this.getParams)
@@ -278,6 +368,10 @@
               this.alertSuccess('执行成功', id, data.execute_time, data.affected_rows)
             } else if (action == 'rollback') {
               this.alertSuccess('回滚成功', id, '', data.affected_rows)
+            } else if (action == 'approve') {
+              this.alertSuccess('审批通过', id, '')
+            } else if (action == 'disapprove') {
+              this.alertSuccess('审批驳回', id, '')
             }
           } else {
             let msg = response.data.msg
@@ -285,6 +379,20 @@
           } 
           this.handleGetSqlList()
         })
+      },
+
+      handleGetStrategyList () {
+        GetStrategyList({})
+        .then(
+          response => {
+            console.log(response)
+            const results = response.data.results
+            if (results) {
+              this.strategy = results[0]
+              console.log(this.strategy.is_manual_review == false)
+            }
+          }
+        )
       },
 
       cancel () {

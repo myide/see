@@ -26,4 +26,3 @@ class BaseView(ReturnFormatMixin, viewsets.ModelViewSet):
     # 搜索
     filter_backends = [filters.SearchFilter]
     search_fields = []
-

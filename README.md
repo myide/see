@@ -17,8 +17,17 @@
     - SQL语句执行
     - SQL回滚
     - 历史记录
+- SQL查询
+    - 查询目标数据库的详细表结构
+    - SQL语句功能（美团SQLAdvisor）
 - 用户管理
     - 用户注册/注销/加组/授权等功能
+- 个性化设置
+    - 管理员可以做SQL关键字拦截，平台的审批功能开关等设置
+    - 用户可以订阅其常用的数据库，指定审批工单的经理，以简化审核时所需的操作
+- 人工审批功能，可自定义开启或关闭
+    - 若开启审批，则工单至少需双人确认才可上线（流程：提交人 -- inception自动审核 -- 经理审批 -- DBA上线）
+    - 若关闭审批，则工单可由经理上线（流程：提交人 -- inception自动审核 -- 经理上线）
 - 用户权限
     - 通过用户管理设置用户信息
     - 根据用户身份（组员/经理/总监）鉴权用户对SQL的审核/取消/执行/回滚等操作
@@ -49,11 +58,19 @@
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/dashboard.png)
 
-- SQL审核
+- SQL查询
+
+![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/query.png)
+
+- 工单审核
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/check.png)
 
-- SQL列表
+- 工单设置
+
+![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/platsettings.png)
+
+- 工单列表
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/list.png)
 

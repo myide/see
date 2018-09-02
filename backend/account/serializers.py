@@ -23,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
     def create_sysaccount(self, validated_data):
+        print(validated_data)
         sys_account = validated_data.pop('sysaccount',[])
         for account in sys_account:
             validated_data[account] = 1
@@ -48,6 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        print(validated_data)
         validated_data.pop('password')
         newpassword = validated_data.pop('newpassword')
         if newpassword:

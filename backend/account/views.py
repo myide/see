@@ -35,3 +35,6 @@ class UserViewSet(BaseView):
 
     def perform_update(self, serializer):
         serializer.update(self.get_object(), self.request.data)
+
+    def perform_create(self, serializer):
+        serializer.create(self.request.data)

@@ -346,7 +346,7 @@
           CreateGroup(this.createGroupForm)
           .then(response => {
             let httpstatus = response.status
-            if (httpstatus = 201) {
+            if (httpstatus == 201) {
               let title = '服务器提示'
               let msg = '组 ' + response.data.name + ' 创建成功'
               this.notice(title, msg)
@@ -368,7 +368,7 @@
           UpdateGroup(this.updateGroupForm.id, this.updateGroupForm)
           .then(response => {
             let httpstatus = response.status
-            if (httpstatus = 200) {
+            if (httpstatus == 200) {
               let title = '服务器提示'
               let msg = '组 ' + response.data.name + ' 修改成功'
               this.notice(title, msg)
@@ -385,7 +385,7 @@
         DeleteGroup(this.deleteData.id)
         .then(response => {
           let httpstatus = response.status
-          if (httpstatus = 204) {
+          if (httpstatus == 204) {
             let title = '服务器提示'
             let msg = '组 ' + this.deleteData.name + ' 删除成功'
             this.notice(title, msg)
