@@ -6,7 +6,7 @@ from utils.baseviews import MaxSizePagination, BaseView
 from sqlmng.models import Inceptsql
 from sqlmng.serializers import *
 from account.serializers import *
-from utils.inception import Inception
+from utils.sqltools import Inception
 import datetime
 # Create your views here.
 
