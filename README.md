@@ -81,7 +81,7 @@
 
 ## License
 
-- Django 2.0
+- Eclipse Public License - v 2.0
 
 2018 © See
 
