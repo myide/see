@@ -83,6 +83,6 @@
 
 - Django 2.0
 
-2018 © Cookie
+2018 © See
 
 
