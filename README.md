@@ -78,10 +78,12 @@
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/user.png)
 
+## 交流学习
+QQ群 630791951
 
 ## License
 
-- Django 2.0
+- Eclipse Public License - v 2.0
 
 2018 © See
 
