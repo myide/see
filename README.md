@@ -78,6 +78,8 @@
 
 ![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/user.png)
 
+## 交流学习
+QQ群 630791951
 
 ## License
 
