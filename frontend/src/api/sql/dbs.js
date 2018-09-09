@@ -1,13 +1,13 @@
-import axios from '../../libs/http'
+import axios from '../../libs/http';
 
-const dbConfs = '/api/sqlmng/dbconfs/'
+const dbConfs = '/api/sqlmng/dbconfs/';
 
 export function GetDbList(params) {
     return axios({
-      url: dbConfs,
-      method: 'get',
-      params
-    })
+        url: dbConfs,
+        method: 'get',
+        params
+    });
 }
 
 export function UpdateDb(id, data) {
@@ -15,7 +15,7 @@ export function UpdateDb(id, data) {
         url: dbConfs + id + '/',
         method: 'put',
         data: data
-    })
+    });
 }
 
 export function CreateDb(data) {
@@ -23,12 +23,12 @@ export function CreateDb(data) {
         url: dbConfs,
         method: 'post',
         data: data
-    })
+    });
 }
 
 export function DeleteDb(id) {
     return axios({
         url: dbConfs + id + '/',
         method: 'delete',
-    })
+    });
 }

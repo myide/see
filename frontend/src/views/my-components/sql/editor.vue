@@ -1,6 +1,5 @@
-<!-- 声明：此组件及功能参考开源项目 Yearning -->
 <template>
-  <div style="width: 100%;height: 350px"></div>
+  <div style="width: 100%;height: 300px"></div>
 </template>
 
 <script>

@@ -22,7 +22,7 @@
             </Row>  
             </br>
             <Row>
-              <Table :columns="columnsSqlList" :data="sqlList"></Table>
+              <Table :columns="columnsSqlList" :data="sqlList" size="small"></Table>
               </br>
               <Page :total=total show-sizer :current=getParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
             </Row>
@@ -61,7 +61,6 @@
      </div>
 </template>
 <script>
-  import {GetStrategyList} from '@/api/sql/strategy'
   import {GetSqlList, SqlAction} from '@/api/sql/inception'
   import {getSqlContent} from '@/utils/sql/inception'
   import {addDate} from '@/utils/base/date'
@@ -93,7 +92,6 @@
           1:{color:'green', desc:'通过'},
           2:{color:'red', desc:'驳回'}
         },
-        strategy:{is_manual_review:false},
         total:1,
         getParams:{
           page:1,
@@ -153,10 +151,10 @@
           {
             title: 'SQL语句',
             key: '',
-            width: 220,
+            width: 150,
             render: (h, params) => {
               return h('div', [
-                h('span', {}, params.row.sql_content.slice(0,20) + '...'),
+                h('span', {}, params.row.sql_content.slice(0,6) + '...'),
                 h('Button', {
                   props: {
                     size: 'small',
@@ -176,6 +174,7 @@
           {
             title: '流程',
             key: '',
+            width: 120,
             render: (h, params) => {
               const statusMap = {
                 1:'success',
@@ -220,7 +219,6 @@
               } else {
                 var abbreviatedRemark = remark
               }
-              // return h('span',{attrs:{title: remark}}, abbreviatedRemark)
               return h(Tooltip,{props:{placement: "top", content: remark}}, 
               [
                 h('div', {props:{slot:'content'}}, [h('div',{}, abbreviatedRemark)])
@@ -264,18 +262,19 @@
             align: 'center',
             render: (h, params) => {
               const id = params.row.id
-              let status = params.row.status
+              const status = params.row.status
+              const is_manual_review = params.row.is_manual_review
               let popcss = {
                 width:170,
                 place:'top',
               }
               
-              if (status == -1){
+              if (status == -1) {
                 var ddItem = [ 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) ]) , 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'放弃 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('reject', params)} } }, [h(DropdownItem, {}, '放弃')] ) ]),
-                  h('div' , {style:{display: this.strategy.is_manual_review != true || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
-                  h('div' , {style:{display: this.strategy.is_manual_review != true || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
+                  h('div' , {style:{display: is_manual_review == false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
+                  h('div' , {style:{display: is_manual_review ==false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
                 ]
               } else if (status == 0){
                 var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'回滚 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('rollback', params)} } }, [h(DropdownItem, {}, '回滚')] ) ]
@@ -307,7 +306,6 @@
 
     created () {
       this.handleGetSqlList()
-      this.handleGetStrategyList()
     },
 
     methods: {
@@ -379,20 +377,6 @@
           } 
           this.handleGetSqlList()
         })
-      },
-
-      handleGetStrategyList () {
-        GetStrategyList({})
-        .then(
-          response => {
-            console.log(response)
-            const results = response.data.results
-            if (results) {
-              this.strategy = results[0]
-              console.log(this.strategy.is_manual_review == false)
-            }
-          }
-        )
       },
 
       cancel () {

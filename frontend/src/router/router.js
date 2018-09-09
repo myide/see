@@ -44,36 +44,18 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [{
-        path: '/access-test',
-        icon: 'lock-combination',
-        title: '权限测试页',
-        name: 'accesstest',
-        access: 0,
-        component: Main,
-        children: [{
-            path: 'index',
-            title: '权限测试页',
-            name: 'accesstest_index',
-            access: 0,
-            component: () =>
-                import ('@/views/access/access-test.vue')
-        }]
-    },
-    {
         path: '/pandect',
         icon: 'eye',
         title: '总览',
         name: 'pandect',
         component: Main,
-        children: [
-            {
-                path: 'dashboard',
-                title: 'Dashboard',
-                name: 'dashboard',
-                component: () =>
-                    import ('@/views/pandect/dashboard.vue')
-            },
-        ]
+        children: [{
+            path: 'dashboard',
+            title: 'Dashboard',
+            name: 'dashboard',
+            component: () =>
+                import ('@/views/pandect/dashboard.vue')
+        }, ]
     },
     {
         path: '/sqlquery',
@@ -81,15 +63,13 @@ export const appRouter = [{
         title: '查询优化',
         name: 'sqlquery',
         component: Main,
-        children: [
-            {
-                path: 'optimize',
-                title: '查询优化',
-                name: 'optimize',
-                component: () =>
-                    import ('@/views/sql/optimize.vue')
-            },
-        ]
+        children: [{
+            path: 'optimize',
+            title: '查询优化',
+            name: 'optimize',
+            component: () =>
+                import ('@/views/sql/optimize.vue')
+        }, ]
     },
     {
         path: '/sqlmng',
@@ -97,8 +77,7 @@ export const appRouter = [{
         title: 'SQL工单',
         name: 'sqlmng',
         component: Main,
-        children: [
-            {
+        children: [{
                 path: 'check',
                 title: '工单审核',
                 name: 'check',
@@ -125,13 +104,19 @@ export const appRouter = [{
     {
         path: '/settings',
         icon: 'settings',
-        title: '平台设置',
+        title: '平台管理',
         name: 'settings',
         component: Main,
-        children: [
+        children: [{
+                path: 'authrules',
+                title: '权限规则',
+                name: 'authrules',
+                component: () =>
+                    import ('@/views/sql/authRules.vue')
+            },
             {
                 path: 'platform',
-                title: '流程',
+                title: '流程设置',
                 name: 'platform',
                 component: () =>
                     import ('@/views/sql/platformSettings.vue')
@@ -152,8 +137,7 @@ export const appRouter = [{
         title: '用户管理',
         name: 'accountmng',
         component: Main,
-        children: [
-            {
+        children: [{
                 path: 'user',
                 title: '用户',
                 name: 'user',

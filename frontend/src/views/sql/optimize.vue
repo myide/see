@@ -1,7 +1,7 @@
 <style scoped>
     .parm_check_element {
       width: 200px;
-      margin-left: 10px;
+      margin-left: 20px;
     }
 </style>
 
@@ -12,14 +12,14 @@
         <Col span="12">
             <div>
               <Alert show-icon>查询表结构</Alert>
-                <Select @on-change="handleGetDb" placeholder="选择环境" style="width:200px">
+                <Select @on-change="handleGetDb" placeholder="选择环境" style="width:100px">
                     <Option value="prd" >生产</Option>
                     <Option value="test" >测试</Option>
                 </Select>
-                <Select v-model="database" @on-change="handleGetTables" placeholder="选择数据库" filterable style="width:200px; margin-left:20px">
+                <Select v-model="database" @on-change="handleGetTables" placeholder="选择数据库" filterable class="parm_check_element">
                     <Option v-for="item in dbList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                 </Select>
-                <Select v-model="table" @on-change="handleGetTableInfo" placeholder="选择表" filterable style="width:200px; margin-left:20px">
+                <Select v-model="table" @on-change="handleGetTableInfo" placeholder="选择表" filterable class="parm_check_element">
                     <Option v-for="item in tableList" :value="item" :key="item">{{ item }}</Option>
                 </Select>
             </div>

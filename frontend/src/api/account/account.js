@@ -1,15 +1,15 @@
-import axios from '../../libs/http'
+import axios from '../../libs/http';
 
-const users = '/api/account/users/'
-const groups = '/api/account/groups/'
-const permissions = '/api/account/permissions/'
+const users = '/api/account/users/';
+const groups = '/api/account/groups/';
+const permissions = '/api/account/permissions/';
 
 export function GetUserList(params) {
     return axios({
-      url: users,
-      method: 'get',
-      params
-    })
+        url: users,
+        method: 'get',
+        params
+    });
 }
 
 export function UpdateUser(id, data) {
@@ -17,7 +17,7 @@ export function UpdateUser(id, data) {
         url: users + id + '/',
         method: 'put',
         data: data
-    })
+    });
 }
 
 export function CreateUser(data) {
@@ -25,22 +25,22 @@ export function CreateUser(data) {
         url: users,
         method: 'post',
         data: data
-    })
+    });
 }
 
 export function DeleteUser(id) {
     return axios({
         url: users + id + '/',
         method: 'delete',
-    })
+    });
 }
 
 export function GetGroupList(params) {
     return axios({
-      url: groups,
-      method: 'get',
-      params
-    })
+        url: groups,
+        method: 'get',
+        params
+    });
 }
 
 export function CreateGroup(data) {
@@ -48,7 +48,7 @@ export function CreateGroup(data) {
         url: groups,
         method: 'post',
         data: data
-    })
+    });
 }
 
 export function UpdateGroup(id, data) {
@@ -56,14 +56,14 @@ export function UpdateGroup(id, data) {
         url: groups + id + '/',
         method: 'put',
         data: data
-    })
+    });
 }
 
 export function DeleteGroup(id) {
     return axios({
         url: groups + id + '/',
         method: 'delete',
-    })
+    });
 }
 
 export function GetPermissonList(params) {
@@ -71,5 +71,5 @@ export function GetPermissonList(params) {
         url: permissions,
         method: 'get',
         params
-    })
+    });
 }

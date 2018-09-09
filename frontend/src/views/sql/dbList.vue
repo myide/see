@@ -15,7 +15,7 @@
       </br>
       <Row>
         <Col span="22">
-          <Table :columns="columnsDbList" :data="dbList"></Table>
+          <Table :columns="columnsDbList" :data="dbList" size="small"></Table>
         </Col>
       </Row>
       </br>

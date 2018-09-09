@@ -1,13 +1,13 @@
-import axios from '../../libs/http'
+import axios from '../../libs/http';
 
-const forbiddenwords = '/api/sqlmng/forbiddenwords/'
+const forbiddenwords = '/api/sqlmng/forbiddenwords/';
 
 export function GetFWList(params) {
     return axios({
-      url: forbiddenwords,
-      method: 'get',
-      params
-    })
+        url: forbiddenwords,
+        method: 'get',
+        params
+    });
 }
 
 export function UpdateFW(id, data) {
@@ -15,7 +15,7 @@ export function UpdateFW(id, data) {
         url: forbiddenwords + id + '/',
         method: 'put',
         data: data
-    })
+    });
 }
 
 export function CreateFW(data) {
@@ -23,5 +23,5 @@ export function CreateFW(data) {
         url: forbiddenwords,
         method: 'post',
         data: data
-    })
+    });
 }

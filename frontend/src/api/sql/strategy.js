@@ -1,13 +1,13 @@
-import axios from '../../libs/http'
+import axios from '../../libs/http';
 
-const strategy = '/api/sqlmng/strategy/'
+const strategy = '/api/sqlmng/strategy/';
 
 export function GetStrategyList(params) {
     return axios({
-      url: strategy,
-      method: 'get',
-      params
-    })
+        url: strategy,
+        method: 'get',
+        params
+    });
 }
 
 export function UpdateStrategy(id, data) {
@@ -15,7 +15,7 @@ export function UpdateStrategy(id, data) {
         url: strategy + id + '/',
         method: 'put',
         data: data
-    })
+    });
 }
 
 export function CreateStrategy(data) {
@@ -23,5 +23,5 @@ export function CreateStrategy(data) {
         url: strategy,
         method: 'post',
         data: data
-    })
+    });
 }
