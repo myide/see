@@ -8,7 +8,7 @@
 ![](https://img.shields.io/badge/python-3.6-brightgreen.svg)
 ![](https://img.shields.io/badge/Django-2.0-brightgreen.svg)
 
-## Feature 功能
+## 功能
 
 - 目标库管理
     - 目标数据库的增删改查操作
@@ -39,7 +39,7 @@
 - 其他
     - DashBoard报表展示
 
-## Environment 环境
+## 环境
 
 - Python 3.6
     - Django 2.0
@@ -49,10 +49,10 @@
     - iview 2.8
     - iview-admin 1.3
 
-## Install 安装及使用日志
+## 安装及使用日志
 待更新
 
-## Snapshot 界面展示
+## 界面展示
 
 - Dashboard审计
 
