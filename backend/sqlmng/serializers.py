@@ -15,7 +15,7 @@ class InceptionSerializer(serializers.ModelSerializer):
         steps = instance.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else 'Admin'
-            updatetime = step.updatetime if step.status != 0 else '' 
+            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
             data.append(
                 {
                     'id': step.id,
@@ -97,3 +97,9 @@ class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
         ret['db_list'] = self.get_db_list(env, instance)
         ret['commiter'] = self.get_commiter(instance)
         return ret
+
+class AuthRulesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AuthRules
+        fields = '__all__'

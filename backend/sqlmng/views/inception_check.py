@@ -35,7 +35,7 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
             instance_id = instance.id
             users_id.append(None)
             for index, uid in enumerate(users_id):
-                status = 1 if index == 0 else 0 
+                status = 1 if index == 0 else 0
                 step_serializer = self.serializer_step(data={'work_order':instance_id, 'user':uid, 'status':status})
                 step_serializer.is_valid(raise_exception=True)
                 step_serializer.save()

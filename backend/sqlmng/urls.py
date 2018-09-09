@@ -8,7 +8,7 @@ from .views.settings import ForbiddenWordsViewSet, StrategyViewSet, PersonalSett
 from .views.step import StepViewSet
 from .views.target_db import DbViewSet
 from .views.workorder_main import InceptionMainView
-
+from .views.auth_rules import AuthRulesViewSet
 # register的可选参数 base_name: 用来生成urls名字，如果viewset中没有包含queryset, base_name一定要有
 
 router = DefaultRouter()
@@ -19,6 +19,7 @@ router.register(r'autoselects', SelectDataView, base_name='SelectDataView')
 router.register(r'forbiddenwords', ForbiddenWordsViewSet, base_name='ForbiddenWordsViewSet')
 router.register(r'strategy', StrategyViewSet, base_name='StrategyViewSet')
 router.register(r'personalsettings', PersonalSettingsViewSet, base_name='PersonalSettingsViewSet')
+router.register(r'authrules', AuthRulesViewSet, base_name='AuthRulesViewSet')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

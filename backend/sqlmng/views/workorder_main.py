@@ -14,7 +14,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
     serializer_class = InceptionSerializer
-    permission_classes = [IsHandleAble, AuthOrReadOnly] 
+    permission_classes = [IsHandleAble] 
     search_fields = ['commiter', 'sql_content', 'env', 'treater', 'remark']
     action_type = '--enable-execute'
 
@@ -72,7 +72,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         instance.rollback_opid = opids
         instance.exe_affected_rows = affected_rows
         self.ret['data']['affected_rows'] = affected_rows
-        self.ret['data']['execute_time'] = '%.3f' % execute_time
+        self.ret['data']['execute_time'] = '%.3f' % execute_time 
         self.ret['msg'] = exception_sqls
         self.mail(instance, self.action_type)
         self.replace_remark(instance)
@@ -101,8 +101,8 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         instance = self.get_object()
         dbobj = instance.db
         rollback_opid_list = instance.rollback_opid
-        rollback_db = instance.rollback_db
-        back_sqls = ''
+        rollback_db = instance.rollback_db 
+        back_sqls = '' 
         for opid in eval(rollback_opid_list)[1:]:
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
@@ -111,6 +111,6 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)
         execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
         instance.status = -3
-        instance.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1
+        instance.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1 
         self.replace_remark(instance)
         return Response(self.ret)

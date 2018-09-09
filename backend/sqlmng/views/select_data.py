@@ -7,7 +7,7 @@ from sqlmng.models import *
 
 class SelectDataView(AppellationMixins, BaseView):
     '''
-        根据前端的选择&用户身份返回check sql时需要的执行人，数据库数据
+        根据用户身份返回check sql时需要的执行人，数据库数据
     '''
     queryset = Dbconf.objects.all()
     serializer_class = DbSerializer

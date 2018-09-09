@@ -8,7 +8,7 @@ from utils.basemodels import Basemodel
 # Create your models here.
 
 class Dbconf(Basemodel):
-    GENDER_CHOICES = (
+    ENVS = (
         ('prd', u'生产环境'),
         ('test', u'测试环境')
     )
@@ -17,7 +17,7 @@ class Dbconf(Basemodel):
     password = models.CharField(max_length=128)
     host = models.CharField(max_length=16)
     port = models.CharField(max_length=5)
-    env = models.CharField(max_length=20, choices=GENDER_CHOICES)
+    env = models.CharField(max_length=8, choices=ENVS)
     class Meta:
         unique_together = ('name', 'host', 'env')
 
@@ -30,20 +30,22 @@ class Inceptsql(Basemodel):
         (1, u'已放弃'),
         (2, u'执行失败'),
     )
-    ENV = (
+    ENVS = (
         ('prd', u'生产环境'),
         ('test', u'测试环境')
     )
     users = models.ManyToManyField(User)
     group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
     db = models.ForeignKey(Dbconf, on_delete=models.CASCADE)
+    is_manual_review = models.BooleanField(default=False)
     handleable = models.BooleanField(default=False)
     commiter = models.CharField(max_length=20, null=True, blank=True)
     sql_content = models.TextField()
-    env = models.CharField(max_length=20, choices=ENV)
+    env = models.CharField(max_length=8, choices=ENVS)
     treater = models.CharField(max_length=20)
     status = models.IntegerField(default=-1, choices=STATUS)
     execute_errors = models.TextField(default='', null=True, blank=True)
+    #execute_time = models.CharField(max_length = 11)
     exe_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     roll_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     rollback_opid = models.TextField(null=True, blank=True)
@@ -66,3 +68,20 @@ class Strategy(Basemodel):
 class ForbiddenWords(Basemodel):
     forbidden_words = models.TextField(null=True, blank=True)
 
+class AuthRules(Basemodel):
+    ROLES = (
+        ('developer_supremo', u'总监'),
+        ('developer_manager', u'经理'),
+        ('developer', u'研发'),
+    )
+    ENVS = (
+        ('prd', u'生产环境'),
+        ('test', u'测试环境')
+    )
+    is_manual_review = models.BooleanField()
+    role = models.CharField(max_length=32, choices=ROLES)
+    env = models.CharField(max_length=8, choices=ENVS)
+    reject = models.BooleanField()
+    execute = models.BooleanField()
+    rollback = models.BooleanField()
+    approve = models.BooleanField()
