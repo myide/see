@@ -30,7 +30,8 @@ make
 make install
 
 cd /usr/local/
-wget https://github.com/mysql-inception/inception/archive/master.zip unzip master.zip
+wget https://github.com/mysql-inception/inception/archive/master.zip 
+unzip master.zip
 cd inception-master/
 sh inception_build.sh builddir linux
 
@@ -194,8 +195,9 @@ cd /usr/local/
 /usr/local/python3.6/bin/pyvenv seevenv
 cd seevenv
 source bin/activate
-git clone git@github.com:chenkun1998/see.git
-cd see/backend
+wget https://github.com/chenkun1998/see/archive/master.zip
+unzip master.zip
+cd see-master/backend/
 pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mirrors.aliyun.com/pypi/simple/
 
 ```
