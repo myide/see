@@ -126,7 +126,7 @@ export const appRouter = [{
                 title: '目标数据库',
                 name: 'dblist',
                 component: () =>
-                    import ('@/views/sql/dblist.vue')
+                    import ('@/views/sql/dbList.vue')
             },
         ]
     },
