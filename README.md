@@ -49,8 +49,8 @@
     - iview 2.8
     - iview-admin 1.3
 
-## 安装及使用日志
-待更新
+## 安装文档
+[安装文档](https://github.com/chenkun1998/see/blob/master/frontend/src/files/install.md)
 
 ## 界面展示
 
