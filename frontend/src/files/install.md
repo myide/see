@@ -1,12 +1,12 @@
 ## See项目搭建
 
 ### 安装清单
-##### 1 Mysql
-##### 2 Inception
-##### 3 Sqladvisor
-##### 4 Redis
-##### 5 Nginx
-##### 6 See项目
+##### -1 Mysql
+##### -2 Inception
+##### -3 Sqladvisor
+##### -4 Redis
+##### -5 Nginx
+##### -6 See项目
 
 
 #### 1 Mysql
@@ -174,6 +174,15 @@ cd Python-3.6.6
 make && make install
 ln -s /usr/local/python3.6/bin/python3.6 /usr/bin/python3
 ln -s /usr/local/python3.6/bin/pip3 /usr/bin/pip3
+ln -s /usr/local/python3.6/bin/pyvenv /usr/bin/pyvenv
+
+# 链接库文件
+cp /usr/local/python3.6/lib/libpython3.6m.so.1.0 /usr/local/lib
+cd /usr/local/lib
+ln -s libpython3.6m.so.1.0 libpython3.6m.so
+echo '/usr/local/lib' >> /etc/ld.so.conf
+/sbin/ldconfig
+
 ```
 
 ##### 6.3 安装Django及See后端
