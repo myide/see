@@ -138,7 +138,7 @@ daemonize yes
     error_log    /var/log/error.log;
 
     location / { 
-        root /usr/local/seevenv/see/frontend/dist/; 
+        root /usr/local/seevenv/see/frontend/dist/;  # see项目前端文件 
         try_files $uri $uri/ /index.html =404; 
         index  index.html; 
     } 
@@ -153,6 +153,13 @@ daemonize yes
     }
 
   }
+
+##### 5.3 对前端(frontend)单独打包
+cnpm install
+cnpm install --save-dev vue2-ace-editor
+cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
+npm run dev  # 启动
+npm run build  # 打包
 
 
 ```
