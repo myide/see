@@ -239,7 +239,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
 redis-server /etc/redis.conf
 /usr/local/nginx/sbin/nginx
-/usr/local/seevenv/see-master/backend
+cd /usr/local/seevenv/see-master/backend
 nohup python manage.py celery worker -c 4 --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
 ```
