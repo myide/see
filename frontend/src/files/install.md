@@ -259,6 +259,19 @@ python manage.py createsuperuser --username admin --email admin@domain.com
             self.client_flag |= CLIENT.MULTI_RESULTS
 
 ```
+##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
+```
+# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv//lib/python3.6/site-packages/pymysql/cursors.py
+
+    # 找到此处
+    if not self._defer_warnings:
+        self._show_warnings()    
+
+    # 修改为
+    if not self._defer_warnings:
+        pass  
+
+```
 
 ### 8 启动所有服务
 ```bash
