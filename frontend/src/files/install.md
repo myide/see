@@ -38,10 +38,8 @@ sh inception_build.sh builddir linux
 ```
 
 ##### 2.2 修改配置
-
+编辑文件 /etc/inc.cnf ,内容如下 
 ```ini
-
-vi /etc/inc.cnf ###################
 [inception]
 general_log=1
 general_log_file=inc.log
@@ -129,7 +127,8 @@ daemonize yes
 #### 5 Nginx
 ##### 5.1 安装过程略
 
-##### 5.2 配置, 使server部分的配置如下
+##### 5.2 配置
+修改Nginx配置文件 nginx.conf, 使server部分的内容如下
 ```
  server
   {
