@@ -1,6 +1,6 @@
 ## See项目搭建
 
-### 安装清单
+### 部署清单
      1. Mysql
      2. Inception
      3. Sqladvisor
