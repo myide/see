@@ -294,6 +294,6 @@ gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
 
 http://xxx.xxx.xxx.xxx:81/    # see 项目
 
-http://xxx.xxx.xxx.xxx:81/api/docs/  # see api 文档
+http://xxx.xxx.xxx.xxx:81/docs/  # see api 文档
 
 
