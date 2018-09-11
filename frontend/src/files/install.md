@@ -154,14 +154,15 @@ daemonize yes
 
   }
 
-##### 5.3 对前端(frontend)单独打包
+```
+##### 5.3 前端打包
+上一步的Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
+``` bash
 cnpm install
 cnpm install --save-dev vue2-ace-editor
 cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
 npm run dev  # 启动
 npm run build  # 打包
-
-
 ```
 
 #### 6 See
