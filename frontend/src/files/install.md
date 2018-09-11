@@ -133,18 +133,26 @@ daemonize yes
 ```
  server
   {
-    listen 81;  # 用户访问的端口
+    listen 81;  
     access_log    /var/log/access.log;
     error_log    /var/log/error.log;
 
     location / { 
-        root /usr/local/seevenv/see/frontend/dist/;  # see项目前端文件 
+        root /usr/local/seevenv/see-master/frontend/dist/; 
         try_files $uri $uri/ /index.html =404; 
         index  index.html; 
     } 
 
+    location /static/rest_framework_swagger { 
+        root /usr/local/seevenv/lib/python3.6/site-packages/rest_framework_swagger/; 
+    } 
+
+    location /static/rest_framework { 
+        root /usr/local/seevenv/lib/python3.6/site-packages/rest_framework/;
+    } 
+
     location /api {
-        proxy_pass http://127.0.0.1:8090;  # see项目后端的启动端口
+        proxy_pass http://127.0.0.1:8090;
         add_header Access-Control-Allow-Origin *; 
         add_header Access-Control-Allow-Headers Content-Type;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
@@ -208,7 +216,7 @@ pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mir
 ```
 
 ##### 6.4 配置gunicorn
-在see项目的setting.py文件的同级目录里，增加一个配置文件 gunicorn_config.py，内容如下：
+在see项目的setting.py文件的同级目录里，增加一个配置文件 /usr/local/seevenv/see-master/backend/sqlweb/gunicorn_config.py, 内容如下：
 ```ini
 bind = "127.0.0.1:8090"
 daemon = True
