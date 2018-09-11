@@ -143,7 +143,7 @@ daemonize yes
         index  index.html; 
     } 
 
-    location /static/rest_framework_swagger {  #  前端swagger静态文件
+    location /static/rest_framework_swagger {  #  前端API静态文件
         root /usr/local/seevenv/lib/python3.6/site-packages/rest_framework_swagger/; 
     } 
 
