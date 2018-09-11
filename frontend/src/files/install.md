@@ -1,12 +1,12 @@
 ## See项目搭建
 
 ### 安装清单
-##### 1. Mysql
-##### 2. Inception
-##### 3. Sqladvisor
-##### 4. Redis
-##### 5. Nginx
-##### 6. See项目
+    ##### 1. Mysql
+    ##### 2. Inception
+    ##### 3. Sqladvisor
+    ##### 4. Redis
+    ##### 5. Nginx
+    ##### 6. See项目
 
 
 #### 1 Mysql
