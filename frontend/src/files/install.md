@@ -14,7 +14,7 @@
 ##### 1.2 mysql配置文件内容需包含以下配置
 ```ini
 [mysqld]
-server-id       = 100  # 不限制
+server-id       = 100  # 不限制具体数值
 log_bin = mysql-bin
 binlog_format = row
 ```
