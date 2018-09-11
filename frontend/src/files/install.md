@@ -239,7 +239,28 @@ python manage.py migrate
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 
-### 7 启动所有服务
+### 7 解决python3下pymysql对inception支持的问题
+##### 7.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+```
+# 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
+
+    # 找到此处
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+    # 修改为
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if self.server_version.split('.', 1)[0] == 'Inception2':
+            self.client_flag |= CLIENT.MULTI_RESULTS
+        elif int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+```
+
+### 8 启动所有服务
 ```bash
 
 /etc/init.d/mysqld start
