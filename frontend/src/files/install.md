@@ -1,5 +1,10 @@
 ## See项目搭建
 
+
+### 操作系统支持
+     CentOS 6+
+     CentOS 7+
+
 ### 部署清单
      1. Mysql
      2. Inception
