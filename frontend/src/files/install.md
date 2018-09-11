@@ -133,7 +133,7 @@ daemonize yes
 ```
  server
   {
-    listen 81;#监听端口
+    listen 81;  # 用户访问的端口
     access_log    /var/log/access.log;
     error_log    /var/log/error.log;
 
@@ -144,8 +144,7 @@ daemonize yes
     } 
 
     location /api {
-        # rewrite  ^/api/(.*)$ /$1 break;
-        proxy_pass http://127.0.0.1:8090;
+        proxy_pass http://127.0.0.1:8090;  # see项目后端的启动端口
         add_header Access-Control-Allow-Origin *; 
         add_header Access-Control-Allow-Headers Content-Type;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
