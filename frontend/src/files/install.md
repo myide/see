@@ -133,26 +133,26 @@ daemonize yes
 ```
  server
   {
-    listen 81;  
+    listen 81;  # 用户访问端口
     access_log    /var/log/access.log;
     error_log    /var/log/error.log;
 
     location / { 
-        root /usr/local/seevenv/see-master/frontend/dist/; 
+        root /usr/local/seevenv/see-master/frontend/dist/;  # 前端项目文件
         try_files $uri $uri/ /index.html =404; 
         index  index.html; 
     } 
 
-    location /static/rest_framework_swagger { 
+    location /static/rest_framework_swagger {  #  前端swagger静态文件
         root /usr/local/seevenv/lib/python3.6/site-packages/rest_framework_swagger/; 
     } 
 
-    location /static/rest_framework { 
+    location /static/rest_framework {  #  前端rest_framework静态文件
         root /usr/local/seevenv/lib/python3.6/site-packages/rest_framework/;
     } 
 
     location /api {
-        proxy_pass http://127.0.0.1:8090;
+        proxy_pass http://127.0.0.1:8090;  # 后端端口
         add_header Access-Control-Allow-Origin *; 
         add_header Access-Control-Allow-Headers Content-Type;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept";
