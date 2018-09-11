@@ -194,9 +194,7 @@ echo '/usr/local/lib' >> /etc/ld.so.conf
 ```
 
 ##### 6.3 安装Django及See后端
-
-创建虚拟环境，在该环境下安装Django
-
+步骤
 ```bash
 cd /usr/local/
 /usr/local/python3.6/bin/pyvenv seevenv
