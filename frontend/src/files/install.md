@@ -266,7 +266,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 ##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
 ```
-# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv//lib/python3.6/site-packages/pymysql/cursors.py
+# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
 
     # 找到此处
     if not self._defer_warnings:
