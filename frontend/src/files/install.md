@@ -269,7 +269,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 
 ### 8 设置
 ##### 8.1 设置inception参数
-修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py，
+修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py
 ```
 # 找到此处的参数，修改其为实际的值
     self.inception_ipaddr = '127.0.0.1'
