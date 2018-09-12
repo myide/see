@@ -10,6 +10,7 @@ class Inception(object):
     def __init__(self, sql, dbname = ''):
         self.sql = sql
         self.dbname = dbname
+        self.inception_ipaddr = '127.0.0.1'  # inception地址
 
     def inception_handle(self, dbaddr):
         status = 0
@@ -17,7 +18,7 @@ class Inception(object):
           inception_magic_start;\
           use {}; {} inception_magic_commit;'.format(dbaddr, self.dbname, self.sql)
         try:
-            conn = pymysql.connect(host='127.0.0.1', user='root', passwd='', port=6669, db='', use_unicode=True, charset="utf8")  # 连接inception
+            conn = pymysql.connect(host=self.inception_ipaddr, user='', passwd='', port=6669, db='', use_unicode=True, charset="utf8")  # 连接inception
             cur = conn.cursor()
             cur.execute(sql)
             result = cur.fetchall()
@@ -29,7 +30,7 @@ class Inception(object):
         return {'result': result, 'status': status}
 
     def manual(self):
-        conn = pymysql.connect(host='127.0.0.1', port=3306, user='root', passwd='123456', db=self.dbname, charset='utf8')  # 连接SQL备份服务器
+        conn = pymysql.connect(host=self.inception_ipaddr, port=3306, user='root', passwd='123456', db=self.dbname, charset='utf8')  # 连接SQL备份服务器
         conn.autocommit(True)
         cur = conn.cursor()
         cur.execute(self.sql)
@@ -40,8 +41,8 @@ class Inception(object):
 
     def get_back_sql(self):
         per_rollback = self.manual()
-        back_sql = ''
-        for i in per_rollback: 
+        back_sql = ''  # 回滚语句
+        for i in per_rollback:  # 累加
             back_sql += i[0]
         return back_sql
 

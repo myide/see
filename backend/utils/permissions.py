@@ -20,6 +20,7 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
         """
             在调get_object()时检查该权限（get_object -- check_object_permissions -- has_object_permission）
         """
+        print(obj)
         env = obj.env
         is_manual_review = obj.is_manual_review
         role = self.admin if request.user.is_superuser else request.user.role
@@ -27,15 +28,16 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
         uri = uri_list[-2]
         if obj.is_manual_review == True:
             approve_step_instance = obj.step_set.all()[1]
-            approve_user = approve_step_instance.user 
-            if uri in handle_perms: 
+            approve_user = approve_step_instance.user  # 工单审批人
+            if uri in handle_perms:  # 执行/回滚的检查项
                 if not obj.handleable:
                     return False
-                if approve_user == request.user: 
+                if approve_user == request.user:  # 审批人 & 执行人，不能是同一人
                     return False
-            elif uri in approve_perms: 
+            elif uri in approve_perms:  # 审批的检查项
                 if approve_user != request.user:
                     return False
+
         return request.method in SAFE_METHODS or self.check_perm(env, is_manual_review, role, uri)
 
     def check_perm(self, env, is_manual_review, role, uri):
