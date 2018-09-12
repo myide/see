@@ -219,17 +219,7 @@ pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mir
 
 ```
 
-##### 6.4 配置gunicorn
-在see项目的setting.py文件的同级目录里，增加一个配置文件 /usr/local/seevenv/see-master/backend/sqlweb/gunicorn_config.py, 内容如下：
-```ini
-bind = "127.0.0.1:8090"
-daemon = True
-workers = 2
-errorlog = '/tmp/gunicorn.error.log'
-accesslog = '/tmp/gunicorn.access.log'
-```
-
-##### 6.5 创建autoAdmin数据库
+##### 6.4 创建autoAdmin数据库
 确保mysql的root密码为 123456
 
 ```bash
@@ -239,7 +229,7 @@ python manage.py migrate
 
 ```
 
-##### 6.6 创建管理员用户
+##### 6.5 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
@@ -266,7 +256,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 ##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
 ```
-# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv//lib/python3.6/site-packages/pymysql/cursors.py
+# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
 
     # 找到此处
     if not self._defer_warnings:
