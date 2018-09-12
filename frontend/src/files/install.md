@@ -265,10 +265,20 @@ python manage.py createsuperuser --username admin --email admin@domain.com
     # 修改为
     if not self._defer_warnings:
         pass  
-
 ```
 
-### 8 启动所有服务
+### 8 设置
+##### 8.1 设置inception参数
+修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py，
+```
+# 找到此处的参数，修改其为实际的值
+    self.inception_ipaddr = '127.0.0.1'
+    self.user = 'root'
+    self.passwd = '123456'
+    self.port = 3306
+```
+
+### 9 启动所有服务
 ```bash
 
 /etc/init.d/mysqld start
@@ -284,6 +294,6 @@ gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
 
 http://xxx.xxx.xxx.xxx:81/    # see 项目
 
-http://xxx.xxx.xxx.xxx:81/docs/  # see api 文档
+http://xxx.xxx.xxx.xxx:81/api/docs/  # see api 文档
 
 
