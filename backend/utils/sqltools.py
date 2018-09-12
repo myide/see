@@ -10,7 +10,11 @@ class Inception(object):
     def __init__(self, sql, dbname = ''):
         self.sql = sql
         self.dbname = dbname
-        self.inception_ipaddr = '127.0.0.1'  # inception地址
+        ### Inception 数据库地址，用户，密码，端口
+        self.inception_ipaddr = '127.0.0.1'
+        self.user = 'root'
+        self.passwd = '123456'
+        self.port = 3306
 
     def inception_handle(self, dbaddr):
         status = 0
@@ -29,8 +33,8 @@ class Inception(object):
             result = "Mysql Error {}: {}".format(e.args[0], e.args[1])
         return {'result': result, 'status': status}
 
-    def manual(self):
-        conn = pymysql.connect(host=self.inception_ipaddr, port=3306, user='root', passwd='123456', db=self.dbname, charset='utf8')  # 连接SQL备份服务器
+    def manual(self):  # 查询回滚库/表
+        conn = pymysql.connect(host=self.inception_ipaddr, port=self.port, user=self.user, passwd=self.passwd, db=self.dbname, charset='utf8')  # 连接SQL备份服务器
         conn.autocommit(True)
         cur = conn.cursor()
         cur.execute(self.sql)
@@ -58,7 +62,7 @@ class SqlQuery(object):
     def decrypt_password(self, password):
         return self.pc.decrypt(password)
 
-    def main(self, sql):
+    def main(self, sql):  # 查询目标库/表结构
         db = self.instance
         password = self.decrypt_password(db.password)
         try:
