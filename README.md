@@ -55,37 +55,37 @@
     - iview-admin 1.3
 
 ## 安装文档
-- [安装文档](https://github.com/chenkun1998/see/blob/master/frontend/src/files/install.md)
+- [安装文档](https://github.com/myide/see/blob/master/frontend/src/files/install.md)
 
 ## 界面展示
 
 - Dashboard审计
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/dashboard.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/dashboard.png)
 
 - SQL查询
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/query.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/query.png)
 
 - 工单审核
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/check.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/check.png)
 
 - 工单设置
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/platsettings.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/platsettings.png)
 
 - 工单列表
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/list.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/list.png)
 
 - 用户管理
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/user.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/user.png)
 
 - API
 
-![image](https://github.com/chenkun1998/see/blob/master/frontend/src/images/github/api.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/api.png)
 
 ## 交流学习
 QQ群 630791951
