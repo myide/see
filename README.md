@@ -88,7 +88,7 @@
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/api.png)
 
 ## 交流学习
-QQ群 630791951
+- QQ群 630791951
 
 ## License
 
