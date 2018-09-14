@@ -94,6 +94,6 @@ QQ群 630791951
 
 - Eclipse Public License - v 2.0
 
-2018 © See
+Copyright © 2018 See
 
 
