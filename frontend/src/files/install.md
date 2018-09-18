@@ -218,6 +218,8 @@ mysql -uroot -p123456 -e "create database sqlweb CHARACTER SET utf8;"
 python manage.py makemigrations
 python manage.py migrate
 
+#执行命令创建inception库
+python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 ```
 
 ##### 6.5 执行命令创建inception库
