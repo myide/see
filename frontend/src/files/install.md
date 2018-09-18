@@ -229,7 +229,25 @@ python manage.py migrate
 
 ```
 
-##### 6.5 创建管理员用户
+##### 6.5 执行命令创建inception库
+###### 6.5.1 创建测试库，测试表
+```
+mysql -uroot -p123456  # 登录数据库
+mysql> CREATE DATABASE pro1;
+mysql> CREATE TABLE IF NOT EXISTS pro1.mytable1 (
+   `id` INT UNSIGNED AUTO_INCREMENT,
+   `myname` VARCHAR(10) NOT NULL,
+   PRIMARY KEY ( `id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+###### 6.5.2 执行测试脚本
+```
+python /usr/local/seevenv/see-master/backend/utils/inception_test.py
+# 有类似如下返回即可
+((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
+```
+
+##### 6.6 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
