@@ -234,7 +234,7 @@ mysql> CREATE TABLE IF NOT EXISTS pro1.mytable1 (
 ###### 6.5.2 执行测试脚本
 ```
 python /usr/local/seevenv/see-master/backend/utils/inception_test.py
-###### 有类似如下返回即可
+# 有类似如下返回即可
 ((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
 ```
 
