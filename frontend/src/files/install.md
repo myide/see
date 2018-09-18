@@ -212,7 +212,7 @@ cd /usr/local/
 /usr/local/python3.6/bin/pyvenv seevenv
 cd seevenv
 source bin/activate
-wget https://github.com/chenkun1998/see/archive/master.zip
+wget https://github.com/myide/see/archive/master.zip
 unzip master.zip
 cd see-master/backend/
 pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mirrors.aliyun.com/pypi/simple/
