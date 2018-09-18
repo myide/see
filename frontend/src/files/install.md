@@ -166,15 +166,6 @@ daemonize yes
   }
 
 ```
-##### 5.3 前端打包
-上一步的Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
-```bash
-cnpm install
-cnpm install --save-dev vue2-ace-editor
-cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
-npm run dev  # 启动
-npm run build  # 打包
-```
 
 #### 6 See
 
@@ -247,7 +238,17 @@ python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 ((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
 ```
 
-##### 6.6 创建管理员用户
+##### 6.6 前端打包
+Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
+```bash
+cnpm install
+cnpm install --save-dev vue2-ace-editor
+cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
+npm run dev  # 启动
+npm run build  # 打包
+```
+
+##### 6.7 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
