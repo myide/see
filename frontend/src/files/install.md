@@ -90,6 +90,7 @@ git clone https://github.com/Meituan-Dianping/SQLAdvisor.git
 ##### 3.2 安装依赖
 ```bash
 yum install -y cmake libaio-devel libffi-devel glib2 glib2-devel bison
+yum remove -y mysql-community-client mysql-community-server mysql-community-common mysql-community-libs
 cd /usr/lib64/ 
 ln -s libperconaserverclient_r.so.18 libperconaserverclient_r.so 
 yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
@@ -299,11 +300,19 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 
 ### 9 启动所有服务
 ```bash
-
+# mysql
 /etc/init.d/mysqld start
+
+# inception
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
+
+# redis
 redis-server /etc/redis.conf
+
+# nginx
 /usr/local/nginx/sbin/nginx
+
+# see
 cd /usr/local/seevenv/see-master/backend
 nohup python manage.py celery worker -c 4 --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
