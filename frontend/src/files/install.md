@@ -301,19 +301,19 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 
 ### 9 启动所有服务
 ```bash
-# mysql
+# mysql  3306端口
 /etc/init.d/mysqld start
 
-# inception
+# inception  6669端口
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
 
-# redis
+# redis  6379端口
 redis-server /etc/redis.conf
 
-# nginx
+# nginx  81端口
 /usr/local/nginx/sbin/nginx
 
-# see
+# see  8090端口
 cd /usr/local/seevenv/see-master/backend
 nohup python manage.py celery worker -c 4 --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
