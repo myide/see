@@ -28,7 +28,8 @@ binlog_format = row
 ##### 2.1 安装
 ```bash
 yum -y install cmake libncurses5-dev libssl-dev g++ bison gcc gcc-c++ openssl-devel ncurses-devel mysql MySQL-python
-wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz tar -zxvf bison-2.5.1.tar.gz
+wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz 
+tar -zxvf bison-2.5.1.tar.gz
 cd bison-2.5.1
 ./configure
 make
