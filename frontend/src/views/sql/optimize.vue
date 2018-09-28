@@ -61,18 +61,18 @@
             </div>
         </Col>
       </Row>
-
     </Card>
-
+    <copyright> </copyright>
   </div>
 </template>
 <script>
   import {GetDbList} from '@/api/sql/dbs'
   import {GetTableList, GetTableInfo, GetSqlAdvisor} from '@/api/sql/sqlquery'
   import editor from '../my-components/sql/editor'
-  
+  import copyright from '../my-components/public/copyright'
+
   export default {
-    components: {editor},
+    components: {editor, copyright},
     data () {
       return {
         spinShow: false,

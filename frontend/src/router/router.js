@@ -22,7 +22,7 @@ export const otherRouter = {
             title: { i18n: 'home' },
             name: 'home_index',
             component: () =>
-                import ('@/views/home/home.vue')
+                import ('@/views/pandect/dashboard.vue')
         },
         {
             path: 'ownspace',

@@ -124,6 +124,7 @@
                 </div>
             </Card>
         </Row>
+        <copyright> </copyright>
     </div>
 </template>
 
@@ -137,10 +138,12 @@ import toDoListItem from './components/toDoListItem.vue';
 //import userFlow from './components/userFlow.vue'
 import {GetChartData} from '@/api/dashboard/chart'
 import {Tag} from 'iview';
+import copyright from '../my-components/public/copyright'
 
 export default {
     name: 'home',
     components: {
+        copyright,
         Tag,
         dataSourcePie,
         visiteVolume,

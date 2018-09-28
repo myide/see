@@ -87,15 +87,17 @@
       </Row>
 
     </Card>
+    <copyright> </copyright>
 
   </div>
 </template>
 <script>
   import { GetPersonalSettings, CheckSql } from '@/api/sql/check'
   import editor from '../my-components/sql/editor'
-  
+  import copyright from '../my-components/public/copyright'
+
   export default {
-    components: {editor},
+    components: {editor, copyright},
     data () {
       return {
         readonly:true,

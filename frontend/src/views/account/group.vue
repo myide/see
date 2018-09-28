@@ -22,9 +22,9 @@
       </Row>
       </br>
       <Page :total=total show-sizer :current=getParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
-
     </Card>
-
+    <copyright> </copyright>
+    
     <Modal
       v-model="createModal"
       width="800"
@@ -110,10 +110,11 @@
 <script>
   import {Button, Table, Modal, Message, Badge} from 'iview';
   import {GetPermissonList, GetGroupList, CreateGroup, UpdateGroup, DeleteGroup} from '@/api/account/account'
-  import {contains} from '@/utils/account/account'
+  import {contains} from '@/utils/account/account';
+  import copyright from '../my-components/public/copyright'
 
   export default {
-    components: {Button, Table, Modal, Message, Badge},
+    components: {Button, Table, Modal, Message, Badge, copyright},
     data () {
       return {
         deleteModal:false,

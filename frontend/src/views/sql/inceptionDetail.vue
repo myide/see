@@ -1,94 +1,30 @@
+<style scoped>
+    .inner {
+      margin-top:20px
+    }
+</style>
+
 <template>
   <div>
     <Card>
-      <Alert show-icon>基本信息</Alert>
-      <div style="margin-top:10px;margin-bottom:10px">
-
-        <Row>
-          <Col span="2">
-            <p> <b>ID：</b> </p>
-          </Col>
-          <Col span="10">
-            <p> {{this.$route.params.id}} </p>
-          </Col>
-          <Col span="2">
-            <p> <b>数据库：</b>  </p>
-          </Col>
-          <Col span="10">
-            <p> {{row.db_name}} </p>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span="2">
-            <p> <b>提交时间：</b> </p>
-          </Col>
-          <Col span="10">
-            <p> {{row.createtime}} </p>
-          </Col>
-          <Col span="2">
-            <p> <b>流程：</b>  </p>
-          </Col>
-          <Col span="10">
-            <Button size="small" @click="showStep">流程</Button> <Badge :count="badgeData.count" class-name="demo-badge-alone"></Badge>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span="2">
-            <p> <b>提交人：</b> </p>
-          </Col>
-          <Col span="10">
-            <p> {{row.commiter}} </p>
-          </Col>
-          <Col span="2">
-            <p> <b>执行人：</b>  </p>
-          </Col>
-          <Col span="10">
-            <p> {{row.treater}} </p>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span="2">
-            <p> <b>环境：</b> </p>
-          </Col>
-          <Col span="10">
-            <p> {{env}} </p>
-          </Col>
-          <Col span="2">
-            <p> <b>状态：</b>  </p>
-          </Col>
-          <Col span="10">
-            <p v-if="row.status == -3" > <Tag>已回滚</Tag> </p>
-            <p v-else-if="row.status == -2" > <Tag>已暂停</Tag> </p>
-            <p v-else-if="row.status == -1" > <Tag color="blue">待执行</Tag> </p>
-            <p v-else-if="row.status == 0" > <Tag color="green">已执行</Tag> </p>
-            <p v-else-if="row.status == 1" > <Tag color="yellow">已放弃</Tag> </p>
-            <p v-else-if="row.status == 2" > <Tag color="red">执行失败</Tag> </p>
-          </Col>
-        </Row>
-        <Row>
-          <Col span="2">
-            <p> <b>备注：</b> </p>
-          </Col>
-          <Col span="10">
-            <p> {{row.remark}} </p>
-          </Col>
-        </Row>
+      <div>
+        <Tabs size="small">
+          <TabPane label="基本信息"><baseInfo v-if="flag" :row="row"> </baseInfo></TabPane>
+          <TabPane label="SQL语句"><sqlContentInfo v-if="flag" :sqlContent="sqlContent"> </sqlContentInfo></TabPane>
+          <TabPane label="Inception详情"><inceptionInfo v-if="flag" :inceptionDetail="inceptionDetail"> </inceptionInfo></TabPane>
+          <TabPane :label="suggestionLabel" name="suggestion"><suggestionInfo @refreshList="handleGetList" :id="this.$route.params.id" :res="res"> </suggestionInfo></TabPane>
+        </Tabs>
       </div>
-      <Alert show-icon>语句</Alert>
-      <div style="margin-top:10px;margin-bottom:10px">
-        <Row>
-          <Col span="24">
-            <Scroll height=200>
-              <div v-for="(item, index) in sqlContent" :value="item.value" :key="index">{{ item.value }} </div>
-            </Scroll>
-          </Col>
-        </Row>
+      <div class="inner" v-if="is_has_flow(row)">
+        <p></p>
+        <Alert show-icon>工单流</Alert>
+        <Steps :current="stepCurrent" :status="stepCurrentStatus">
+          <step v-for="(item, index) in stepList" :title="item.title" :content="item.content" :key="index"> </step>
+        </Steps>
       </div>
-      <Alert show-icon>操作</Alert>
-      <div style="margin-top:10px;margin-bottom:10px">
+      <div class="inner">
+        <p></p>
+        <Alert show-icon>操作</Alert>
         <Row>
           <Col span="24">
             <Dropdown v-show="showBtn" @on-click='showAction'>
@@ -99,6 +35,8 @@
                 <DropdownMenu v-if="row.status == -1"  slot="list">
                     <DropdownItem name='execute'>执行</DropdownItem>
                     <DropdownItem name='reject'>放弃</DropdownItem>
+                    <DropdownItem name='approve' v-if="showItem">审批通过</DropdownItem>
+                    <DropdownItem name='disapprove' v-if="showItem">审批驳回</DropdownItem>
                 </DropdownMenu>
                 <DropdownMenu v-else-if="row.status == 0"  slot="list">
                     <DropdownItem name='rollback'>回滚</DropdownItem>
@@ -109,6 +47,7 @@
       </div>
 
     </Card>
+    <copyRight> </copyRight>
 
     <Modal
         v-model="modalAction.show"
@@ -117,7 +56,7 @@
         @on-ok="handleAction"
         @on-cancel="cancel">
         <div>
-          <center> {{ modalAction.content }} </center>
+          <center> {{modalAction.content}} </center>
         </div>
     </Modal>  
 
@@ -131,7 +70,7 @@
             <Timeline>
               <TimelineItem v-for="(item, index) in steps" :value="item.value" :key="index" :color="getColor(item.status)">
                 <p class="time">{{ item.updatetime | formatTime }}</p>
-                <p class="content">{{ item.username }} <Tag :color="stepStatusMap[item.status]['color']" style="margin-left:10px">{{ stepStatusMap[item.status]['desc'] }}</Tag> </p>
+                <p class="content">{{item.username}} <Tag :color="stepStatusMap[item.status]['color']" style="margin-left:10px">{{ stepStatusMap[item.status]['desc'] }}</Tag> </p>
               </TimelineItem>
             </Timeline>
           </Scroll>
@@ -141,10 +80,17 @@
   </div>
 </template>
 <script>
+    import {GetSuggestionList} from '@/api/sql/suggestion'
     import {GetSqlDetail, SqlAction} from '@/api/sql/inception'
     import {getSqlContent, handleBadgeData} from '@/utils/sql/inception'
-    
+    import copyRight from '../my-components/public/copyright'
+    import baseInfo from './components/baseInfo'
+    import sqlContentInfo from './components/sqlContentInfo'
+    import inceptionInfo from './components/inceptionInfo'
+    import suggestionInfo from './components/suggestionInfo'
+
     export default {
+      components: {copyRight, baseInfo, sqlContentInfo, inceptionInfo, suggestionInfo},
       filters:{
         formatTime:function(value){
           if(value != '') {
@@ -154,14 +100,33 @@
       },
       data () {
         return {
+          flag:false,
+          stepList:[],
+          stepCurrent:0,
+          stepCurrentStatus:'finish',
+          res:{},
+          count:'',
+          suggestionLabel:(h) => {
+            return h('div', [
+              h('span', '审批意见'),
+              h('Badge', {
+                props: {
+                  count: this.count
+                }
+              })
+            ])
+          },
           row:{},
+          inceptionDetail:[],
           sqlContent:[],
           steps:[],
           stepsModal:false,
           stepStatusMap:{
-            0:{color:'gray', desc:'待处理'},
-            1:{color:'green', desc:'通过'},
-            2:{color:'red', desc:'驳回'}
+            '-1':{color:'gray', desc:'终止', stepStatus:'wait'},
+            0:{color:'gray', desc:'待处理', stepStatus:'wait'},
+            1:{color:'green', desc:'通过', stepStatus:'finish'}, 
+            2:{color:'red', desc:'驳回', stepStatus:'error'},
+            3:{color:'red', desc:'放弃', stepStatus:'error'}
           },
           badgeData:{count:'', badgeStatus:''},
           modalAction: 
@@ -174,12 +139,14 @@
           descMap:{
             execute: {name: '执行'},
             reject: {name: '放弃'},
-            rollback: {name: '回滚'}
+            rollback: {name: '回滚'},
+            approve: {name: '审批通过'},
+            disapprove: {name: '审批驳回'}
           }
         }
       },
 
-      created (){
+      created () {
         this.handleGetSqlDetail()
       },
 
@@ -191,6 +158,14 @@
             return true
           }
         }, 
+        showItem: function () {
+          const row = this.row
+          if (row.is_manual_review == true && row.env == 'prd' && row.status != -2 && row.handleable == false) {
+            return true
+          } else {
+            return false
+          }
+        },
         env: function () {
           if (this.row.env == 'prd') {
             return '生产'
@@ -215,15 +190,37 @@
           return this.stepStatusMap[status]['color']
         },
 
+        is_has_flow (row) {
+          const env = row.env
+          const is_manual_review = row.is_manual_review
+          if (env == 'prd' && is_manual_review == true) {
+            return true
+          } else {
+            return false
+          }
+        },
+
+        handleGetList (page) {
+          const params = {page:page, pagesize:10, work_order_id:this.$route.params.id}
+          GetSuggestionList(params)
+          .then(
+            response => {
+              console.log(response)
+              this.res = response
+              this.count = response.data.count
+            }
+          )
+        },
+
         alertSuccess (title, sqlid, execute_time, affected_rows) {
           this.$Notice.success({
             title: title,
             render: h => {
-                let id = h('p', {}, 'ID：' + sqlid) 
-                let time = execute_time ? h('p', {}, '耗时（秒）：' + execute_time) : ''
-                let rows = affected_rows ? h('p', {}, '影响的行数：' + affected_rows) : ''
-                let subtags = [id, time, rows]
-                return h('div', subtags)
+              let id = h('p', {}, 'ID：' + sqlid) 
+              let time = execute_time ? h('p', {}, '耗时（秒）：' + execute_time) : ''
+              let rows = affected_rows ? h('p', {}, '影响的行数：' + affected_rows) : ''
+              let subtags = [id, time, rows]
+              return h('div', subtags)
             }
           });
         },
@@ -248,12 +245,52 @@
           this.modalAction.content = this.descMap[name].name + ' 此工单?'
         },
 
+        getStepData () {
+          if (this.is_has_flow(this.row) == false ) {
+            return false
+          }
+          let current = -1
+          this.stepList = []
+          for (let i in this.steps) {
+            const item = this.steps[i]
+            const statusCode = item.status
+            if (statusCode != 0 && statusCode != -1) {
+              current += 1
+            }
+
+            const desc = ' [' + this.stepStatusMap[statusCode]['desc'] + '] '
+            const dateTime = item.updatetime.split('.')[0].replace('T',' ')
+            this.stepList.push(
+              {
+                title: item.group,
+                content: item.username + desc + dateTime
+              }
+            )
+          }
+          this.stepCurrent = current
+          let currentStatus = this.steps[current].status 
+          this.stepCurrentStatus = this.stepStatusMap[currentStatus]['stepStatus']  // 数字转换成组件状态
+        },
+
+        parseInceptionDetail(inceptionDetail){
+          const data = JSON.parse(inceptionDetail)
+          let ret = []
+          for (let i in data){
+            ret.push(
+              {
+                value:JSON.stringify(data[i])
+              }
+            )
+            
+          }
+          return ret
+        },
+
         handleAction () {
           let id = this.modalAction.id
           let action = this.modalAction.action
           SqlAction(id, action)
           .then(response => {
-            console.log(response)
             const status = response.data.status
             const data = response.data.data
             if (status == 0) {
@@ -261,7 +298,11 @@
                 this.alertSuccess('执行成功', id, data.execute_time, data.affected_rows)
               } else if (action == 'rollback') {
                 this.alertSuccess('回滚成功', id, '', data.affected_rows)
-              }
+              } else if (action == 'approve') {
+                this.alertSuccess('审批通过', id, '', '')
+              } else if (action == 'disapprove') {
+                this.alertSuccess('审批驳回', id, '', '')
+              } 
               this.handleGetSqlDetail()
             } else {
               let msg = response.data.msg
@@ -271,14 +312,18 @@
         },
 
         handleGetSqlDetail () {
-            GetSqlDetail(this.$route.params.id)
-            .then(response => {
-              console.log(response)
-              this.row = response.data
-              this.steps = this.row.steps
-              this.sqlContent = getSqlContent(this.row.sql_content)
-              this.badgeData = handleBadgeData(this.steps)
-            })
+          GetSqlDetail(this.$route.params.id)
+          .then(response => {
+            console.log(response)
+            this.row = response.data
+            this.steps = this.row.steps
+            this.inceptionDetail = this.parseInceptionDetail(this.row.inception_detail)
+            this.sqlContent = getSqlContent(this.row.sql_content)
+            this.badgeData = handleBadgeData(this.steps)
+            this.handleGetList(1)
+            this.getStepData()
+            this.flag = true
+          })
         },
 
       }

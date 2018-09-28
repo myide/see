@@ -64,19 +64,19 @@
             </Alert>
           </div>
         </Col>
-
       </Row>
-
     </Card>
+    <copyright> </copyright>
   </div>
 </template>
 <script>
   import {GetStrategyList, UpdateStrategy, CreateStrategy} from '@/api/sql/strategy'
   import {GetFWList, UpdateFW, CreateFW} from '@/api/sql/forbiddenwords'
   import {GetUserList} from '@/api/account/account'
+  import copyright from '../my-components/public/copyright'
 
   export default {
-    components: {},
+    components: {copyright},
     data () {
       return {
         readonly:true,

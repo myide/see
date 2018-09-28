@@ -22,6 +22,8 @@
       <Page :total=total show-sizer :current=getParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
 
     </Card>
+    <copyright> </copyright>
+
     <Spin size="large" fix v-if="spinShow"></Spin>
     <Modal
         v-model="createModal"
@@ -107,9 +109,10 @@
 <script>
   import {Button, Table, Modal, Message, Tag} from 'iview';
   import {GetDbList, UpdateDb, CreateDb, DeleteDb} from '@/api/sql/dbs'
+  import copyright from '../my-components/public/copyright'
 
   export default {
-    components: {Button, Table, Modal, Message, Tag},
+    components: {Button, Table, Modal, Message, Tag, copyright},
     data () {
       return {
         spinShow: false,

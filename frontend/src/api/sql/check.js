@@ -25,7 +25,7 @@ export function GetPersonalSettings(params) {
         url: personalSettings,
         method: 'get',
         params
-      })
+    })
 }
 
 export function CreatePersonalSettings(data) {

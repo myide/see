@@ -42,16 +42,16 @@
         </Col>
 
       </Row>
-
     </Card>
+    <copyright> </copyright>
   </div>
 </template>
 <script>
-
   import {GetSelectData, GetPersonalSettings, CreatePersonalSettings} from '@/api/sql/check'
-
+  import copyright from '../my-components/public/copyright'
+  
   export default {
-    components:{},
+    components:{copyright},
     data () {
       return {
         dbList:[],

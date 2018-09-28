@@ -1,11 +1,11 @@
 <style scoped>
-    .time{
-        font-size: 14px;
-        font-weight: bold;
-    }
-    .content{
-        padding-left: 5px;
-    }
+  .time{
+    font-size: 14px;
+  }
+  .content{
+    font-weight: bold;
+    padding-left: 5px;
+  }
 </style>
 
 <template>
@@ -27,6 +27,7 @@
               <Page :total=total show-sizer :current=getParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
             </Row>
           </Card>
+          <copyright> </copyright>
         </div>
         <Spin size="large" fix v-if="spinShow"></Spin>
         <Modal
@@ -50,8 +51,8 @@
               <Scroll height=450>
                 <Timeline>
                   <TimelineItem v-for="(item, index) in steps" :value="item.value" :key="index" :color="getColor(item.status)">
-                    <p class="time">{{ item.updatetime | formatTime }}</p>
-                    <p class="content">{{ item.username }} <Tag :color="stepStatusMap[item.status]['color']" style="margin-left:10px">{{ stepStatusMap[item.status]['desc'] }}</Tag> </p>
+                    <p class="content">{{ item.username }}  </p>
+                    <p class="time">{{ item.updatetime | formatTime }} <Tag :color="stepStatusMap[item.status]['color']" style="margin-left:10px">{{ stepStatusMap[item.status]['desc'] }}</Tag></p>
                   </TimelineItem>
                 </Timeline>
               </Scroll>
@@ -66,11 +67,11 @@
   import {addDate} from '@/utils/base/date'
   import {handleBadgeData} from '@/utils/sql/inception'
   import baseData from '@/utils/sql/data'
-
+  import copyright from '../my-components/public/copyright'
   import {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip, Badge} from 'iview';
 
   export default {
-    components: {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip, Badge},
+    components: {Button, Table, Page, Modal, Message, Icon, Tag, DropdownMenu, DropdownItem, Dropdown, Tooltip, Poptip, Badge, copyright},
     filters:{
       formatTime:function(value){
         if(value != '') {
@@ -88,9 +89,11 @@
         stepsModal:false,
         stepsModalTitle:'',
         stepStatusMap:{
+          '-1':{color:'gray', desc:'终止', stepStatus:'wait'},
           0:{color:'gray', desc:'待处理'},
           1:{color:'green', desc:'通过'},
-          2:{color:'red', desc:'驳回'}
+          2:{color:'red', desc:'驳回'},
+          3:{color:'red', desc:'放弃'}
         },
         total:1,
         getParams:{
@@ -263,6 +266,7 @@
             render: (h, params) => {
               const id = params.row.id
               const status = params.row.status
+              const handleable = params.row.handleable
               const is_manual_review = params.row.is_manual_review
               let popcss = {
                 width:170,
@@ -273,8 +277,8 @@
                 var ddItem = [ 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) ]) , 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'放弃 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('reject', params)} } }, [h(DropdownItem, {}, '放弃')] ) ]),
-                  h('div' , {style:{display: is_manual_review == false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
-                  h('div' , {style:{display: is_manual_review ==false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
+                  h('div' , {style:{display: is_manual_review == false || handleable == true  || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
+                  h('div' , {style:{display: is_manual_review == false || handleable == true  || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
                 ]
               } else if (status == 0){
                 var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'回滚 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('rollback', params)} } }, [h(DropdownItem, {}, '回滚')] ) ]
