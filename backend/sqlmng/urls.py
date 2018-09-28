@@ -2,13 +2,13 @@
 from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
 
+from .views.settings import ForbiddenWordsViewSet, StrategyViewSet, PersonalSettingsViewSet
 from .views.inception_check import InceptionCheckView
 from .views.select_data import SelectDataView
-from .views.settings import ForbiddenWordsViewSet, StrategyViewSet, PersonalSettingsViewSet
-from .views.step import StepViewSet
 from .views.target_db import DbViewSet
 from .views.workorder_main import InceptionMainView
 from .views.auth_rules import AuthRulesViewSet
+from .views.suggestion import SuggestionViewSet
 # register的可选参数 base_name: 用来生成urls名字，如果viewset中没有包含queryset, base_name一定要有
 
 router = DefaultRouter()
@@ -20,6 +20,7 @@ router.register(r'forbiddenwords', ForbiddenWordsViewSet, base_name='ForbiddenWo
 router.register(r'strategy', StrategyViewSet, base_name='StrategyViewSet')
 router.register(r'personalsettings', PersonalSettingsViewSet, base_name='PersonalSettingsViewSet')
 router.register(r'authrules', AuthRulesViewSet, base_name='AuthRulesViewSet')
+router.register(r'suggestion', SuggestionViewSet, base_name='SuggestionViewSet')
 
 urlpatterns = [
     url(r'^', include(router.urls)),

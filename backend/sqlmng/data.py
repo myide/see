@@ -165,3 +165,26 @@ auth_rules = [
 	},
 
 ]
+
+step_rules = {
+	'developer':
+        {
+            'commiter_true': [1],
+            'commiter_false': [1]
+        },
+	'developer_manager':
+        {
+            'commiter_true': [1, 2],
+            'commiter_false': [1, 2]
+        },
+	'developer_supremo':
+        {
+            'commiter_true': [1, 2],
+            'commiter_false': [2, 3]
+        },
+	'admin':
+        {
+            'commiter_true': [1, 2],
+            'commiter_false': [2, 3]
+        }
+}

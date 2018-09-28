@@ -1,11 +1,11 @@
 #coding=utf8
+import re
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
 from sqlmng.mixins import PromptMxins, ActionMxins
 from sqlmng.serializers import *
 from sqlmng.models import *
-import re
 
 class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
     '''
@@ -51,11 +51,12 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
         request_data['group'] = self.check_user_group(request)
         request_data['treater'] = request_data.pop('treater_username')
         request_data['is_manual_review'] = self.get_strategy_is_manual_review(request_data.get('env'))
-        serializer = self.serializer_class(data = request_data)
-        serializer.is_valid(raise_exception = True)
         sql_content = request_data.get('sql_content')
         self.check_forbidden_words(sql_content)
-        self.check_execute_sql(request_data.get('db'), sql_content)
+        inception_detail = self.check_execute_sql(request_data.get('db'), sql_content)[-1]
+        request_data['inception_detail'] = inception_detail
+        serializer = self.serializer_class(data=request_data)
+        serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         self.create_step(instance, request_data['users'])
         self.mail(instance, self.action_type)

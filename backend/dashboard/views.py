@@ -67,8 +67,8 @@ class ChartViewSet(BaseView):
                   'GROUP BY `statistic`.`{}` ORDER BY NULL;'\
                 .format(index, index, index, index)
             records = Inception(sql, 'inception').manual()
-            total_execute_counts = 0  # 执行的sql语句条数
-            total_execute_times = 0  # 执行次数
+            total_execute_counts = 0
+            total_execute_times = 0
             if records:
                 for record in records:
                     total_execute_counts += record[0] * record[1]

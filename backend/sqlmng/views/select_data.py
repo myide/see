@@ -12,7 +12,8 @@ class SelectDataView(AppellationMixins, BaseView):
     queryset = Dbconf.objects.all()
     serializer_class = DbSerializer
     serializer_user = UserSerializer
-    def create(self, request): 
+
+    def create(self, request):
         env = request.data.get('env')
         qs = self.queryset.filter(env = env)
         self.ret['data']['dbs'] = self.serializer_class(qs, many = True).data

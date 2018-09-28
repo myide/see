@@ -2,8 +2,8 @@
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from utils.baseviews import BaseView
-from utils.permissions import IsSuperUser
 from utils.sqltools import SqlQuery
+from utils.permissions import IsSuperUser
 from sqlmng.serializers import *
 from sqlmng.models import *
 

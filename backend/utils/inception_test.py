@@ -27,12 +27,6 @@ try:
     result=cur.fetchall()
     num_fields = len(cur.description) 
     field_names = [i[0] for i in cur.description]
-    print(result)
-    '''
-    for row in result:
-        print row[0], "|",row[1],"|",row[2],"|",row[3],"|",row[4],"|",
-        row[5],"|",row[6],"|",row[7],"|",row[8],"|",row[9],"|",row[10]
-    '''
     cur.close()
     conn.close()
 except pymysql.Error as e:

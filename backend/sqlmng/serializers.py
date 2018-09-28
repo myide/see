@@ -6,24 +6,32 @@ from .models import *
 
 class InceptionSerializer(serializers.ModelSerializer):
 
+    admin = 'Admin'
     class Meta:
         model = Inceptsql
         fields = '__all__'
+
+    def get_step_user_group(self, user_instance):
+        group_name = user_instance.groups.first().name if user_instance and not user_instance.is_superuser else self.admin
+        return group_name
 
     def get_step(self, instance):
         data = []
         steps = instance.step_set.order_by('id')
         for step in steps:
-            username = step.user.username if step.user else 'Admin'
-            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
+            username = step.user.username if step.user else self.admin
+            updatetime = step.updatetime if step.status != 0 else ''
+            group = self.get_step_user_group(step.user)
             data.append(
                 {
                     'id': step.id,
                     'updatetime': updatetime,
                     'username': username,
+                    'group':group,
                     'status':step.status
                 }
             )
+        data.insert(0, {'updatetime':instance.createtime, 'username':'Inception', 'group':'自动审核', 'status':1})
         return data
 
     def to_representation(self, instance):
@@ -103,3 +111,13 @@ class AuthRulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuthRules
         fields = '__all__'
+
+class SuggestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Suggestion
+        fields = '__all__'
+    def to_representation(self, instance):
+        ret = super(SuggestionSerializer, self).to_representation(instance)
+        ret['username'] = instance.user.username if instance.user else ''
+        return ret

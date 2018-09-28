@@ -6,6 +6,7 @@ from utils.dbcrypt import prpcrypt
 from utils.sqltools import Inception
 from .models import *
 import re
+import json
 
 class PromptMxins(object):
     connect_error = 'MySQL连接异常 '
@@ -14,16 +15,29 @@ class PromptMxins(object):
     not_exists_group = '用户的组不存在 '
     executed = 'SQL已执行过'
     approve_warning = '此工单无需重复审批'
+    reject_warning = '该工单当前的流转状态不在您这里，无法放弃'
+    require_handleable = '该工单未审批，无法操作'
+    require_different = '执行人和审批人相同，无法操作'
+    require_same = '您不是该工单的审批人，无法审批'
 
 class ActionMxins(AppellationMixins, object):
 
-    action_desc_map = {
-        'execute': '代执行',
-        'reject': '代放弃',
-        'rollback': '代回滚',
-        'approve':'代审批通过',
-        'disapprove': '代审批驳回',
-    }
+    def get_reject_step(self, instance):
+        user = self.request.user
+        if self.has_flow(instance):
+            if user.is_superuser:
+                return 1 if instance.commiter == user.username else 2
+            else:
+                role = user.role
+                return self.reject_steps.get(role)
+
+    def get_current_step(self, instance):
+        steps = instance.step_set.all()
+        current = 0
+        for step in steps:
+            if step.status not in [-1, 0]:
+                current += 1
+        return current
 
     @property
     def is_manual_review(self):
@@ -38,31 +52,29 @@ class ActionMxins(AppellationMixins, object):
         dbaddr = '--user={}; --password={}; --host={}; --port={}; {};'.format(user, password, host, port, actiontype)
         return dbaddr
 
-    def mail(self, sqlobj, mailtype):
-        if sqlobj.env == self.env_prd:  # 线上环境，发邮件提醒
-            username = self.request.user.username
-            treater = sqlobj.treater  # 执行人
-            commiter = sqlobj.commiter  # 提交人
-            mailto_users = [treater, commiter]
-            mailto_users = list(set(mailto_users))  # 去重（避免提交人和执行人是同一人，每次收2封邮件的bug）
-            mailto_list = [u.email for u in User.objects.filter(username__in = mailto_users)]
-            # 发送邮件，并判断结果
-            send_mail.delay(mailto_list, username, sqlobj.id, sqlobj.remark, mailtype, sqlobj.sql_content, sqlobj.db.name)
+    def has_flow(self, instance):
+        return instance.is_manual_review == True and instance.env == self.env_prd
 
     def replace_remark(self, sqlobj):
         username = self.request.user.username
         uri = self.request.META['PATH_INFO'].split('/')[-2]
-        if username != sqlobj.treater:  # 如果是dba或总监代执行的
+        if username != sqlobj.treater:
             sqlobj.remark +=  '   [' + username + self.action_desc_map.get(uri) + ']'
+        if sqlobj.handleable == True:
+            steps = sqlobj.step_set.all()
+            step_obj_second = steps[1]
+            if not (self.request.user == step_obj_second.user and uri == 'reject'):
+                step_obj = steps[0]
+                step_obj.user = self.request.user
+                step_obj.save()
         sqlobj.save()
 
     def check_execute_sql(self, db_id, sql_content):
         dbobj = Dbconf.objects.get(id = db_id)
-        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)  # 根据数据库名 匹配其地址信息，"--check=1;" 只审核
-        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr)  # 审核
+        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)
+        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr)
         result, status = sql_review.get('result'), sql_review.get('status')
-        # 判断检测错误，有则返回
-        if status == -1 or len(result) == 1:  # 兼容2种版本的抛错
+        if status == -1 or len(result) == 1:
             raise ParseError({self.connect_error: result})
         success_sqls = []
         exception_sqls = []
@@ -74,4 +86,14 @@ class ActionMxins(AppellationMixins, object):
                 exception_sqls.append(error_message)
         if exception_sqls and self.action_type == '--enable-check':
             raise ParseError({self.exception_sqls: exception_sqls})
-        return (success_sqls, exception_sqls)
+        return (success_sqls, exception_sqls, json.dumps(result))
+
+    def mail(self, sqlobj, mailtype):
+        if sqlobj.env == self.env_prd:
+            username = self.request.user.username
+            treater = sqlobj.treater
+            commiter = sqlobj.commiter
+            mailto_users = [treater, commiter]
+            mailto_users = list(set(mailto_users))
+            mailto_list = [u.email for u in User.objects.filter(username__in = mailto_users)]
+            send_mail.delay(mailto_list, username, sqlobj.id, sqlobj.remark, mailtype, sqlobj.sql_content, sqlobj.db.name)
