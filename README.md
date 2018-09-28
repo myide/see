@@ -41,7 +41,7 @@
     - SQL列表界面提供SQL查询，操作等相关功能
 
 - API文档
-    - 各接口自动化的生成Swagger API文档，方便于外部的数据查阅和调用对接
+    - 各接口自动化的生成Swagger API文档，方便于外部的数据查阅及调用对接
     
 - 通知
     - E-mail邮件推送
@@ -99,9 +99,6 @@
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/user.png)
 
-- API
-
-![image](https://github.com/myide/see/blob/master/frontend/src/images/github/api.png)
 
 ## 交流学习
 - QQ群 630791951
