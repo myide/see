@@ -229,7 +229,7 @@ errorlog = '/tmp/gunicorn.error.log'
 accesslog = '/tmp/gunicorn.access.log'
 ```
 
-##### 6.5 创建autoAdmin数据库
+##### 6.5 创建sqlweb数据库
 确保mysql的root密码为 123456
 
 ```bash
