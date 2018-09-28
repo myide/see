@@ -71,10 +71,6 @@
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/check.png)
 
-- 工单设置
-
-![image](https://github.com/myide/see/blob/master/frontend/src/images/github/platsettings.png)
-
 - 工单详情 1
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/detail1.png)
@@ -90,6 +86,10 @@
 - 工单列表
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/list.png)
+
+- 工单设置
+
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/platsettings.png)
 
 - 用户管理
 
