@@ -31,6 +31,7 @@ class ActionMxins(AppellationMixins, object):
                 role = user.role
                 return self.reject_steps.get(role)
 
+    @staticmethod
     def get_current_step(self, instance):
         steps = instance.step_set.all()
         current = 0

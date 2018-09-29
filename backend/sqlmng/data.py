@@ -8,7 +8,7 @@ auth_rules = [
 		'execute':False,
 		'rollback':False,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':True,
@@ -18,7 +18,7 @@ auth_rules = [
 		'execute':False,
 		'rollback':False,
 		'approve':True,
-		#'disapprove':True
+		'disapprove':True
 	},
 	{
 		'is_manual_review':True,
@@ -28,7 +28,7 @@ auth_rules = [
 		'execute':False,
 		'rollback':False,
 		'approve':True,
-		#'disapprove':True
+		'disapprove':True
 	},
 	{
 		'is_manual_review':True,
@@ -38,7 +38,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':True,
-		#'disapprove':True
+		'disapprove':True
 	},
 
 	{
@@ -49,7 +49,7 @@ auth_rules = [
 		'execute':False,
 		'rollback':False,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -59,7 +59,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -69,7 +69,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -79,7 +79,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 
 	{
@@ -90,7 +90,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':True,
@@ -100,7 +100,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':True,
@@ -110,7 +110,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':True,
@@ -120,7 +120,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 
 	{
@@ -131,7 +131,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -141,7 +141,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -151,7 +151,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 	{
 		'is_manual_review':False,
@@ -161,7 +161,7 @@ auth_rules = [
 		'execute':True,
 		'rollback':True,
 		'approve':False,
-		#'disapprove':False
+		'disapprove':False
 	},
 
 ]
