@@ -169,7 +169,7 @@ daemonize yes
   }
 
 ```
-### 6 解决python3下pymysql对inception支持的问题
+#### 6 解决python3下pymysql对inception支持的问题
 ##### 6.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
 ```
 # 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
