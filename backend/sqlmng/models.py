@@ -91,3 +91,4 @@ class AuthRules(Basemodel):
     execute = models.BooleanField()
     rollback = models.BooleanField()
     approve = models.BooleanField()
+    disapprove = models.BooleanField()
