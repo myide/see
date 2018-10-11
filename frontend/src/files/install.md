@@ -36,7 +36,7 @@ make
 make install
 
 cd /usr/local/
-wget https://github.com/mysql-inception/inception/archive/master.zip 
+wget https://github.com/myide/inception/archive/master.zip
 unzip master.zip
 cd inception-master/
 sh inception_build.sh builddir linux
@@ -73,11 +73,6 @@ inception_check_column_default_value=1
 ##### 2.3 启动服务
 ```bash
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
-```
-
-##### 2.4 官方文档学习
-```bash
-http://mysql-inception.github.io/inception-document/
 ```
 
 #### 3 Sqladvisor
