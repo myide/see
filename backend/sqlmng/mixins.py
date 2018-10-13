@@ -32,7 +32,7 @@ class ActionMxins(AppellationMixins, object):
                 return self.reject_steps.get(role)
 
     @staticmethod
-    def get_current_step(self, instance):
+    def get_current_step(instance):
         steps = instance.step_set.all()
         current = 0
         for step in steps:
