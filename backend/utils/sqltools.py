@@ -36,7 +36,10 @@ class Inception(object):
         conn = pymysql.connect(host=self.inception_ipaddr, port=self.port, user=self.user, passwd=self.passwd, db=self.dbname, charset='utf8')  # 连接SQL备份服务器
         conn.autocommit(True)
         cur = conn.cursor()
-        cur.execute(self.sql)
+        try:
+            cur.execute(self.sql)
+        except pymysql.err.ProgrammingError:
+            return []
         return cur.fetchall()
 
     def get_back_table(self):
