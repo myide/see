@@ -21,7 +21,7 @@
 [mysqld]
 server-id = 100  # 不限制具体数值
 log_bin = mysql-bin
-binlog_format = row
+binlog_format = row  # 或 MIXED
 ```
 
 #### 2 Inception
