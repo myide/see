@@ -14,6 +14,7 @@ class DbViewSet(BaseView):
     serializer_class = DbSerializer
     permission_classes = [IsSuperUser]
     search_fields = ['name','host','port','user','remark']
+
     def get_queryset(self):
         env = self.request.GET.get('env')
         queryset = Dbconf.objects.all()

@@ -90,7 +90,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=12000),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
@@ -117,6 +117,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'account',
     'sqlmng',
+    'workflow'
 ]
 
 MIDDLEWARE = [
@@ -193,6 +194,7 @@ DATABASES = {
         'PASSWORD': '123456',
         'HOST':'127.0.0.1',
         'PORT':'3306',
+        'OPTIONS': {'charset':'utf8mb4'},
 	},
 }
 
@@ -214,6 +216,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Media
+MEDIA = {
+    'sql_file_path': 'files/download/sql/handle_result/'
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/

@@ -32,7 +32,7 @@ class Inception(object):
             result = "Mysql Error {}: {}".format(e.args[0], e.args[1])
         return {'result': result, 'status': status}
 
-    def manual(self):  # 查询回滚库/表
+    def manual(self):
         conn = pymysql.connect(host=self.inception_ipaddr, port=self.port, user=self.user, passwd=self.passwd, db=self.dbname, charset='utf8')  # 连接SQL备份服务器
         conn.autocommit(True)
         cur = conn.cursor()
@@ -47,8 +47,8 @@ class Inception(object):
 
     def get_back_sql(self):
         per_rollback = self.manual()
-        back_sql = ''  # 回滚语句
-        for i in per_rollback:  # 累加
+        back_sql = ''
+        for i in per_rollback:
             back_sql += i[0]
         return back_sql
 
@@ -64,16 +64,16 @@ class SqlQuery(object):
     def decrypt_password(self, password):
         return self.pc.decrypt(password)
 
-    def main(self, sql):  # 查询目标库/表结构
+    def main(self, sql):
         db = self.instance
         password = self.decrypt_password(db.password)
         try:
             conn = pymysql.connect(host=db.host, port=int(db.port), user=db.user, passwd=password, db=db.name, charset='utf8')  # 连接目标服务器
+            conn.autocommit(True)
+            cur = conn.cursor()
+            cur.execute(sql)
         except Exception as e:
             raise ParseError(e)
-        conn.autocommit(True)
-        cur = conn.cursor()
-        cur.execute(sql)
         return cur.fetchall()
 
     def get_tables(self):

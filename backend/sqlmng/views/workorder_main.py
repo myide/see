@@ -1,10 +1,13 @@
 #coding=utf8
+import json
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
-from utils.sqltools import Inception
-from sqlmng.mixins import PromptMxins, ActionMxins
+from utils.basemixins import PromptMxins
+from utils.sqltools import Inception, SqlQuery
+from utils.basecomponent import DateEncoder
+from sqlmng.mixins import ActionMxins
 from sqlmng.permissions import IsHandleAble
 from sqlmng.serializers import *
 from sqlmng.models import *
@@ -16,7 +19,6 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
     serializer_class = InceptionSerializer
     permission_classes = [IsHandleAble]
     search_fields = ['commiter', 'sql_content', 'env', 'treater', 'remark']
-    action_type = '--enable-execute'
 
     def filter_date(self, queryset):
         date_range = self.request.GET.get('daterange')
@@ -32,24 +34,28 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         return self.filter_date(query_set)
 
     def check_approve_status(self, instance):
-        step_instance = instance.step_set.all()[1]
+        step_instance = instance.workorder.step_set.all()[1]
         if step_instance.status != 0:
             raise ParseError(self.approve_warning)
 
+    def filter_select_type(self, instance):
+        type = instance.type
+        if type == self.type_select_tag:
+            raise ParseError(self.type_warning)
+
     def handle_approve(self, call_type, status, step_number):
         instance = self.get_object()
-        print(instance, step_number)
         if self.has_flow(instance):
             if call_type == 1:
                 self.check_approve_status(instance)
                 if status == 1:
-                    instance.handleable = True
-                    instance.save()
-            step_instance = instance.step_set.order_by('id')[step_number]
+                    instance.workorder.status = True
+                    instance.workorder.save()
+            step_instance = instance.workorder.step_set.order_by('id')[step_number]
             step_instance.status = status
             step_instance.save()
             if call_type == 3:
-                steps = instance.step_set.all()
+                steps = instance.workorder.step_set.all()
                 steps_behind = steps.filter(id__gt=step_instance.id)
                 for step in steps_behind:
                     step.status = -1
@@ -62,26 +68,32 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
             self.ret = {'status': -2, 'msg':self.executed}
             return Response(self.ret)
         affected_rows = 0
-        execute_time = 0
-        opids = []
-        success_sqls, exception_sqls, inception_detail = self.check_execute_sql(instance.db.id, instance.sql_content)
-        for success_sql in success_sqls:
-            instance.status = 0
-            instance.rollback_db = success_sql[8]
-            affected_rows += success_sql[6]
-            execute_time += float(success_sql[9])
-            opids.append(success_sql[7].replace("'", ""))
-        if exception_sqls:
-            instance.status = 2
-            instance.execute_errors = exception_sqls
-            self.ret['status'] = -1
-        instance.rollback_opid = opids
+        instance.status = 0
+        if instance.type == self.type_select_tag:
+            sql_query = SqlQuery(instance.db)
+            data = sql_query.main(instance.sql_content)
+            affected_rows = len(data)
+            instance.handle_result = json.dumps([list(row) for row in data], cls=DateEncoder)
+        else:
+            execute_time = 0
+            opids = []
+            success_sqls, exception_sqls, handle_result = self.check_execute_sql(instance.db.id, instance.sql_content)
+            for success_sql in success_sqls:
+                instance.rollback_db = success_sql[8]
+                affected_rows += success_sql[6]
+                execute_time += float(success_sql[9])
+                opids.append(success_sql[7].replace("'", ""))
+            if exception_sqls:
+                instance.status = 2
+                instance.execute_errors = exception_sqls
+                self.ret['status'] = -1
+            instance.rollback_opid = opids
+            instance.handle_result = handle_result
+            self.ret['msg'] = exception_sqls
+            self.ret['data']['execute_time'] = '%.3f' % execute_time
         instance.exe_affected_rows = affected_rows
-        instance.inception_detail = inception_detail
         self.ret['data']['affected_rows'] = affected_rows
-        self.ret['data']['execute_time'] = '%.3f' % execute_time
-        self.ret['msg'] = exception_sqls
-        self.mail(instance, self.action_type)
+        self.mail(instance, self.action_type_execute)
         self.replace_remark(instance)
         self.handle_approve(2,1,2)
         return Response(self.ret)
@@ -92,7 +104,6 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
         instance.status = 1
         self.replace_remark(instance)
         role_step = self.get_reject_step(instance)
-        print('999 ', role_step)
         self.handle_approve(3,3,role_step)
         return Response(self.ret)
 
@@ -109,6 +120,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
     @detail_route()
     def rollback(self, request, *args, **kwargs):
         instance = self.get_object()
+        self.filter_select_type(instance)
         dbobj = instance.db
         rollback_opid_list = instance.rollback_opid
         rollback_db = instance.rollback_db
@@ -118,7 +130,7 @@ class InceptionMainView(PromptMxins, ActionMxins, BaseView):
             back_table = Inception(back_source, rollback_db).get_back_table()
             back_content = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
             back_sqls += Inception(back_content, rollback_db).get_back_sql()
-        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type)
+        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type_execute)
         execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
         instance.status = -3
         instance.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1

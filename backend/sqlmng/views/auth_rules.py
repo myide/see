@@ -9,6 +9,7 @@ class AuthRulesViewSet(BaseView):
     '''
     serializer_class = AuthRulesSerializer
     search_fields = ['env']
+
     def get_queryset(self):
         model = self.serializer_class.Meta.model
         objects = model.objects

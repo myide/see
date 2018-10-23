@@ -23,7 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
     def create_sysaccount(self, validated_data):
-        print(validated_data)
         sys_account = validated_data.pop('sysaccount',[])
         for account in sys_account:
             validated_data[account] = 1
@@ -49,7 +48,6 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        print(validated_data)
         validated_data.pop('password')
         newpassword = validated_data.pop('newpassword')
         if newpassword:
@@ -85,3 +83,8 @@ class PermissionSerializer(serializers.ModelSerializer):
     def get_perm_name(self, instance):
         return ' '.join((instance.content_type.app_label, instance.content_type.model, instance.name))
 
+class PersonalCenterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        exclude = ['password']

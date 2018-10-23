@@ -17,7 +17,7 @@ class InceptionSerializer(serializers.ModelSerializer):
 
     def get_step(self, instance):
         data = []
-        steps = instance.step_set.order_by('id')
+        steps = instance.workorder.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
             updatetime = step.updatetime if step.status != 0 else ''
@@ -69,12 +69,6 @@ class StrategySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Strategy
-        fields = '__all__'
-
-class StepSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Step
         fields = '__all__'
 
 class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):

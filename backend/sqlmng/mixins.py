@@ -8,19 +8,11 @@ from .models import *
 import re
 import json
 
-class PromptMxins(object):
-    connect_error = 'MySQL连接异常 '
-    forbidden_words = '禁用关键字 '
-    exception_sqls = 'SQL语法错误 '
-    not_exists_group = '用户的组不存在 '
-    executed = 'SQL已执行过'
-    approve_warning = '此工单无需重复审批'
-    reject_warning = '该工单当前的流转状态不在您这里，无法放弃'
-    require_handleable = '该工单未审批，无法操作'
-    require_different = '执行人和审批人相同，无法操作'
-    require_same = '您不是该工单的审批人，无法审批'
-
 class ActionMxins(AppellationMixins, object):
+
+    type_select_tag = 'select'
+    action_type_execute = '--enable-execute'
+    action_type_check = '--enable-check'
 
     def get_reject_step(self, instance):
         user = self.request.user
@@ -33,7 +25,7 @@ class ActionMxins(AppellationMixins, object):
 
     @staticmethod
     def get_current_step(instance):
-        steps = instance.step_set.all()
+        steps = instance.workorder.step_set.all()
         current = 0
         for step in steps:
             if step.status not in [-1, 0]:
@@ -61,8 +53,8 @@ class ActionMxins(AppellationMixins, object):
         uri = self.request.META['PATH_INFO'].split('/')[-2]
         if username != sqlobj.treater:
             sqlobj.remark +=  '   [' + username + self.action_desc_map.get(uri) + ']'
-        if sqlobj.handleable == True:
-            steps = sqlobj.step_set.all()
+        if sqlobj.workorder.status == True:
+            steps = sqlobj.workorder.step_set.all()
             step_obj_second = steps[1]
             if not (self.request.user == step_obj_second.user and uri == 'reject'):
                 step_obj = steps[0]

@@ -5,6 +5,7 @@ from django.db import models
 from account.models import User
 from django.contrib.auth.models import Group
 from utils.basemodels import Basemodel
+from workflow.models import Workorder
 # Create your models here.
 
 class Dbconf(Basemodel):
@@ -26,7 +27,7 @@ class Inceptsql(Basemodel):
         (-3, u'已回滚'),
         (-2, u'已暂停'),
         (-1, u'待执行'),
-        (0, u'已执行'),
+        (0, u'执行成功'),
         (1, u'已放弃'),
         (2, u'执行失败'),
     )
@@ -37,31 +38,20 @@ class Inceptsql(Basemodel):
     users = models.ManyToManyField(User)
     group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
     db = models.ForeignKey(Dbconf, on_delete=models.CASCADE)
+    workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE)
     is_manual_review = models.BooleanField(default=False, verbose_name='有流程')
-    handleable = models.BooleanField(default=False, verbose_name='审批状态')
-    commiter = models.CharField(max_length=20, null=True, blank=True)
+    commiter = models.CharField(max_length=32, null=True, blank=True)
     sql_content = models.TextField()
     env = models.CharField(max_length=8, choices=ENVS)
-    treater = models.CharField(max_length=20)
+    type = models.CharField(max_length=32, null=True, blank=True)
+    treater = models.CharField(max_length=32)
     status = models.IntegerField(default=-1, choices=STATUS)
     execute_errors = models.TextField(default='', null=True, blank=True)
     exe_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     roll_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     rollback_opid = models.TextField(null=True, blank=True)
     rollback_db = models.CharField(max_length=100, null=True, blank=True)
-    inception_detail = models.TextField(default='', null=True, blank=True, verbose_name='inception详情')
-
-class Step(Basemodel):
-    STATUS = (
-        (-1, u'终止'),
-        (0, u'待处理'),
-        (1, u'通过'),
-        (2, u'驳回'),
-        (3, u'放弃')
-    )
-    work_order = models.ForeignKey(Inceptsql, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.IntegerField(default=0, choices=STATUS)
+    handle_result = models.TextField(default='', null=True, blank=True, verbose_name='处理详情')
 
 class Suggestion(Basemodel):
     work_order = models.ForeignKey(Inceptsql, on_delete=models.CASCADE)

@@ -2,12 +2,11 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
 from utils.permissions import SAFE_METHODS
-from utils.basemixins import AppellationMixins
+from utils.basemixins import AppellationMixins, PromptMxins
 from sqlmng.serializers import AuthRulesSerializer
 from sqlmng.mixins import ActionMxins
 from sqlmng.data import step_rules
 from sqlmng.models import *
-from .mixins import PromptMxins
 
 reject_perms = ['reject']
 approve_perms = ['approve', 'disapprove']
@@ -34,10 +33,10 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
         if (request.method in SAFE_METHODS and uri not in reject_perms + approve_perms + handle_perms) or env == self.env_test:
             return True
         if obj.is_manual_review == True:
-            approve_step_instance = obj.step_set.all()[1]
+            approve_step_instance = obj.workorder.step_set.all()[1]
             approve_user = approve_step_instance.user
             if uri in handle_perms:
-                if not obj.handleable:
+                if not obj.workorder.status:
                     raise PermissionDenied(PromptMxins.require_handleable)
                 if approve_user == user:
                     raise PermissionDenied(PromptMxins.require_different)

@@ -3,7 +3,9 @@ import re
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
-from sqlmng.mixins import PromptMxins, ActionMxins
+from utils.basemixins import PromptMxins
+from workflow.serializers import WorkorderSerializer, StepSerializer
+from sqlmng.mixins import ActionMxins
 from sqlmng.serializers import *
 from sqlmng.models import *
 
@@ -13,8 +15,8 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
     '''
     queryset = Inceptsql.objects.all()
     serializer_class = InceptionSerializer
+    serializer_order = WorkorderSerializer
     serializer_step = StepSerializer
-    action_type = '--enable-check'
 
     def check_forbidden_words(self, sql_content):
         forbidden_instance = ForbiddenWords.objects.first()
@@ -52,12 +54,21 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
         request_data['treater'] = request_data.pop('treater_username')
         request_data['is_manual_review'] = self.get_strategy_is_manual_review(request_data.get('env'))
         sql_content = request_data.get('sql_content')
+        select = re.search(self.type_select_tag, sql_content, re.IGNORECASE)
         self.check_forbidden_words(sql_content)
-        inception_detail = self.check_execute_sql(request_data.get('db'), sql_content)[-1]
-        request_data['inception_detail'] = inception_detail
+        if bool(select):
+            handle_result = None
+            request_data['type'] = self.type_select_tag
+        else:
+            handle_result = self.check_execute_sql(request_data.get('db'), sql_content)[-1]
+        workorder_serializer = self.serializer_order(data={})
+        workorder_serializer.is_valid()
+        workorder_instance = workorder_serializer.save()
+        request_data['handle_result'] = handle_result
+        request_data['workorder'] = workorder_instance.id
         serializer = self.serializer_class(data=request_data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         self.create_step(instance, request_data['users'])
-        self.mail(instance, self.action_type)
+        self.mail(instance, self.action_type_check)
         return Response(self.ret)

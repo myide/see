@@ -25,9 +25,9 @@ try:
     cur=conn.cursor()
     ret=cur.execute(sql)
     result=cur.fetchall()
-    print(result)
     num_fields = len(cur.description) 
     field_names = [i[0] for i in cur.description]
+    print(result)
     cur.close()
     conn.close()
 except pymysql.Error as e:
