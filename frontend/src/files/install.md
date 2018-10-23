@@ -19,23 +19,24 @@
 ##### 1.2 mysql配置文件内容需包含以下配置
 ```ini
 [mysqld]
-server-id       = 100  # 不限制具体数值
+server-id = 100  # 不限制具体数值
 log_bin = mysql-bin
-binlog_format = row
+binlog_format = row  # 或 MIXED
 ```
 
 #### 2 Inception
 ##### 2.1 安装
 ```bash
 yum -y install cmake libncurses5-dev libssl-dev g++ bison gcc gcc-c++ openssl-devel ncurses-devel mysql MySQL-python
-wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz tar -zxvf bison-2.5.1.tar.gz
+wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
+tar -zxvf bison-2.5.1.tar.gz
 cd bison-2.5.1
 ./configure
 make
 make install
 
 cd /usr/local/
-wget https://github.com/mysql-inception/inception/archive/master.zip 
+wget https://github.com/myide/inception/archive/master.zip
 unzip master.zip
 cd inception-master/
 sh inception_build.sh builddir linux
@@ -74,11 +75,6 @@ inception_check_column_default_value=1
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
 ```
 
-##### 2.4 官方文档学习
-```bash
-http://mysql-inception.github.io/inception-document/
-```
-
 #### 3 Sqladvisor
 
 ##### 3.1 克隆代码
@@ -90,6 +86,8 @@ git clone https://github.com/Meituan-Dianping/SQLAdvisor.git
 ##### 3.2 安装依赖
 ```bash
 yum install -y cmake libaio-devel libffi-devel glib2 glib2-devel bison
+# 移除mysql-community库(无用途且和Percona-Server有冲突)
+yum remove -y mysql-community-client mysql-community-server mysql-community-common mysql-community-libs
 cd /usr/lib64/ 
 ln -s libperconaserverclient_r.so.18 libperconaserverclient_r.so 
 yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
@@ -166,25 +164,48 @@ daemonize yes
   }
 
 ```
-##### 5.3 前端打包
-上一步的Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
-```bash
-cnpm install
-cnpm install --save-dev vue2-ace-editor
-cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
-npm run dev  # 启动
-npm run build  # 打包
+#### 6 解决python3下pymysql对inception支持的问题
+##### 6.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+```
+# 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
+
+    # 找到此处
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+    # 修改为
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if self.server_version.split('.', 1)[0] == 'Inception2':
+            self.client_flag |= CLIENT.MULTI_RESULTS
+        elif int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+```
+##### 6.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
+```
+# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
+
+    # 找到此处
+    if not self._defer_warnings:
+        self._show_warnings()    
+
+    # 修改为
+    if not self._defer_warnings:
+        pass  
 ```
 
-#### 6 See
+#### 7 See
 
-##### 6.1 安装依赖
+##### 7.1 安装依赖
 
 ```bash
 yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel
 ```
 
-##### 6.2 下载并安装python3.6
+##### 7.2 下载并安装python3.6
 
 ```bash
 wget https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tgz
@@ -205,31 +226,21 @@ echo '/usr/local/lib' >> /etc/ld.so.conf
 
 ```
 
-##### 6.3 安装Django及See后端
+##### 7.3 安装Django及See后端
 步骤
 ```bash
 cd /usr/local/
 /usr/local/python3.6/bin/pyvenv seevenv
 cd seevenv
 source bin/activate
-wget https://github.com/chenkun1998/see/archive/master.zip
+wget https://github.com/myide/see/archive/master.zip
 unzip master.zip
 cd see-master/backend/
 pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mirrors.aliyun.com/pypi/simple/
 
 ```
 
-##### 6.4 配置gunicorn
-在see项目的setting.py文件的同级目录里，增加一个配置文件 /usr/local/seevenv/see-master/backend/sqlweb/gunicorn_config.py, 内容如下：
-```ini
-bind = "127.0.0.1:8090"
-daemon = True
-workers = 2
-errorlog = '/tmp/gunicorn.error.log'
-accesslog = '/tmp/gunicorn.access.log'
-```
-
-##### 6.5 创建autoAdmin数据库
+##### 7.4 创建数据库
 确保mysql的root密码为 123456
 
 ```bash
@@ -239,52 +250,64 @@ python manage.py migrate
 
 ```
 
-##### 6.6 创建管理员用户
+##### 7.5 执行命令创建inception库
+###### 7.5.1 创建测试库，测试表
+```
+mysql -uroot -p123456  # 登录数据库
+mysql> CREATE DATABASE pro1;
+mysql> CREATE TABLE IF NOT EXISTS pro1.mytable1 (
+   `id` INT UNSIGNED AUTO_INCREMENT,
+   `myname` VARCHAR(10) NOT NULL,
+   PRIMARY KEY ( `id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+###### 7.5.2 执行测试脚本
+```
+python /usr/local/seevenv/see-master/backend/utils/inception_test.py
+# 有类似如下返回即可
+((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
+```
+
+##### 7.6 前端打包
+Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
+```bash
+cnpm install
+cnpm install --save-dev vue2-ace-editor
+cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
+npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即是打包后产生的前端文件，用于nginx部署
+```
+
+##### 7.7 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 
-### 7 解决python3下pymysql对inception支持的问题
-##### 7.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+### 8 设置
+##### 8.1 设置inception参数
+修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py
 ```
-# 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
-
-    # 找到此处
-    def _request_authentication(self):
-        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-        if int(self.server_version.split('.', 1)[0]) >= 5:
-            self.client_flag |= CLIENT.MULTI_RESULTS
-
-    # 修改为
-    def _request_authentication(self):
-        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-        if self.server_version.split('.', 1)[0] == 'Inception2':
-            self.client_flag |= CLIENT.MULTI_RESULTS
-        elif int(self.server_version.split('.', 1)[0]) >= 5:
-            self.client_flag |= CLIENT.MULTI_RESULTS
-
-```
-##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
-```
-# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv//lib/python3.6/site-packages/pymysql/cursors.py
-
-    # 找到此处
-    if not self._defer_warnings:
-        self._show_warnings()    
-
-    # 修改为
-    if not self._defer_warnings:
-        pass  
-
+# 找到此处的参数，修改其为实际的值
+    self.inception_ipaddr = '127.0.0.1'
+    self.user = 'root'
+    self.passwd = '123456'
+    self.port = 3306
 ```
 
-### 8 启动所有服务
+### 9 启动所有服务
 ```bash
-
+# mysql  3306端口
 /etc/init.d/mysqld start
+
+# inception  6669端口
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
+
+# redis  6379端口
 redis-server /etc/redis.conf
+
+# nginx  81端口
 /usr/local/nginx/sbin/nginx
+
+# see  8090端口
 cd /usr/local/seevenv/see-master/backend
 nohup python manage.py celery worker -c 4 --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
@@ -294,6 +317,6 @@ gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
 
 http://xxx.xxx.xxx.xxx:81/    # see 项目
 
-http://xxx.xxx.xxx.xxx:81/docs/  # see api 文档
+http://xxx.xxx.xxx.xxx:81/api/docs/  # see api 文档
 
-
+##### 推荐用Chrome浏览器访问
