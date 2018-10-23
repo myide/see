@@ -33,11 +33,11 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
             return request.user.groups.first().id
 
     def create_step(self, instance, users_id):
-        if self.is_manual_review and instance.env == self.env_prd:  # 有审批流程且是生产环境
+        if self.is_manual_review and instance.env == self.env_prd:
             instance_id = instance.id
             users_id.append(None)
             for index, uid in enumerate(users_id):
-                status = 1 if index == 0 else 0  # 第一个step的状态是1
+                status = 1 if index == 0 else 0
                 step_serializer = self.serializer_step(data={'work_order':instance_id, 'user':uid, 'status':status})
                 step_serializer.is_valid(raise_exception=True)
                 step_serializer.save()
@@ -55,25 +55,20 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
         request_data['is_manual_review'] = self.get_strategy_is_manual_review(request_data.get('env'))
         sql_content = request_data.get('sql_content')
         select = re.search(self.type_select_tag, sql_content, re.IGNORECASE)
-        # 禁止词过滤
         self.check_forbidden_words(sql_content)
-        # 检查
-        if bool(select):  # select类型，脚本去操作
+        if bool(select):
             handle_result = None
             request_data['type'] = self.type_select_tag
-        else:  # inception
+        else:
             handle_result = self.check_execute_sql(request_data.get('db'), sql_content, self.action_type_check)[-1]
-        # 审核通过，写入数据库
         workorder_serializer = self.serializer_order(data={})
         workorder_serializer.is_valid()
         workorder_instance = workorder_serializer.save()
-        # 创建sql记录
         request_data['handle_result'] = handle_result
         request_data['workorder'] = workorder_instance.id
         serializer = self.serializer_class(data=request_data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        # 创建step
         self.create_step(instance, request_data['users'])
         self.mail(instance, self.action_type_check)
         return Response(self.ret)
