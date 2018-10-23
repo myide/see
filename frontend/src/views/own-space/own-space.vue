@@ -15,57 +15,42 @@
                     :model="userForm" 
                     :label-width="100" 
                     label-position="right"
-                    :rules="inforValidate"
                 >
-                    <FormItem label="用户姓名：" prop="name">
+                    <FormItem label="用户名：">
                         <div style="display:inline-block;width:300px;">
-                            <Input v-model="userForm.name" ></Input>
+                            <p> {{ userForm.username }}</p>
                         </div>
                     </FormItem>
-                    <FormItem label="用户手机：" prop="cellphone" >
-                        <div style="display:inline-block;width:204px;">
-                            <Input v-model="userForm.cellphone" @on-keydown="hasChangePhone"></Input>
-                        </div>
-                        <div style="display:inline-block;position:relative;">
-                            <Button @click="getIdentifyCode" :disabled="canGetIdentifyCode">{{ gettingIdentifyCodeBtnContent }}</Button>
-                            <div class="own-space-input-identifycode-con" v-if="inputCodeVisible">
-                                <div style="background-color:white;z-index:110;margin:10px;">
-                                    <Input v-model="securityCode" placeholder="请填写短信验证码" ></Input>
-                                    <div style="margin-top:10px;text-align:right">
-                                        <Button type="ghost" @click="cancelInputCodeBox">取消</Button>
-                                        <Button type="primary" @click="submitCode" :loading="checkIdentifyCodeLoading">确定</Button>
-                                    </div>
-                                </div>
-                            </div>
+
+                    <FormItem label="加入时间：">
+                        <div style="display:inline-block;width:300px;">
+                            <p> {{ userForm.date_joined }}</p>
                         </div>
                     </FormItem>
-                    <FormItem label="公司：">
-                        <span>{{ userForm.company }}</span>
+
+                    <FormItem label="Email：">
+                        <div style="display:inline-block;width:300px;">
+                            <p> {{ userForm.email }}</p>
+                        </div>
                     </FormItem>
-                    <FormItem label="部门：">
-                        <span>{{ userForm.department }}</span>
-                    </FormItem>
+
                     <FormItem label="登录密码：">
                         <Button type="text" size="small" @click="showEditPassword">修改密码</Button>
                     </FormItem>
-                    <div>
-                        <Button type="text" style="width: 100px;" @click="cancelEditUserInfor">取消</Button>
-                        <Button type="primary" style="width: 100px;" :loading="save_loading" @click="saveEdit">保存</Button>
-                    </div>
                 </Form>
             </div>
         </Card>
         <Modal v-model="editPasswordModal" :closable='false' :mask-closable=false :width="500">
             <h3 slot="header" style="color:#2D8CF0">修改密码</h3>
             <Form ref="editPasswordForm" :model="editPasswordForm" :label-width="100" label-position="right" :rules="passwordValidate">
-                <FormItem label="原密码" prop="oldPass" :error="oldPassError">
-                    <Input v-model="editPasswordForm.oldPass" placeholder="请输入现在使用的密码" ></Input>
+                <FormItem label="原密码" prop="old_pass" :error="oldPassError">
+                    <Input v-model="editPasswordForm.old_pass" placeholder="请输入现在使用的密码" ></Input>
                 </FormItem>
-                <FormItem label="新密码" prop="newPass">
-                    <Input v-model="editPasswordForm.newPass" placeholder="请输入新密码，至少6位字符" ></Input>
+                <FormItem label="新密码" prop="new_pass">
+                    <Input v-model="editPasswordForm.new_pass" placeholder="请输入新密码，至少6位字符" ></Input>
                 </FormItem>
-                <FormItem label="确认新密码" prop="rePass">
-                    <Input v-model="editPasswordForm.rePass" placeholder="请再次输入新密码" ></Input>
+                <FormItem label="确认新密码" prop="rep_pass">
+                    <Input v-model="editPasswordForm.rep_pass" placeholder="请再次输入新密码" ></Input>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -77,6 +62,8 @@
 </template>
 
 <script>
+import { GetPersonal, UpdatePersonal } from '@/api/account/account'
+
 export default {
     name: 'ownspace_index',
     data () {
@@ -89,7 +76,7 @@ export default {
             }
         };
         const valideRePassword = (rule, value, callback) => {
-            if (value !== this.editPasswordForm.newPass) {
+            if (value !== this.editPasswordForm.new_pass) {
                 callback(new Error('两次输入密码不一致'));
             } else {
                 callback();
@@ -97,10 +84,7 @@ export default {
         };
         return {
             userForm: {
-                name: '',
-                cellphone: '',
-                company: '',
-                department: ''
+                username: 'Terry',
             },
             uid: '', // 登录用户的userId
             securityCode: '', // 验证码
@@ -114,30 +98,21 @@ export default {
             hasGetIdentifyCode: false, // 是否点了获取验证码
             canGetIdentifyCode: false, // 是否可点获取验证码
             checkIdentifyCodeLoading: false,
-            inforValidate: {
-                name: [
-                    { required: true, message: '请输入姓名', trigger: 'blur' }
-                ],
-                cellphone: [
-                    { required: true, message: '请输入手机号码' },
-                    { validator: validePhone }
-                ]
-            },
             editPasswordForm: {
-                oldPass: '',
-                newPass: '',
-                rePass: ''
+                old_pass: '',
+                new_pass: '',
+                rep_pass: ''
             },
             passwordValidate: {
-                oldPass: [
+                old_pass: [
                     { required: true, message: '请输入原密码', trigger: 'blur' }
                 ],
-                newPass: [
+                new_pass: [
                     { required: true, message: '请输入新密码', trigger: 'blur' },
                     { min: 6, message: '请至少输入6个字符', trigger: 'blur' },
                     { max: 32, message: '最多输入32个字符', trigger: 'blur' }
                 ],
-                rePass: [
+                rep_pass: [
                     { required: true, message: '请再次输入新密码', trigger: 'blur' },
                     { validator: valideRePassword, trigger: 'blur' }
                 ]
@@ -207,13 +182,25 @@ export default {
         cancelEditPass () {
             this.editPasswordModal = false;
         },
+        getPersonal () {
+            GetPersonal()
+            .then(response => {
+                console.log(response)
+                this.userForm = response.data
+            })
+        },
         saveEditPass () {
             this.$refs['editPasswordForm'].validate((valid) => {
                 if (valid) {
-                    this.savePassLoading = true;
                     // you can write ajax request here
-                }
-            });
+                    UpdatePersonal(this.editPasswordForm)
+                    .then(response => {
+                        console.log(response)
+                        this.$Message.success('保存成功');
+                        this.editPasswordModal = false
+                    })
+                };
+            })
         },
         init () {
             this.userForm.name = 'Lison';
@@ -254,6 +241,7 @@ export default {
     },
     mounted () {
         this.init();
+        this.getPersonal()
     }
 };
 </script>

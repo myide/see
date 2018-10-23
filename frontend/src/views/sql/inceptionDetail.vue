@@ -11,7 +11,7 @@
         <Tabs size="small">
           <TabPane label="基本信息"><baseInfo v-if="flag" :row="row"> </baseInfo></TabPane>
           <TabPane label="SQL语句"><sqlContentInfo v-if="flag" :sqlContent="sqlContent"> </sqlContentInfo></TabPane>
-          <TabPane label="Inception详情"><inceptionInfo v-if="flag" :inceptionDetail="inceptionDetail"> </inceptionInfo></TabPane>
+          <TabPane :label="labelResult"><handleResult v-if="flag" :row="row" :handleResult="handle_result"> </handleResult></TabPane>
           <TabPane :label="suggestionLabel" name="suggestion"><suggestionInfo @refreshList="handleGetList" :id="this.$route.params.id" :res="res"> </suggestionInfo></TabPane>
         </Tabs>
       </div>
@@ -86,11 +86,11 @@
     import copyRight from '../my-components/public/copyright'
     import baseInfo from './components/baseInfo'
     import sqlContentInfo from './components/sqlContentInfo'
-    import inceptionInfo from './components/inceptionInfo'
+    import handleResult from './components/handleResult'
     import suggestionInfo from './components/suggestionInfo'
 
     export default {
-      components: {copyRight, baseInfo, sqlContentInfo, inceptionInfo, suggestionInfo},
+      components: {copyRight, baseInfo, sqlContentInfo, handleResult, suggestionInfo},
       filters:{
         formatTime:function(value){
           if(value != '') {
@@ -117,7 +117,7 @@
             ])
           },
           row:{},
-          inceptionDetail:[],
+          handle_result:[],
           sqlContent:[],
           steps:[],
           stepsModal:false,
@@ -152,7 +152,7 @@
 
       computed: {
         showBtn: function () {
-          if (this.row.status == -3 || this.row.status == 1) {
+          if (this.row.status == -3 || this.row.status == 1 || (this.row.type == 'select' && this.row.status == 0 ) ) {
             return false
           } else {
             return true
@@ -173,6 +173,13 @@
             return '测试'
           }
         },
+        labelResult: function () {
+          if (this.row.type == 'select') {
+            return '查询结果' 
+          } else {
+            return 'Inception结果'
+          }
+        }
 
       },
 
@@ -272,8 +279,8 @@
           this.stepCurrentStatus = this.stepStatusMap[currentStatus]['stepStatus']  // 数字转换成组件状态
         },
 
-        parseInceptionDetail(inceptionDetail){
-          const data = JSON.parse(inceptionDetail)
+        parseHandleResult(handle_result){
+          const data = JSON.parse(handle_result)
           let ret = []
           for (let i in data){
             ret.push(
@@ -317,7 +324,7 @@
             console.log(response)
             this.row = response.data
             this.steps = this.row.steps
-            this.inceptionDetail = this.parseInceptionDetail(this.row.inception_detail)
+            this.handle_result = this.parseHandleResult(this.row.handle_result)
             this.sqlContent = getSqlContent(this.row.sql_content)
             this.badgeData = handleBadgeData(this.steps)
             this.handleGetList(1)

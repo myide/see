@@ -53,12 +53,12 @@
                       <Radio label="test">测试</Radio>
                     </RadioGroup>
                   </FormItem>
-                  <FormItem label="数据库" prop="db">
+                  <FormItem label="目标数据库" prop="db">
                     <Select v-model="checkData.db" class="parm_check_element" filterable>
                         <Option v-for="item in dbList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                     </Select>
                   </FormItem>
-                  <FormItem label="工单处理人" prop="treater">
+                  <FormItem label="工单核准人" prop="treater">
                       <Input v-model="checkData.treater_username" class="parm_check_element" :readonly="readonly" />
                   </FormItem>
                 </Form>
@@ -68,7 +68,7 @@
                     <p><b>Tips</b></p>
                 <template slot="desc">
                   <p>
-                    <b>1</b>.  您可以在<router-link to='/sqlmng/settings'><b>设置</b></router-link>里指定常用的数据库&工单处理人，之后只显示这些数据供您选择。
+                    <b>1</b>.  您可以在<router-link to='/sqlmng/settings'><b>设置</b></router-link>里指定常用的数据库&工单核准人，之后只显示这些数据供您选择。
                   </p>
                   <p>
                     <b>2</b>.  关于流程
@@ -156,15 +156,14 @@
         require('brace/theme/xcode')
       },
 
-      renderFunc (treater) {
+      renderFunc (treater, title) {
         this.$Notice.success({
-          title: 'SQL审核通过',
-          desc: 'SQL审核通过...',
+          title: title,
           render: h => {
             return h('span', [
               '请等待 ',
               h('a', treater),
-              ' 执行'
+              ' 处理'
             ])
           }
         });
@@ -226,9 +225,10 @@
             .then(response => {
               console.log(response)
               let status = response.data.status
+              let data = response.data.data
               let msg = response.data.msg
               if (status == 0){
-                this.renderFunc(this.checkData.treater_username)
+                this.renderFunc(this.checkData.treater_username, 'SQL工单 已提交')          
               } else if (status == -1 || status == -2){
                 this.warning('SQL审核不通过', msg)
               } 

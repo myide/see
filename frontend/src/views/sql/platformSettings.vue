@@ -39,7 +39,7 @@
               <FormItem label="开启审批流">
                 <i-switch v-model="strategy.is_manual_review" @on-change="change" />
               </FormItem>
-              <FormItem label="工单SQL操作人" v-show="strategy.is_manual_review">
+              <FormItem label="SQL工单 操作人" v-show="strategy.is_manual_review">
                 <Select v-model="strategy.users" multiple filterable>
                   <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.username }}</Option>
                 </Select>
@@ -112,7 +112,7 @@
 
       handleNotice (response) {
         let httpstatus = response.status
-        if (httpstatus == 200) {
+        if (httpstatus == 200 || httpstatus == 201) {
           let title = '服务器提示'
           let msg = '设置 保存成功'
           this.notice(title, msg)

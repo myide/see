@@ -33,7 +33,7 @@ export const otherRouter = {
         },
         {
             path: 'inceptionsql/:id',
-            title: 'sql详情',
+            title: '工单详情',
             name: 'inceptiondetail',
             component: () =>
                 import ('@/views/sql/inceptionDetail.vue'),

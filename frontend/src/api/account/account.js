@@ -3,6 +3,7 @@ import axios from '../../libs/http';
 const users = '/api/account/users/';
 const groups = '/api/account/groups/';
 const permissions = '/api/account/permissions/';
+const personal = '/api/account/personal/'
 
 export function GetUserList(params) {
     return axios({
@@ -71,5 +72,21 @@ export function GetPermissonList(params) {
         url: permissions,
         method: 'get',
         params
+    });
+}
+
+export function GetPersonal(params) {
+    return axios({
+        url: personal,
+        method: 'get',
+        params
+    });
+}
+
+export function UpdatePersonal(data) {
+    return axios({
+        url: personal,
+        method: 'post',
+        data: data
     });
 }

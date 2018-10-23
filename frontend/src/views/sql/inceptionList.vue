@@ -128,7 +128,7 @@
           },
 
           {
-            title: '提交人',
+            title: '发起人',
             key: 'commiter'
           },
 
@@ -147,7 +147,7 @@
           },
 
           {
-            title: '数据库',
+            title: '目标库',
             key: 'db_name',
           },
 
@@ -231,7 +231,7 @@
           },
 
           {
-            title: '操作状态',
+            title: '工单状态',
             key: '',
             width: 100,
             render: (h, params) => {
@@ -243,18 +243,18 @@
               } else if (status == -1) {
                 return h('div', [h(Tag,{props:{color:'blue'}}, '待执行')])
               } else if (status == 0) {
-                return h('div', [h(Tag,{props:{color:'green'}}, '已执行')])
+                return h('div', [h(Tag,{props:{color:'green'}}, '成功')])
               } else if (status == 1) {
                 return h('div', [h(Tag,{props:{color:'yellow'}}, '已放弃')])
               } else if (status == 2) {
-                return h('div', [h(Tag,{props:{color:'red'}}, '执行失败')])
+                return h('div', [h(Tag,{props:{color:'red'}}, '失败')])
               }
 
             }
           },
 
           {
-            title: '执行人',
+            title: '核准人',
             key: 'treater'
           },
           
@@ -266,6 +266,7 @@
             render: (h, params) => {
               const id = params.row.id
               const status = params.row.status
+              const type = params.row.type
               const handleable = params.row.handleable
               const is_manual_review = params.row.is_manual_review
               let popcss = {
@@ -285,7 +286,7 @@
               } else {
                 var ddItem = []
               }
-              return h('div', {style:{display: status == -3 || status == 1 ? 'none' : 'display'}}, [
+              return h('div', {style:{display: status == -3 || status == 1 || (type == 'select' && status == 0 ) ? 'none' : 'display'}}, [
                 h(Dropdown,
                 {
                   style: {marginLeft: '20px'},

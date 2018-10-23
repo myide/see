@@ -11,7 +11,7 @@
                   <Option v-for="item in dbList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                 </Select>
               </FormItem>
-              <FormItem label="工单处理人">
+              <FormItem label="工单核准人">
                 <Select v-model="personalSettings.leader" filterable>
                   <Option v-for="item in leaderList" :value="item.id" :key="item.id">{{ item.username }}</Option>
                 </Select>
