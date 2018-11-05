@@ -12,4 +12,3 @@ django-celery==3.2.2
 celery-with-redis==3.0
 uwsgi==2.0.17.1
 gunicorn==19.9.0
-
