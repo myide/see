@@ -3,13 +3,13 @@ import re
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
-from utils.basemixins import PromptMxins
+from utils.basemixins import PromptMixins
 from workflow.serializers import WorkorderSerializer, StepSerializer
-from sqlmng.mixins import ActionMxins
+from sqlmng.mixins import ActionMixins
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
+class InceptionCheckView(PromptMixins, ActionMixins, BaseView):
     '''
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
@@ -32,6 +32,11 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
                 raise ParseError(self.not_exists_group)
             return request.user.groups.first().id
 
+    def check_db(self, request_data):
+        db = request_data.get('db')
+        if not Dbconf.objects.filter(id=db):
+            raise ParseError(self.not_exists_target_db)
+
     def create_step(self, instance, users_id):
         if self.is_manual_review and instance.env == self.env_prd:
             instance_id = instance.id
@@ -50,6 +55,7 @@ class InceptionCheckView(PromptMxins, ActionMxins, BaseView):
 
     def create(self, request, *args, **kwargs):
         request_data = request.data
+        self.check_db(request_data)
         request_data['group'] = self.check_user_group(request)
         request_data['treater'] = request_data.pop('treater_username')
         request_data['is_manual_review'] = self.get_strategy_is_manual_review(request_data.get('env'))

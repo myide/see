@@ -1,19 +1,37 @@
 #coding=utf-8
+import configparser
 import subprocess
 import pymysql
 from rest_framework.exceptions import ParseError
+from django.conf import settings
 from .dbcrypt import prpcrypt
+from sqlmng.models import InceptionConnection
 
 class Inception(object):
 
     def __init__(self, sql, dbname = ''):
         self.sql = sql
         self.dbname = dbname
-        ### Inception 数据库地址，用户，密码，端口
-        self.inception_ipaddr = '127.0.0.1'
-        self.user = 'root'
-        self.passwd = '123456'
-        self.port = 3306
+
+    @property
+    def get_inception_conn(self):
+        instance = InceptionConnection.objects.all()[0]
+        return {
+            'host':instance.host,
+            'port':int(instance.port)
+        }
+
+    @property
+    def get_inception_backup(self):
+        conf = configparser.ConfigParser()
+        file_path = settings.INCEPTION_SETTINGS.get('file_path')
+        conf.read(file_path)
+        return {
+            'host': conf.get('inception', 'inception_remote_backup_host'),
+            'port': int(conf.get('inception', 'inception_remote_backup_port')),
+            'user': conf.get('inception', 'inception_remote_system_user'),
+            'passwd': conf.get('inception', 'inception_remote_system_password')
+        }
 
     def inception_handle(self, dbaddr):
         status = 0
@@ -21,7 +39,7 @@ class Inception(object):
           inception_magic_start;\
           use {}; {} inception_magic_commit;'.format(dbaddr, self.dbname, self.sql)
         try:
-            conn = pymysql.connect(host=self.inception_ipaddr, user='', passwd='', port=6669, db='', use_unicode=True, charset="utf8")  # 连接inception
+            conn = pymysql.connect(user='', passwd='', db='', use_unicode=True, charset="utf8", **self.get_inception_conn)
             cur = conn.cursor()
             cur.execute(sql)
             result = cur.fetchall()
@@ -33,7 +51,7 @@ class Inception(object):
         return {'result': result, 'status': status}
 
     def manual(self):
-        conn = pymysql.connect(host=self.inception_ipaddr, port=self.port, user=self.user, passwd=self.passwd, db=self.dbname, charset='utf8')  # 连接SQL备份服务器
+        conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
         conn.autocommit(True)
         cur = conn.cursor()
         try:
@@ -68,7 +86,7 @@ class SqlQuery(object):
         db = self.instance
         password = self.decrypt_password(db.password)
         try:
-            conn = pymysql.connect(host=db.host, port=int(db.port), user=db.user, passwd=password, db=db.name, charset='utf8')  # 连接目标服务器
+            conn = pymysql.connect(host=db.host, port=int(db.port), user=db.user, passwd=password, db=db.name, charset='utf8')
             conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(sql)

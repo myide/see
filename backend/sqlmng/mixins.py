@@ -1,15 +1,125 @@
 #coding=utf8
+import re
+import json
+import subprocess
+import configparser
 from rest_framework.exceptions import ParseError
+from django.conf import settings
 from utils.tasks import send_mail
 from utils.basemixins import AppellationMixins
 from utils.dbcrypt import prpcrypt
 from utils.sqltools import Inception
 from .models import *
-import re
-import json
 
-class ActionMxins(AppellationMixins, object):
+class FixedDataMixins(object):
 
+    def get_queryset(self):
+        model = self.serializer_class.Meta.model
+        objects = model.objects
+        queryset = objects.all()
+        if queryset.count() != len(self.source_data):
+            queryset.delete()
+            datas = [model(**data) for data in self.source_data]
+            objects.bulk_create(datas)
+            queryset = objects.all()
+        return queryset
+
+class InceptionConn(object):
+    error_tag = 'error'
+
+    def get_cmd(self, sub_cmd):
+        conn = self.get_inception_conn()
+        return '{} -e "{}" '.format(conn, sub_cmd)
+
+    def get_inception_conn(self):
+        instance = InceptionConnection.objects.all()[0]
+        return 'mysql -h{} -P{}'.format(instance.host, instance.port)
+
+    def get_mysql_conn(self, params):
+        return 'mysql -h{} -P{} -u{} -p{} -e "show databases" '.format(
+            params.get('host'),
+            params.get('port'),
+            params.get('user'),
+            params.get('password')
+        )
+
+class CheckConn(InceptionConn):
+    pc = prpcrypt()
+    conf = configparser.ConfigParser()
+    file_path = settings.INCEPTION_SETTINGS.get('file_path')
+
+    def check(self, request):
+        res = {'status':0, 'data':''}
+        request_data = request.data
+        check_type = request_data.get('check_type')
+        if check_type == 'inception_conn':
+            sub_cmd = "inception get variables"
+            cmd = self.get_cmd(sub_cmd)
+        else:
+            params = {}
+            if check_type == 'inception_backup':
+                self.conf.read(self.file_path)
+                password = self.conf.get('inception', 'inception_remote_system_password')
+                request_data['password'] = password
+                params = request_data
+            elif check_type == 'update_target_db':
+                db_id = request_data.get('id')
+                instance = Dbconf.objects.get(id=db_id)
+                params = {
+                    'host': instance.host,
+                    'port': instance.port,
+                    'user': instance.user,
+                    'password': self.pc.decrypt(instance.password)
+                }
+            elif check_type == 'create_target_db':
+                params = request_data
+            cmd = self.get_mysql_conn(params)
+        popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        lines = popen.stdout.readlines()
+        last_item = lines[-1].decode('gbk')
+        if self.error_tag in last_item.lower():
+            res['status'] = -1
+            res['data'] = last_item
+        return res
+
+class HandleInceptionSettingsMixins(InceptionConn):
+
+    backup_variables = [
+        'inception_remote_backup_host',
+        'inception_remote_backup_port',
+        'inception_remote_system_user',
+        'inception_remote_system_password'
+    ]
+
+    def get_inception_backup(self):
+        return {variable:self.get_status(variable) for variable in self.backup_variables}
+
+    def get_status(self, variable_name):
+        filter_words = [variable_name, '\t', '\n']
+        sub_cmd = "inception get variables '{}'".format(variable_name)
+        cmd = self.get_cmd(sub_cmd)
+        popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        lines = popen.stdout.readlines()
+        if not lines:
+            return None
+        res = lines[-1].decode('gbk')
+        if self.error_tag in res.lower():
+            return None
+        for word in filter_words:
+            res = res.replace(word, '')
+        return res
+
+    def set_variable(self, request):
+        request_data = request.data
+        variable_name = request_data.get('variable_name')
+        variable_value = request_data.get('variable_value')
+        sub_cmd = "inception set {}={}".format(variable_name, variable_value)
+        cmd = self.get_cmd(sub_cmd)
+        subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+class ActionMixins(AppellationMixins):
+
+    pc = prpcrypt()
     type_select_tag = 'select'
     action_type_execute = '--enable-execute'
     action_type_check = '--enable-check'
@@ -40,8 +150,7 @@ class ActionMxins(AppellationMixins, object):
         return instance.is_manual_review
 
     def get_db_addr(self, user, password, host, port, actiontype):
-        pc = prpcrypt()
-        password = pc.decrypt(password)
+        password = self.pc.decrypt(password)
         dbaddr = '--user={}; --password={}; --host={}; --port={}; {};'.format(user, password, host, port, actiontype)
         return dbaddr
 

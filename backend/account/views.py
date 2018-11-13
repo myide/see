@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from utils.permissions import IsSuperUser
-from utils.basemixins import PromptMxins
+from utils.basemixins import PromptMixins
 from utils.baseviews import MaxSizePagination, BaseView
 from .serializers import *
 
@@ -43,7 +43,7 @@ class UserViewSet(BaseView):
     def perform_create(self, serializer):
         serializer.create(self.request.data)
 
-class PersonalCenterViewSet(PromptMxins, BaseView):
+class PersonalCenterViewSet(PromptMixins, BaseView):
     '''
         个人中心
     '''

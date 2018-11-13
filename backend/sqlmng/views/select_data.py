@@ -13,10 +13,11 @@ class SelectDataView(AppellationMixins, BaseView):
     serializer_class = DbSerializer
     serializer_user = UserSerializer
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         env = request.data.get('env')
-        qs = self.queryset.filter(env = env)
-        self.ret['data']['dbs'] = self.serializer_class(qs, many = True).data
+        cluster = request.data.get('cluster') or None
+        qs = self.queryset.filter(env=env, cluster_id=cluster)
+        self.ret['data']['dbs'] = self.serializer_class(qs, many=True).data
         userobj = request.user
         user_data = self.serializer_user(userobj).data
         self.ret['data']['commiter'] = user_data
@@ -24,6 +25,6 @@ class SelectDataView(AppellationMixins, BaseView):
             treaters = [user_data]
         else:
             group = userobj.groups.first()
-            treaters = self.serializer_user(group.user_set.filter(role = self.dev_mng), many = True).data if group else []
+            treaters = self.serializer_user(group.user_set.filter(role=self.dev_mng), many=True).data if group else []
         self.ret['data']['treaters'] = treaters
         return Response(self.ret)

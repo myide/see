@@ -4,15 +4,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
-from utils.basemixins import PromptMxins
+from utils.basemixins import PromptMixins
 from utils.sqltools import Inception, SqlQuery
 from utils.basecomponent import DateEncoder
-from sqlmng.mixins import ActionMxins
+from sqlmng.mixins import ActionMixins
 from sqlmng.permissions import IsHandleAble
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class InceptionMainView(PromptMxins, ActionMxins, BaseView):
+class InceptionMainView(PromptMixins, ActionMixins, BaseView):
     '''
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''

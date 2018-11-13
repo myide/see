@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from rest_framework import serializers
-from utils.dbcrypt import prpcrypt
-from utils.basemixins import AppellationMixins
+from utils.basemixins import AppellationMixins, SetEncryptMixins
+from .mixins import HandleInceptionSettingsMixins
 from .models import *
 
 class InceptionSerializer(serializers.ModelSerializer):
@@ -40,24 +40,17 @@ class InceptionSerializer(serializers.ModelSerializer):
         ret['steps'] = self.get_step(instance)
         return ret
 
-class DbSerializer(serializers.ModelSerializer):
+class DbSerializer(SetEncryptMixins, serializers.ModelSerializer):
 
     class Meta:
         model = Dbconf
         fields = '__all__'
 
-    def create(self, validated_data):
-        password = validated_data.get('password')
-        pc = prpcrypt()
-        validated_data['password'] = pc.encrypt(password)
-        return super(DbSerializer, self).create(validated_data)
-
-    def update(self, instance, validated_data):
-        password = validated_data.get('password')
-        if password != instance.password:
-            pc = prpcrypt()
-            validated_data['password'] = pc.encrypt(password)
-        return super(DbSerializer, self).update(instance, validated_data)
+    def to_representation(self, instance):
+        ret = super(DbSerializer, self).to_representation(instance)
+        cluster = instance.cluster
+        ret['cluster'] = {'id':cluster.id, 'name':cluster.name} if cluster else {}
+        return ret
 
 class ForbiddenWordsSerializer(serializers.ModelSerializer):
 
@@ -85,8 +78,20 @@ class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
         return leader
 
     def get_db_list(self, env, instance):
-        db_queryset = instance.dbconf_set.all() if env == self.env_prd else Dbconf.objects.filter(env=env)
-        db_list = [{'id':db.id, 'name':db.name} for db in db_queryset] if db_queryset else []
+        db_queryset = instance.dbconf_set.all()
+        db_list = []
+        if db_queryset:
+            for db in db_queryset:
+                cluster_id = db.cluster.id if db.cluster else None
+                cluster_name = db.cluster.name if db.cluster else None
+                row = {
+                    'id': db.id,
+                    'name': db.name,
+                    'env': db.env,
+                    'cluster_id': cluster_id,
+                    'cluster_name': cluster_name,
+                }
+                db_list.append(row)
         return db_list
 
     def get_commiter(self, instance):
@@ -111,7 +116,36 @@ class SuggestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Suggestion
         fields = '__all__'
+
     def to_representation(self, instance):
         ret = super(SuggestionSerializer, self).to_representation(instance)
         ret['username'] = instance.user.username if instance.user else ''
         return ret
+
+class DbClusterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cluster
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super(DbClusterSerializer, self).to_representation(instance)
+        ret['dbs'] = [db.id for db in instance.dbconf_set.all()]
+        return ret
+
+class InceptionVariablesSerializer(HandleInceptionSettingsMixins, serializers.ModelSerializer):
+
+    class Meta:
+        model = InceptionVariables
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super(InceptionVariablesSerializer, self).to_representation(instance)
+        ret['value'] = self.get_status(instance.name)
+        return ret
+
+class InceptionConnectionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InceptionConnection
+        fields = '__all__'

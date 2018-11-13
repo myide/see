@@ -4,15 +4,14 @@ from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 
 class RenderFile(object):
-
+    path = settings.MEDIA.get('sql_file_path')
     def create_file(self, params, content):
         pk, sfx = params.get('pk'), params.get('sfx')
         file_name = '{}.{}'.format(pk, sfx)
-        path = settings.MEDIA.get('sql_file_path')
-        isExists = os.path.exists(path)
+        isExists = os.path.exists(self.path)
         if not isExists:
-            os.makedirs(path)
-        path = os.path.join(path, file_name)
+            os.makedirs(self.path)
+        path = os.path.join(self.path, file_name)
         with open(path, 'w') as f:
             content_list = json.loads(content)
             length = len(content_list)

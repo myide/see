@@ -221,6 +221,11 @@ MEDIA = {
     'sql_file_path': 'files/download/sql/handle_result/'
 }
 
+# inception settings
+INCEPTION_SETTINGS = {
+    'file_path': '/etc/inc.cnf'
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 

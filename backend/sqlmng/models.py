@@ -8,19 +8,25 @@ from utils.basemodels import Basemodel
 from workflow.models import Workorder
 # Create your models here.
 
+class Cluster(Basemodel):
+    class Meta:
+        unique_together = ['name']
+
 class Dbconf(Basemodel):
     ENVS = (
         ('prd', u'生产环境'),
         ('test', u'测试环境')
     )
     related_user = models.ManyToManyField(User, null=True, blank=True)
+    cluster = models.ForeignKey(Cluster, null=True, blank=True, on_delete=models.SET_NULL)
     user = models.CharField(max_length=128)
     password = models.CharField(max_length=128)
     host = models.CharField(max_length=16)
     port = models.CharField(max_length=5)
     env = models.CharField(max_length=8, choices=ENVS)
     class Meta:
-        unique_together = ('name', 'host', 'env')
+        unique_together = ('name', 'host', 'env', 'cluster')
+        ordering = ['-id']
 
 class Inceptsql(Basemodel):
     STATUS = (
@@ -82,3 +88,14 @@ class AuthRules(Basemodel):
     rollback = models.BooleanField()
     approve = models.BooleanField()
     disapprove = models.BooleanField()
+
+class InceptionVariables(Basemodel):
+    param = models.CharField(max_length=64, null=True, blank=True)
+    default = models.CharField(max_length=16, null=True, blank=True)
+    instructions = models.TextField(null=True, blank=True)
+    class Meta:
+        ordering = ['id']
+
+class InceptionConnection(Basemodel):
+    host = models.CharField(max_length=32, null=True, blank=True, default='127.0.0.1')
+    port = models.CharField(max_length=6, null=True, blank=True, default=6669)
