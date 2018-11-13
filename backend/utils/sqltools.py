@@ -15,7 +15,7 @@ class Inception(object):
 
     @property
     def get_inception_conn(self):
-        instance = InceptionConnection.objects.all()[0]
+        instance = InceptionConnection.objects.first()
         return {
             'host':instance.host,
             'port':int(instance.port)
