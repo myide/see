@@ -128,10 +128,10 @@
         transferTitles: ['系统权限', '组权限'],
         permissionList:[],
         groupList:[],
-        // 显示组权限
+        // 显示组权限或成员
         showContent:{
-          title:'',
           modal:false,
+          title:'',
           data:[],
         },
         // 创建组数据

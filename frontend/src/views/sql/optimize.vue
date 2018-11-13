@@ -12,16 +12,16 @@
         <Col span="12">
             <div>
               <Alert show-icon>查询表结构</Alert>
-                <Select @on-change="handleGetDb" placeholder="选择环境" style="width:100px">
-                    <Option value="prd" >生产</Option>
-                    <Option value="test" >测试</Option>
-                </Select>
-                <Select v-model="database" @on-change="handleGetTables" placeholder="选择数据库" filterable class="parm_check_element">
-                    <Option v-for="item in dbList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                </Select>
-                <Select v-model="table" @on-change="handleGetTableInfo" placeholder="选择表" filterable class="parm_check_element">
-                    <Option v-for="item in tableList" :value="item" :key="item">{{ item }}</Option>
-                </Select>
+                <Row>  
+                  <Col span="10">
+                    <Cascader :data="targetDbs" trigger="hover" @on-change="handleGetTables"></Cascader>
+                  </Col>
+                  <Col span="10">
+                    <Select v-model="table" @on-change="handleGetTableInfo" placeholder="选择表" filterable class="parm_check_element">
+                        <Option v-for="item in tableList" :value="item" :key="item">{{ item }}</Option>
+                    </Select>
+                  </Col>
+                </Row>
             </div>
             </br>
             <Alert show-icon>SQL语句优化</Alert>
@@ -67,6 +67,8 @@
 </template>
 <script>
   import {GetDbList} from '@/api/sql/dbs'
+  import {GetPersonalSettings} from '@/api/sql/check'
+  import {CascaderData} from '@/utils/sql/formatData'
   import {GetTableList, GetTableInfo, GetSqlAdvisor} from '@/api/sql/sqlquery'
   import editor from '../my-components/sql/editor'
   import copyright from '../my-components/public/copyright'
@@ -76,14 +78,20 @@
     data () {
       return {
         spinShow: false,
+        targetDbs:[],
         wordList:[],
         dbList:[],
         tableList:[],
-        database:'',
         table:'',
         query_result:'',
         checkData:{
           sql:'',
+        },
+        env_map: {
+          prd:'生产',
+          test:'测试',
+          '生产':'prd',
+          '测试':'test'
         },
         getParams:{
           page:1,
@@ -100,6 +108,7 @@
 
     created () {
        this.getWordList()
+       this.handleSelect()
     },
 
     methods: {
@@ -150,22 +159,23 @@
       handleClear () {
         this.checkData.sql = ''
       },
-
-      handleGetDb (e) {
-        this.spinShow = true
-        this.getParams.env = e
-        GetDbList(this.getParams)
-        .then(
-          response => {
-            console.log(response)
-            this.spinShow = false
-            this.dbList = response.data.results
-          }
-        )
+      handleSelect () {
+        GetPersonalSettings()
+        .then(response => {
+          const data = response.data.results[0]
+          const dbs = data.db_list
+          dbs.map( (item) => {
+              item.env = this.env_map[item.env]
+          })
+          this.targetDbs = CascaderData(dbs)          
+        })
+        .catch(error => {
+          console.log(error)
+        })
       },
 
       handleGetTables (e) {
-        //this.tableList = []
+        this.database = e[2]
         this.spinShow = true
         GetTableList(this.database)
         .then(

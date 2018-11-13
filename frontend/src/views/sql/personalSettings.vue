@@ -6,7 +6,18 @@
           <Alert show-icon>订阅</Alert>
           <div>
             <Form class="step-form" :label-width="100">
-              <FormItem label="常用数据库">
+              <FormItem label="集群">
+                <Select v-model="queryParams.cluster" filterable @on-change="handleChange">
+                  <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                </Select>
+              </FormItem>
+              <FormItem label="环境">
+                <RadioGroup v-model="queryParams.env" @on-change="handleChange">
+                  <Radio label="prd">生产</Radio>
+                  <Radio label="test">测试</Radio>
+                </RadioGroup>
+              </FormItem>
+              <FormItem label="数据库">
                 <Select v-model="personalSettings.dbs" multiple filterable>
                   <Option v-for="item in dbList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                 </Select>
@@ -17,13 +28,7 @@
                 </Select>
               </FormItem>
               <FormItem label="操作">
-                <Row>
-                  <Col span="12">
-                    <center>
-                      <Button type="primary" @click='handleCreatePersonalSettings'>保存</Button>
-                    </center>
-                  </Col>
-                </Row>
+                <Button type="primary" @click='handleCreatePersonalSettings'>保存</Button>
               </FormItem>
             </Form>
           </div>
@@ -48,6 +53,7 @@
 </template>
 <script>
   import {GetSelectData, GetPersonalSettings, CreatePersonalSettings} from '@/api/sql/check'
+  import {GetClusterList} from '@/api/sql/cluster'
   import copyright from '../my-components/public/copyright'
   
   export default {
@@ -55,7 +61,12 @@
     data () {
       return {
         dbList:[],
+        clusterList:[],
         leaderList:[],
+        queryParams:{
+          cluster:'',
+          env:'prd'
+        },
         personalSettings:{
           dbs:[],  // id list
           leader:null  // id
@@ -64,7 +75,7 @@
     },
 
     created () {
-      this.handleGetData()
+      this.handleInitData()
     },
 
     methods: {
@@ -93,7 +104,12 @@
         return leader
       },
 
-      handleGetData () {
+      handleInitData () {
+        this.handleGetClusterList()
+        this.handleGetPersonalSettings()
+      },
+
+      handleChange () {
         this.handleSelect()
         this.handleGetPersonalSettings()
       },
@@ -102,7 +118,6 @@
         GetPersonalSettings({env:'prd'})
         .then(
           response => {
-            console.log(response)
             const data = response.data.results[0]
             this.personalSettings.dbs = this.getDbList(data.db_list)
             this.personalSettings.leader = this.getLeader(data.leader)
@@ -111,18 +126,34 @@
       },
 
       handleSelect () {
-        GetSelectData({env:'prd'})
+        let data = this.queryParams
+        GetSelectData(data)
         .then(response => {
-          console.log(response)
           this.dbList = response.data.data.dbs
           this.leaderList = response.data.data.treaters
         })
-        .catch(error => {
-          console.log(error)
-        })
+      },
+
+      handleGetClusterList () {
+        this.spinShow = true
+        GetClusterList(this.getClusterParams)
+        .then(
+          res => {
+            this.spinShow = false
+            this.clusterList = res.data.results
+            this.setDefaultCluster()
+          }
+        )
+      },
+
+      setDefaultCluster () {
+        if (this.clusterList.length != 0) {
+          this.queryParams.cluster = this.clusterList[0].id
+        }
       },
 
       handleCreatePersonalSettings () {
+        this.personalSettings.cluster = this.queryParams.cluster
         const data = this.personalSettings
         CreatePersonalSettings (data)  
         .then(
@@ -133,7 +164,7 @@
               let msg = '设置 保存成功'
               this.notice(title, msg)
             }
-            this.handleGetData()
+            this.handleInitData()
           },
         )
       }

@@ -104,7 +104,7 @@ export const appRouter = [{
     {
         path: '/settings',
         icon: 'settings',
-        title: '平台管理',
+        title: '平台设置',
         name: 'settings',
         component: Main,
         children: [{
@@ -122,8 +122,32 @@ export const appRouter = [{
                     import ('@/views/sql/platformSettings.vue')
             },
             {
+                path: 'inception',
+                title: 'Inception设置',
+                name: 'inception',
+                component: () =>
+                    import ('@/views/sql/inceptionSettings.vue')
+            },   
+            
+        ]
+    },
+
+    {
+        path: '/target',
+        icon: 'shuffle',
+        title: '目标库管理',
+        name: 'target',
+        component: Main,
+        children: [{
+                path: 'cluster',
+                title: '集群',
+                name: 'cluster',
+                component: () =>
+                    import ('@/views/sql/dbcluster.vue')
+            },
+            {
                 path: 'dblist',
-                title: '目标数据库',
+                title: '数据库',
                 name: 'dblist',
                 component: () =>
                     import ('@/views/sql/dbList.vue')

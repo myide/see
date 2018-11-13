@@ -47,16 +47,8 @@
               </br>
               <div>
                 <Form class="step-form" ref="checkConf" :model="checkData" :rules="ruleCheckData" :label-width="100">
-                  <FormItem label="环境">
-                    <RadioGroup v-model="checkData.env" @on-change="handleSelect">
-                      <Radio label="prd">生产</Radio>
-                      <Radio label="test">测试</Radio>
-                    </RadioGroup>
-                  </FormItem>
-                  <FormItem label="目标数据库" prop="db">
-                    <Select v-model="checkData.db" class="parm_check_element" filterable>
-                        <Option v-for="item in dbList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                    </Select>
+                  <FormItem label="目标数据库">
+                     <Cascader :data="targetDbs" v-model="targetDb" trigger="hover" class="parm_check_element"></Cascader>
                   </FormItem>
                   <FormItem label="工单核准人" prop="treater">
                       <Input v-model="checkData.treater_username" class="parm_check_element" :readonly="readonly" />
@@ -92,6 +84,7 @@
   </div>
 </template>
 <script>
+  import {CascaderData} from '@/utils/sql/formatData'
   import { GetPersonalSettings, CheckSql } from '@/api/sql/check'
   import editor from '../my-components/sql/editor'
   import copyright from '../my-components/public/copyright'
@@ -102,23 +95,30 @@
       return {
         readonly:true,
         wordList:[],
+        env_map: {
+          prd:'生产',
+          test:'测试',
+          '生产':'prd',
+          '测试':'test'
+        },
         checkData:{
           treater_username:'',
           sql_content:'',
           remark:'',
-          env:'prd',
+          env:'',
           db:'',
           treater:'',
           commiter:'',
-          users:[]
+          users:[],
         },
         commiter:{},
         ruleCheckData:{
           sql_content:[{ required: true, message: '请输入SQL', trigger: 'blur' }],
           treater:[{ required: true, message: '请选择执行人', trigger: 'change', type: 'number' }],
-          db: [{ required: true, message: '请选择数据库', trigger: 'change', type: 'number' }],
+          db: [{ required: true, message: '请选择数据库', trigger: 'change', type: 'array', len: 3, fields: {0: {type: "number", required: true},1: {type: "string", required: true},2: {type: "number", required: true}} }],
         },
-        dbList:[],
+        targetDb:[],
+        targetDbs:[],
         keyMap:{
           'sql_content':'SQL',
           'env':'环境',
@@ -130,7 +130,7 @@
 
     created () {
       this.getWordList()
-      this.handleSelect(this.checkData.env)
+      this.handleSelect()
     },
 
     methods: {
@@ -187,11 +187,9 @@
           this.checkData.treater_username = treater.username
         }
       },
-
-      handleSelect (e) {
-        GetPersonalSettings({env:e})
+      handleSelect () {
+        GetPersonalSettings()
         .then(response => {
-          console.log(response)
           const data = response.data.results[0]
           const dbs = data.db_list
           const commiter = data.commiter
@@ -199,13 +197,10 @@
           this.setTreater(treater)
           this.checkData.commiter = commiter.username
           this.checkData.users = [commiter.id, treater.id]
-          this.dbList = []
           dbs.map( (item) => {
-            this.dbList.push({
-              value:item.id,
-              label:item.name
-            })
+              item.env = this.env_map[item.env]
           })
+          this.targetDbs = CascaderData(dbs)       
         })
         .catch(error => {
           console.log(error)
@@ -221,9 +216,10 @@
             if (!valid) {
               return
             }
+            this.checkData.env = this.env_map[this.targetDb[1]]
+            this.checkData.db = this.targetDb[2]
             CheckSql(this.checkData)
             .then(response => {
-              console.log(response)
               let status = response.data.status
               let data = response.data.data
               let msg = response.data.msg
@@ -240,7 +236,6 @@
         })
 
       },
-
 
     },
 

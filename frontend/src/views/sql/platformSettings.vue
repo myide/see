@@ -10,7 +10,7 @@
                 <Input v-model="forbiddenWords.forbidden_words" :readonly="readonly" type="textarea" :rows="4" placeholder="SQL语句里不允许出现的词，多个以空格分隔" />
               </FormItem>
               <FormItem label="操作">
-                <div style="margin-left:20px">
+                <div>
                   <Button type="warning" v-show="readonly == true" @click="editHandle">编辑</Button>
                   <Button type="primary" v-show="readonly == false" @click="saveHandle">保存</Button>
                 </div>
@@ -45,7 +45,7 @@
                 </Select>
               </FormItem>
               <FormItem label="操作">
-                <div style="margin-left:20px">
+                <div>
                   <Button type="primary" @click="handleWriteStrategy">提交</Button>
                 </div>
               </FormItem>

@@ -3,7 +3,7 @@
       <Card>
       <Row>  
         <Col span="4">
-          <Input icon="search" v-model="getParams.search" placeholder="搜索" @on-click="handleGetDbList" @on-enter="handleGetDbList" />
+          <Input icon="search" v-model="getDbParams.search" placeholder="搜索" @on-click="handleGetDbList" @on-enter="handleGetDbList" />
         </Col>
 
         <Col span="10">
@@ -19,7 +19,7 @@
         </Col>
       </Row>
       </br>
-      <Page :total=total show-sizer :current=getParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
+      <Page :total=total show-sizer :current=getDbParams.page @on-change="pageChange" @on-page-size-change="sizeChange"></Page>
 
     </Card>
     <copyright> </copyright>
@@ -32,6 +32,11 @@
         @on-ok="handleCreateDb"
         @on-cancel="cancel">
         <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
+          <FormItem label="所属集群：" prop="cluster">
+            <Select v-model="createDbForm.cluster" filterable>
+              <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
           <FormItem label="环境：" prop="env">
             <Select v-model="createDbForm.env">
               <Option value="prd" >生产</Option>
@@ -55,7 +60,10 @@
           </FormItem>
           <FormItem label="备注：" prop="remark">
             <Input v-model="createDbForm.remark"></Input>
-          </FormItem>              
+          </FormItem>
+          <FormItem label="连接测试">
+              <Button type="info" shape="circle" @click="createCheckConn">连接</Button>
+          </FormItem>             
         </Form>  
       </Modal>      
 
@@ -66,6 +74,11 @@
         @on-ok="handleUpdateDb"
         @on-cancel="cancel">
         <Form ref="updateDbForm" :model="updateDbForm" :rules="ruleupdateDbForm" :label-width="100">
+          <FormItem label="所属集群：" prop="cluster">
+            <Select v-model="updateDbForm.cluster" filterable>
+              <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
           <FormItem label="环境：">
             <Select v-model="updateDbForm.env">
               <Option value="prd" >生产</Option>
@@ -89,7 +102,10 @@
           </FormItem>
           <FormItem label="备注：" prop="remark">
             <Input v-model="updateDbForm.remark"></Input>
-          </FormItem>              
+          </FormItem>     
+          <FormItem label="连接测试">
+              <Button type="info" shape="circle" @click="updateCheckConn">连接</Button>
+          </FormItem>  
         </Form>  
       </Modal>   
 
@@ -108,7 +124,8 @@
 </template>
 <script>
   import {Button, Table, Modal, Message, Tag} from 'iview';
-  import {GetDbList, UpdateDb, CreateDb, DeleteDb} from '@/api/sql/dbs'
+  import {GetDbList, UpdateDb, CreateDb, DeleteDb, CheckConn} from '@/api/sql/dbs'
+  import {GetClusterList} from '@/api/sql/cluster'
   import copyright from '../my-components/public/copyright'
 
   export default {
@@ -122,6 +139,7 @@
         search: '',
         // 数据库配置数据
         createDbForm: {
+          cluster:'',
           env: 'prd',
           name: '',
           host:'',
@@ -139,6 +157,7 @@
         },
         updateDbForm: {
           id:'',
+          cluster:'',
           env: '',
           name: '',
           host:'',
@@ -158,6 +177,13 @@
           {
               title: '数据库名',
               key: 'name'
+          },
+          {
+              title: '所属集群',
+              render: (h, params) => {
+                const clusterName = params.row.cluster.name
+                return h('div', {}, clusterName)
+            }
           },
           {
               title: '数据库地址',
@@ -205,17 +231,17 @@
                       },
                       on: {
                         click: () => {
-                          console.log(params.row)
+                          const row = params.row
                           this.updateModal = true
-                          //this.updateDbForm = params.row
-                          this.updateDbForm.id = params.row.id
-                          this.updateDbForm.env = params.row.env
-                          this.updateDbForm.name = params.row.name
-                          this.updateDbForm.host = params.row.host
-                          this.updateDbForm.port = params.row.port
-                          this.updateDbForm.user = params.row.user
-                          this.updateDbForm.password = params.row.password
-                          this.updateDbForm.remark = params.row.remark
+                          this.updateDbForm.cluster = row.cluster.id
+                          this.updateDbForm.id = row.id
+                          this.updateDbForm.env = row.env
+                          this.updateDbForm.name = row.name
+                          this.updateDbForm.host = row.host
+                          this.updateDbForm.port = row.port
+                          this.updateDbForm.user = row.user
+                          this.updateDbForm.password = row.password
+                          this.updateDbForm.remark = row.remark
                         }
                       }
                   }, '修改'),
@@ -243,28 +269,87 @@
         // get
         total:1,
         dbList:[],
-        getParams:{
+        clusterList:[],
+        getDbParams:{
           page:1,
           pagesize:10,
           search:'',
-        }
+        },
+        getClusterParams:{
+          page:1,
+          pagesize:1000,
+          search:'',
+        },
       }
     },
 
     created (){
-      this.handleGetDbList()
+      this.initData()
     },
 
     methods: {
 
-      pageChange (page) {
-        this.getParams.page = page
+      initData () {
+        this.handleGetClusterList()
         this.handleGetDbList()
       },
 
+      pageChange (page) {
+        this.getDbParams.page = page
+        this.initData()
+      },
+
       sizeChange(size){
-        this.getParams.pagesize = size
-        this.handleGetDbList()
+        this.getDbParams.pagesize = size
+        this.initData()
+      },
+
+      createCheckConn () {
+        this.$refs.createDbForm.validate((valid) => {
+          if (!valid) {
+            return
+          }
+          const data = {
+            check_type: 'create_target_db',
+            host:this.createDbForm.host,
+            port:this.createDbForm.port,
+            user:this.createDbForm.user,
+            password:this.createDbForm.password,
+          }
+          this.handleCheckConn(data)
+        })
+      },
+
+      updateCheckConn () {
+        const data = {
+          check_type: 'update_target_db',
+          id: this.updateDbForm.id
+        }
+        this.handleCheckConn(data)
+      },
+
+      handleCheckConn (data) {
+        CheckConn(data)
+        .then(
+          res => {
+            console.log(res)
+            const status = res.data.status
+            if (status == 0) {
+                this.$Message.success(
+                    {
+                        content:'连接成功',
+                        duration: 3
+                    }
+                )
+            } else {
+                this.$Message.warning(
+                    {
+                        content:'连接失败',
+                        duration: 3
+                    }
+                )
+            }
+          })
       },
 
       handleCreateDb () {
@@ -275,7 +360,7 @@
           CreateDb(this.createDbForm)  
           .then(
             res => {
-              this.handleGetDbList()
+              this.initData()
             },
           )
         })
@@ -293,7 +378,7 @@
           UpdateDb(id, data)  
           .then(
             res => {
-              this.handleGetDbList()
+              this.initData()
             },
           )
         })
@@ -303,7 +388,7 @@
         DeleteDb(this.deleteId)
         .then(res => {
           console.log(res)
-          this.handleGetDbList()
+          this.initData()
         })
         .catch(error => {
           console.log(error)
@@ -312,12 +397,24 @@
      
       handleGetDbList () {
         this.spinShow = true
-        GetDbList(this.getParams)
+        GetDbList(this.getDbParams)
         .then(
           res => {
             this.spinShow = false
             this.dbList = res.data.results
             this.total = res.data.count
+          }
+        )
+      },
+
+      handleGetClusterList () {
+        this.spinShow = true
+        GetClusterList(this.getClusterParams)
+        .then(
+          res => {
+            console.log(res)
+            this.spinShow = false
+            this.clusterList = res.data.results
           }
         )
       },

@@ -1,8 +1,7 @@
-
-export function contains (arr, obj) {  
+export function ContainsIdList (arr, id) {  
     var i = arr.length;  
     while (i--) {  
-        if (arr[i].id === obj) {  
+        if (arr[i] === id) {  
             return true;  
         }  
     }  

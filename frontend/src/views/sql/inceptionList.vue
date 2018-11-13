@@ -273,7 +273,6 @@
                 width:170,
                 place:'top',
               }
-              
               if (status == -1) {
                 var ddItem = [ 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 此工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) ]) , 

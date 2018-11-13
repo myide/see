@@ -1,6 +1,7 @@
 import axios from '../../libs/http';
 
 const dbConfs = '/api/sqlmng/dbconfs/';
+const checkConnUrl = '/api/sqlmng/inception/conncheck/'
 
 export function GetDbList(params) {
     return axios({
@@ -30,5 +31,13 @@ export function DeleteDb(id) {
     return axios({
         url: dbConfs + id + '/',
         method: 'delete',
+    });
+}
+
+export function CheckConn(data) {
+    return axios({
+        url: checkConnUrl,
+        method: 'post',
+        data: data
     });
 }
