@@ -10,6 +10,7 @@ from utils.basemixins import AppellationMixins
 from utils.dbcrypt import prpcrypt
 from utils.sqltools import Inception
 from .models import *
+from .data import inception_conn
 
 class FixedDataMixins(object):
 
@@ -26,14 +27,16 @@ class FixedDataMixins(object):
 
 class InceptionConn(object):
     error_tag = 'error'
+    model = InceptionConnection
 
     def get_cmd(self, sub_cmd):
         conn = self.get_inception_conn()
         return '{} -e "{}" '.format(conn, sub_cmd)
 
     def get_inception_conn(self):
-        instance = InceptionConnection.objects.all()[0]
-        return 'mysql -h{} -P{}'.format(instance.host, instance.port)
+        instance = self.model.objects.first()
+        obj = instance or self.model.objects.get_or_create(**inception_conn[0])[0]
+        return 'mysql -h{} -P{}'.format(obj.host, obj.port)
 
     def get_mysql_conn(self, params):
         return 'mysql -h{} -P{} -u{} -p{} -e "show databases" '.format(

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from utils.baseviews import ReturnFormatMixin, BaseView
 from utils.permissions import IsSuperUser
 from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
-from sqlmng.data import variables
+from sqlmng.data import variables, inception_conn
 from sqlmng.serializers import *
 from sqlmng.models import *
 
@@ -60,13 +60,14 @@ class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, 
         self.set_variable(request)
         return Response(self.ret)
 
-class InceptionConnectionViewSet(BaseView):
+class InceptionConnectionViewSet(FixedDataMixins, BaseView):
     '''
         Inception 连接
     '''
     queryset = InceptionConnection.objects.all()
     serializer_class = InceptionConnectionSerializer
     permission_classes = [IsSuperUser]
+    source_data = inception_conn
 
 class InceptionBackupView(ReturnFormatMixin, HandleInceptionSettingsMixins, APIView):
     '''

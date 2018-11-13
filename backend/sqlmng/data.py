@@ -354,3 +354,10 @@ variables = [
 	},
 
 ]
+
+inception_conn = [
+	{
+		'host':'127.0.0.1',
+		'port':6669
+	}
+]
