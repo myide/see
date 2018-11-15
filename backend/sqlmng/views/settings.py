@@ -41,7 +41,8 @@ class PersonalSettingsViewSet(BaseView):
         user_serializer.save()
         cluster = request_data.get('cluster')
         dbs = request_data.get('dbs')
-        alter_qs = instance.dbconf_set.filter(cluster=cluster)
+        env = request_data.get('env')
+        alter_qs = instance.dbconf_set.filter(cluster=cluster, env=env)
         for obj in alter_qs:
             instance.dbconf_set.remove(obj)
         for db_id in dbs:
