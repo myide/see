@@ -14,7 +14,7 @@
      6. See项目
 
 
-#### 1 Mysql
+### 1 Mysql
 ##### 1.1 安装过程略
 ##### 1.2 mysql配置文件内容需包含以下配置
 ```ini
@@ -24,7 +24,7 @@ log_bin = mysql-bin
 binlog_format = row  # 或 MIXED
 ```
 
-#### 2 Inception
+### 2 Inception
 ##### 2.1 安装
 ```bash
 yum -y install cmake libncurses5-dev libssl-dev g++ bison gcc gcc-c++ openssl-devel ncurses-devel mysql MySQL-python
@@ -75,7 +75,7 @@ inception_check_column_default_value=1
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
 ```
 
-#### 3 Sqladvisor
+### 3 Sqladvisor
 
 ##### 3.1 克隆代码
 ```bash
@@ -116,7 +116,7 @@ sqladvisor -h 127.0.0.1  -P 3306  -u root -p '123456' -d test -q "sql语句" -v 
 https://github.com/Meituan-Dianping/SQLAdvisor/blob/master/doc/QUICK_START.md
 ```
 
-#### 4 Redis
+### 4 Redis
 
 ##### 4.1 安装
 ```bash
@@ -127,7 +127,7 @@ yum install -y redis
 daemonize yes
 ```
 
-#### 5 Nginx
+### 5 Nginx
 ##### 5.1 安装过程略
 
 ##### 5.2 配置
@@ -165,7 +165,7 @@ daemonize yes
 
 ```
 
-#### 6 See
+### 6 See
 
 ##### 6.1 安装依赖
 
@@ -261,7 +261,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
     self.port = 3306
 ```
 
-#### 8 解决python3下pymysql对inception支持的问题
+### 8 解决python3下pymysql对inception支持的问题
 ##### 8.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
 ```
 # 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
