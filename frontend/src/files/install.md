@@ -164,48 +164,16 @@ daemonize yes
   }
 
 ```
-#### 6 解决python3下pymysql对inception支持的问题
-##### 6.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
-```
-# 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
 
-    # 找到此处
-    def _request_authentication(self):
-        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-        if int(self.server_version.split('.', 1)[0]) >= 5:
-            self.client_flag |= CLIENT.MULTI_RESULTS
+#### 6 See
 
-    # 修改为
-    def _request_authentication(self):
-        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
-        if self.server_version.split('.', 1)[0] == 'Inception2':
-            self.client_flag |= CLIENT.MULTI_RESULTS
-        elif int(self.server_version.split('.', 1)[0]) >= 5:
-            self.client_flag |= CLIENT.MULTI_RESULTS
-
-```
-##### 6.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
-```
-# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
-
-    # 找到此处
-    if not self._defer_warnings:
-        self._show_warnings()    
-
-    # 修改为
-    if not self._defer_warnings:
-        pass  
-```
-
-#### 7 See
-
-##### 7.1 安装依赖
+##### 6.1 安装依赖
 
 ```bash
 yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel
 ```
 
-##### 7.2 下载并安装python3.6
+##### 6.2 下载并安装python3.6
 
 ```bash
 wget https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tgz
@@ -226,7 +194,7 @@ echo '/usr/local/lib' >> /etc/ld.so.conf
 
 ```
 
-##### 7.3 安装Django及See后端
+##### 6.3 安装Django及See后端
 步骤
 ```bash
 cd /usr/local/
@@ -240,7 +208,7 @@ pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mir
 
 ```
 
-##### 7.4 创建数据库
+##### 6.4 创建数据库
 确保mysql的root密码为 123456
 
 ```bash
@@ -250,8 +218,8 @@ python manage.py migrate
 
 ```
 
-##### 7.5 执行命令创建inception库
-###### 7.5.1 创建测试库，测试表
+##### 6.5 执行命令创建inception库
+###### 6.5.1 创建测试库，测试表
 ```
 mysql -uroot -p123456  # 登录数据库
 mysql> CREATE DATABASE pro1;
@@ -261,14 +229,14 @@ mysql> CREATE TABLE IF NOT EXISTS pro1.mytable1 (
    PRIMARY KEY ( `id` )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-###### 7.5.2 执行测试脚本
+###### 6.5.2 执行测试脚本
 ```
 python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 # 有类似如下返回即可
 ((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
 ```
 
-##### 7.6 前端打包
+##### 6.6 前端打包
 Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
 ```bash
 cnpm install
@@ -277,13 +245,13 @@ cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392
 npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即是打包后产生的前端文件，用于nginx部署
 ```
 
-##### 7.7 创建管理员用户
+##### 6.7 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 
-### 8 设置
-##### 8.1 设置inception参数
+### 7 设置
+##### 7.1 设置inception参数
 修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py
 ```
 # 找到此处的参数，修改其为实际的值
@@ -291,6 +259,39 @@ python manage.py createsuperuser --username admin --email admin@domain.com
     self.user = 'root'
     self.passwd = '123456'
     self.port = 3306
+```
+
+#### 8 解决python3下pymysql对inception支持的问题
+##### 8.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+```
+# 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
+
+    # 找到此处
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+    # 修改为
+    def _request_authentication(self):
+        # https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
+        if self.server_version.split('.', 1)[0] == 'Inception2':
+            self.client_flag |= CLIENT.MULTI_RESULTS
+        elif int(self.server_version.split('.', 1)[0]) >= 5:
+            self.client_flag |= CLIENT.MULTI_RESULTS
+
+```
+##### 8.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
+```
+# 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
+
+    # 找到此处
+    if not self._defer_warnings:
+        self._show_warnings()    
+
+    # 修改为
+    if not self._defer_warnings:
+        pass  
 ```
 
 ### 9 启动所有服务
