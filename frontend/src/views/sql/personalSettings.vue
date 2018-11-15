@@ -154,6 +154,7 @@
 
       handleCreatePersonalSettings () {
         this.personalSettings.cluster = this.queryParams.cluster
+        this.personalSettings.env = this.queryParams.env
         const data = this.personalSettings
         CreatePersonalSettings (data)  
         .then(
