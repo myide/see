@@ -290,7 +290,7 @@
       filterDbList (dbList, dbs) {
         let data = []
         dbList.map( (item) => {
-          if (item.cluster == null || ContainsIdList(dbs, item.id) == true) {
+          if (Object.keys(item.cluster).length === 0 || ContainsIdList(dbs, item.id) == true) {
             data.push(item)
           }
         })
