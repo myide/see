@@ -48,7 +48,7 @@
               <div>
                 <Form class="step-form" ref="checkConf" :model="checkData" :rules="ruleCheckData" :label-width="100">
                   <FormItem label="目标数据库">
-                     <Cascader :data="targetDbs" v-model="targetDb" trigger="hover" class="parm_check_element"></Cascader>
+                     <Cascader :data="targetDbs" v-model="targetDb" trigger="hover" class="parm_check_element" @on-change="handleSelect"></Cascader>
                   </FormItem>
                   <FormItem label="工单核准人" prop="treater">
                       <Input v-model="checkData.treater_username" class="parm_check_element" :readonly="readonly" />
@@ -102,11 +102,11 @@
           '测试':'test'
         },
         checkData:{
-          treater_username:'',
           sql_content:'',
           remark:'',
           env:'',
           db:'',
+          treater_username:'',
           treater:'',
           commiter:'',
           users:[],
@@ -119,12 +119,6 @@
         },
         targetDb:[],
         targetDbs:[],
-        keyMap:{
-          'sql_content':'SQL',
-          'env':'环境',
-          'db':'数据库',
-          'treater':'执行人',
-        },
       }
     },
 
@@ -187,8 +181,23 @@
           this.checkData.treater_username = treater.username
         }
       },
-      handleSelect () {
-        GetPersonalSettings()
+
+      treaterClear(){
+        this.checkData.treater_username = ''
+        this.checkData.treater = ''
+      },
+
+      handleSelect (e) {
+        this.treaterClear()
+        if (e == undefined) {
+          var env = 'test'
+        } else {
+          env = this.env_map[e[1]]
+        }
+        const data = {
+          env:env
+        }
+        GetPersonalSettings(data)
         .then(response => {
           const data = response.data.results[0]
           const dbs = data.db_list
@@ -198,7 +207,7 @@
           this.checkData.commiter = commiter.username
           this.checkData.users = [commiter.id, treater.id]
           dbs.map( (item) => {
-              item.env = this.env_map[item.env]
+            item.env = this.env_map[item.env]
           })
           this.targetDbs = CascaderData(dbs)       
         })
