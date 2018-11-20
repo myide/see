@@ -22,7 +22,7 @@
                   <Option v-for="item in dbList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                 </Select>
               </FormItem>
-              <FormItem label="工单核准人">
+              <FormItem label="工单核准人" v-if="showLeader">
                 <Select v-model="personalSettings.leader" filterable>
                   <Option v-for="item in leaderList" :value="item.id" :key="item.id">{{ item.username }}</Option>
                 </Select>
@@ -60,6 +60,7 @@
     components:{copyright},
     data () {
       return {
+        showLeader:true,
         dbList:[],
         clusterList:[],
         leaderList:[],
@@ -109,18 +110,25 @@
         this.handleGetPersonalSettings()
       },
 
-      handleChange () {
+      handleChange (e) {
+        if (e == 'prd'){
+          this.showLeader = true
+        } else if (e == 'test') {
+          this.showLeader = false
+        }
         this.handleSelect()
         this.handleGetPersonalSettings()
       },
 
       handleGetPersonalSettings () {
-        GetPersonalSettings({env:'prd'})
+        GetPersonalSettings({env:this.queryParams.env})
         .then(
           response => {
             const data = response.data.results[0]
             this.personalSettings.dbs = this.getDbList(data.db_list)
-            this.personalSettings.leader = this.getLeader(data.leader)
+            if (this.queryParams.env == 'prd') {
+              this.personalSettings.leader = this.getLeader(data.leader)
+            }
           }
         )
       },
