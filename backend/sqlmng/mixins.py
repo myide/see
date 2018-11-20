@@ -25,6 +25,31 @@ class FixedDataMixins(object):
             queryset = objects.all()
         return queryset
 
+class ChangeSpecialCharacterMixins(object):
+
+    special_character_list = ['*']
+    transference_character = '\\'
+
+    def convert(self, forbidden_words):
+        forbidden_words_list = forbidden_words.split()
+        forbidden_list = []
+        for word in forbidden_words_list:
+            if word:
+                if word in self.special_character_list:
+                    word = '{}{}'.format(self.transference_character, word)
+                forbidden_list.append(word)
+        return forbidden_list
+
+    def reverse(self, forbidden_list):
+        forbiddens = []
+        for word in forbidden_list:
+            if self.transference_character in word:
+                word = word.replace(self.transference_character, '')
+            forbiddens.append(word)
+        if len(forbiddens) == 1:
+            return forbiddens[0]
+        return forbiddens
+
 class InceptionConn(object):
     error_tag = 'error'
     model = InceptionConnection

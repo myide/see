@@ -5,11 +5,11 @@ from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
 from utils.basemixins import PromptMixins
 from workflow.serializers import WorkorderSerializer, StepSerializer
-from sqlmng.mixins import ActionMixins
+from sqlmng.mixins import ChangeSpecialCharacterMixins, ActionMixins
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class InceptionCheckView(PromptMixins, ActionMixins, BaseView):
+class InceptionCheckView(PromptMixins, ChangeSpecialCharacterMixins, ActionMixins, BaseView):
     '''
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
@@ -21,10 +21,10 @@ class InceptionCheckView(PromptMixins, ActionMixins, BaseView):
     def check_forbidden_words(self, sql_content):
         forbidden_instance = ForbiddenWords.objects.first()
         if forbidden_instance:
-            forbidden_word_list = [fword for fword in forbidden_instance.forbidden_words.split() if fword]
+            forbidden_word_list = [fword for fword in self.convert(forbidden_instance.forbidden_words)]
             forbidden_words = [fword for fword in forbidden_word_list if re.search(re.compile(fword, re.I), sql_content)]
             if forbidden_words:
-                raise ParseError({self.forbidden_words: forbidden_words})
+                raise ParseError({self.forbidden_words: self.reverse(forbidden_words)})
 
     def check_user_group(self, request):
         if request.data.get('env') == self.env_prd and not request.user.is_superuser:
