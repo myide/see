@@ -283,7 +283,15 @@ python manage.py createsuperuser --username admin --email admin@domain.com
         pass  
 ```
 
-### 8 启动所有服务
+### 8 INSTALL SOAR
+```bash
+mkdir -p /usr/local/SOAR/bin/
+cp /usr/local/seevenv/see-master/frontend/src/files/soar /usr/local/SOAR/bin
+mod +x /usr/local/SOAR/bin/soar
+
+```
+
+### 9 启动所有服务
 ```bash
 # mysql  3306端口
 /etc/init.d/mysqld start
