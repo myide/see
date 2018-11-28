@@ -11,7 +11,7 @@
         <Tabs size="small">
           <TabPane label="基本信息"><baseInfo v-if="flag" :row="row"> </baseInfo></TabPane>
           <TabPane label="SQL语句"><sqlContentInfo v-if="flag" :sqlContent="sqlContent"> </sqlContentInfo></TabPane>
-          <TabPane :label="labelResult"><handleResult v-if="flag" :row="row" :handleResult="handle_result"> </handleResult></TabPane>
+          <TabPane :label="labelResult"><handleResult v-if="flag" :row="row" :handleResultCheck="handle_result_check" :handleResultExecute="handle_result_execute" :handleResultRollback="handle_result_rollback" > </handleResult></TabPane>
           <TabPane :label="suggestionLabel" name="suggestion"><suggestionInfo @refreshList="handleGetList" :id="this.$route.params.id" :res="res"> </suggestionInfo></TabPane>
         </Tabs>
       </div>
@@ -28,19 +28,19 @@
         <Row>
           <Col span="24">
             <Dropdown v-show="showBtn" @on-click='showAction'>
-                <Button type="primary">
-                    操作
-                    <Icon type="arrow-down-b"></Icon>
-                </Button>
-                <DropdownMenu v-if="row.status == -1"  slot="list">
-                    <DropdownItem name='execute'>执行</DropdownItem>
-                    <DropdownItem name='reject'>放弃</DropdownItem>
-                    <DropdownItem name='approve' v-if="showItem">审批通过</DropdownItem>
-                    <DropdownItem name='disapprove' v-if="showItem">审批驳回</DropdownItem>
-                </DropdownMenu>
-                <DropdownMenu v-else-if="row.status == 0"  slot="list">
-                    <DropdownItem name='rollback'>回滚</DropdownItem>
-                </DropdownMenu>
+              <Button type="primary">
+                操作
+                <Icon type="arrow-down-b"></Icon>
+              </Button>
+              <DropdownMenu v-if="row.status == -1"  slot="list">
+                <DropdownItem name='execute'>执行</DropdownItem>
+                <DropdownItem name='reject'>放弃</DropdownItem>
+                <DropdownItem name='approve' v-if="showItem">审批通过</DropdownItem>
+                <DropdownItem name='disapprove' v-if="showItem">审批驳回</DropdownItem>
+              </DropdownMenu>
+              <DropdownMenu v-else-if="row.status == 0"  slot="list">
+                <DropdownItem name='rollback'>回滚</DropdownItem>
+              </DropdownMenu>
             </Dropdown>
           </Col>
         </Row>
@@ -79,6 +79,7 @@
 
   </div>
 </template>
+
 <script>
     import {GetSuggestionList} from '@/api/sql/suggestion'
     import {GetSqlDetail, SqlAction} from '@/api/sql/inception'
@@ -117,7 +118,9 @@
             ])
           },
           row:{},
-          handle_result:[],
+          handle_result_check:[],
+          handle_result_execute:[],
+          handle_result_rollback:[],
           sqlContent:[],
           steps:[],
           stepsModal:false,
@@ -152,7 +155,7 @@
 
       computed: {
         showBtn: function () {
-          if (this.row.status == -3 || this.row.status == 1 || (this.row.type == 'select' && this.row.status == 0 ) ) {
+          if (this.row.status == -4 || this.row.status == -3 || this.row.status == 1 || (this.row.type == 'select' && this.row.status == 0 ) || this.row.rollback_able == 0 ) {
             return false
           } else {
             return true
@@ -280,6 +283,10 @@
         },
 
         parseHandleResult(handle_result){
+          console.log(handle_result, typeof(handle_result))
+          if (handle_result == "") {
+            return
+          }
           const data = JSON.parse(handle_result)
           let ret = []
           for (let i in data){
@@ -324,7 +331,9 @@
             console.log(response)
             this.row = response.data
             this.steps = this.row.steps
-            this.handle_result = this.parseHandleResult(this.row.handle_result)
+            this.handle_result_check = this.parseHandleResult(this.row.handle_result_check)
+            this.handle_result_execute = this.parseHandleResult(this.row.handle_result_execute)
+            this.handle_result_rollback = this.parseHandleResult(this.row.handle_result_rollback)
             this.sqlContent = getSqlContent(this.row.sql_content)
             this.badgeData = handleBadgeData(this.steps)
             this.handleGetList(1)

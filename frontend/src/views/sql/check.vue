@@ -1,6 +1,6 @@
 <style scoped>
     .parm_check_element {
-      width: 200px;
+      width: 400px;
       margin-left: 10px;
     }
 </style>
@@ -36,9 +36,9 @@
                 </FormItem>
               </Form>
             </div>
-            </Col>
+        </Col>
 
-          <Col span="12">
+        <Col span="12">
             <Alert show-icon style='margin-left:12%'>
               <Icon type="ios-lightbulb-outline" slot="icon"></Icon>
                 选择执行条件
@@ -46,7 +46,7 @@
             <div style='margin-left:50px'>
               </br>
               <div>
-                <Form class="step-form" ref="checkConf" :model="checkData" :rules="ruleCheckData" :label-width="100">
+                <Form ref="checkConf" :model="checkData" :rules="ruleCheckData" :label-width="100">
                   <FormItem label="目标数据库">
                      <Cascader :data="targetDbs" v-model="targetDb" trigger="hover" class="parm_check_element" @on-change="handleSelect"></Cascader>
                   </FormItem>
@@ -57,7 +57,7 @@
               </div>
               <div>
                 <Alert type="warning" show-icon closable>
-                    <p><b>Tips</b></p>
+                <p><b>Tips</b></p>
                 <template slot="desc">
                   <p>
                     <b>1</b>.  您可以在<router-link to='/sqlmng/settings'><b>设置</b></router-link>里指定常用的数据库&工单核准人，之后只显示这些数据供您选择。
@@ -211,9 +211,6 @@
           })
           this.targetDbs = CascaderData(dbs)       
         })
-        .catch(error => {
-          console.log(error)
-        })
       },
       
       handleCheckSql () {
@@ -237,9 +234,6 @@
               } else if (status == -1 || status == -2){
                 this.warning('SQL审核不通过', msg)
               } 
-            })
-            .catch(error => {
-              console.log(error)
             })
           })
         })

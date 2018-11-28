@@ -47,37 +47,50 @@
         <Row>
           <Col span="12">
             <FormItem label="角色：">
-                <Select v-model="createUserForm.role">
-                    <Option v-for="item in roleList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
+              <Select v-model="createUserForm.role">
+                <Option v-for="item in roleList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
             </FormItem>
           </Col>
           <Col span="12">
             <FormItem label="属组：">
-                <Select v-model="createUserForm.groups[0]">
-                    <Option v-for="item in groupList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
+              <Select v-model="createUserForm.groups[0]">
+                <Option v-for="item in groupList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
             </FormItem>
           </Col>
         </Row>
-        <FormItem label="权限：">          
-          <Transfer
-            filterable
-            :data="permissionList"
-            :target-keys="targetKeysCreate"
-            :filter-method="filterMethod"
-            @on-change="handleChangeCreate"
-            :list-style="listStyle"
-            :titles="transferTitles">
-          </Transfer>
-        </FormItem>
-        <FormItem label="系统身份：" prop="systemAccount">
-          <CheckboxGroup v-model="createUserForm.sysaccount">
-              <Checkbox label="is_active">已激活</Checkbox>
-              <Checkbox label="is_staff">登录后台</Checkbox>
-              <Checkbox label="is_superuser">管理员</Checkbox>
-          </CheckboxGroup>
-        </FormItem>        
+        <Row>
+          <Col span="24">      
+            <FormItem label="权限：">          
+              <Transfer
+                filterable
+                :data="permissionList"
+                :target-keys="targetKeysCreate"
+                :filter-method="filterMethod"
+                @on-change="handleChangeCreate"
+                :list-style="listStyle"
+                :titles="transferTitles">
+              </Transfer>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span="12">
+            <FormItem label="系统身份：" prop="systemAccount">
+              <CheckboxGroup v-model="createUserForm.sysaccount">
+                <Checkbox label="is_active">已激活</Checkbox>
+                <Checkbox label="is_staff">登录后台</Checkbox>
+                <Checkbox label="is_superuser">管理员</Checkbox>
+              </CheckboxGroup>
+            </FormItem>    
+          </Col> 
+          <Col span="12">
+            <FormItem label="邮箱：" prop="email">
+              <Input v-model="createUserForm.email"></Input>
+            </FormItem>   
+          </Col>
+        </Row>   
       </Form>  
     </Modal>      
 
@@ -103,37 +116,50 @@
         <Row>
           <Col span="12">
             <FormItem label="角色：">
-                <Select v-model="updateUserForm.role">
-                    <Option v-for="item in roleList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
+              <Select v-model="updateUserForm.role">
+                <Option v-for="item in roleList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
             </FormItem>
           </Col>
           <Col span="12"> 
             <FormItem label="属组：">
-                <Select v-model="updateUserForm.groups[0]">
-                    <Option v-for="item in groupList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
+              <Select v-model="updateUserForm.groups[0]">
+                <Option v-for="item in groupList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
             </FormItem>
           </Col>
         </Row>
-        <FormItem label="权限：">          
-          <Transfer
-            :data="updateUserForm.permissionList"
-            :target-keys="targetKeysupdate"
-            filterable
-            :filter-method="filterMethod"
-            @on-change="handleChangeupdate"
-            :list-style="listStyle"
-            :titles="transferTitles">
-          </Transfer>
-        </FormItem>
-        <FormItem label="系统身份：">
-          <CheckboxGroup v-model="updateUserForm.sysaccount">
-              <Checkbox label="is_active">已激活</Checkbox>
-              <Checkbox label="is_staff">登录后台</Checkbox>
-              <Checkbox label="is_superuser">管理员</Checkbox>
-          </CheckboxGroup>
-        </FormItem>           
+        <Row>
+          <Col span="24">
+            <FormItem label="权限：">          
+              <Transfer
+                :data="updateUserForm.permissionList"
+                :target-keys="targetKeysupdate"
+                filterable
+                :filter-method="filterMethod"
+                @on-change="handleChangeupdate"
+                :list-style="listStyle"
+                :titles="transferTitles">
+              </Transfer>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row>
+          <Col span="12">
+            <FormItem label="系统身份：">
+              <CheckboxGroup v-model="updateUserForm.sysaccount">
+                <Checkbox label="is_active">已激活</Checkbox>
+                <Checkbox label="is_staff">登录后台</Checkbox>
+                <Checkbox label="is_superuser">管理员</Checkbox>
+              </CheckboxGroup>
+            </FormItem>   
+          </Col>
+          <Col span="12">
+            <FormItem label="邮箱：" prop="email">
+              <Input v-model="updateUserForm.email"></Input>
+            </FormItem>   
+          </Col>
+        </Row>        
       </Form>  
     </Modal>  
   
@@ -206,6 +232,7 @@
         createUserForm: {
           username:'',
           password:'',
+          email:'',
           sysaccount:['is_active', 'is_staff'],
           role:'developer',
           groups:[],
@@ -213,6 +240,7 @@
         ruleCreateUserForm: {
           username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
           password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+          email: [{ required: true, message: '邮箱不能为空', trigger: 'blur' }],
         },
         // 修改用户数据
         updateUserForm: {
@@ -220,6 +248,7 @@
           username:'',
           password:'',
           newpassword:'',
+          email:'',
           permissionList:[],  //  此处赋值'' ，会引起 vue.esm.js:591 [Vue warn]: Invalid prop: type check failed for prop "data". Expected Array, got String.
           sysaccount:[],
           role:'',
@@ -227,16 +256,23 @@
         },
         ruleUpdateUserForm: {
           username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
+          email: [{ required: true, message: '邮箱不能为空', trigger: 'blur' }],
         },
         columnsUser: [
           {
               title: '用户名',
+              width:150,
               render: (h, params) => {
-                return h('Avatar', {style:{color: "#f56a00",backgroundColor: "#fde3cf"}}, params.row.username)
+                return h('Tag', {}, params.row.username)
               }
           },
           {
+              title: '邮箱',
+              key: 'email'
+          },
+          {
               title: '角色',
+              width:100,
               render: (h, params) => {
                 const roleMap = {
                   developer:'研发',
@@ -249,13 +285,13 @@
           },
           {
               title: '属组',
-              key: 'groups',
               render: (h, params) => {
                 return h('span', {}, params.row.groups.name)
               }
           },
           {
               title: '权限',
+              width:80,
               render: (h, params) => {
                 let perms = params.row.perms
                 if (perms.length == 0) {
@@ -307,7 +343,6 @@
           },
           {
               title: '操作',
-              key: 'action',
               width: 150,
               align: 'center',
               render: (h, params) => {
@@ -327,8 +362,8 @@
                           this.updateUserForm.id = params.row.id
                           this.updateUserForm.username = params.row.username
                           this.updateUserForm.role = params.row.role
+                          this.updateUserForm.email = params.row.email
                           this.updateUserForm.groups = JSON.stringify(params.row.groups) == "{}" ? [] : [params.row.groups.id]
-                          console.log(this.updateUserForm.role)
                           this.updateUserForm.password = params.row.password
                           this.updateUserForm.newpassword = ''
                           // 系统身份

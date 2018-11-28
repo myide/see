@@ -67,11 +67,12 @@
     <Modal
         v-model="deleteModal"
         width="450"
-        title="删除项目"
+        title="删除集群"
         @on-ok="handleDeleteCluster"
         @on-cancel="cancel">
         <div>
-          <p> 删除数据库配置 <b>{{name}}</b> ？</p>
+          <p> 删除集群 <b>{{deleteParams.name}}</b>？</p>
+          <p> (此操作只会删除集群本身，不会删除集群关联的数据库) </p>
         </div>
     </Modal>      
 
@@ -206,7 +207,8 @@
                     on: {
                       click: () => {
                         this.deleteModal = true
-                        this.deleteId = params.row.id
+                        this.deleteParams.id = params.row.id
+                        this.deleteParams.name = params.row.name
                       }
                     }
                   }, '删除')
@@ -247,8 +249,10 @@
           },
         ],
         // delete
-        deleteId:'',
-        name:'',
+        deleteParams:{
+          id:'',
+          name:''
+        },
         // get
         total:1,
         dbList:[],
@@ -328,7 +332,7 @@
       },
 
       handleDeleteCluster () {
-        DeleteCluster(this.deleteId)
+        DeleteCluster(this.deleteParams.id)
         .then(res => {
           console.log(res)
           this.initData()

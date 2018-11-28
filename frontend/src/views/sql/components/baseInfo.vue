@@ -60,12 +60,13 @@
             <p> <b>工单状态：</b>  </p>
           </Col>
           <Col span="10">
+            <p v-if="row.status == -4" > <Tag color="red">回滚失败</Tag> </p>
             <p v-if="row.status == -3" > <Tag>已回滚</Tag> </p>
             <p v-else-if="row.status == -2" > <Tag>已暂停</Tag> </p>
             <p v-else-if="row.status == -1" > <Tag color="blue">待执行</Tag> </p>
             <p v-else-if="row.status == 0" > <Tag color="green">成功</Tag> </p>
             <p v-else-if="row.status == 1" > <Tag color="yellow">已放弃</Tag> </p>
-            <p v-else-if="row.status == 2" > <Tag color="red">失败</Tag> </p>
+            <p v-else-if="row.status == 2" > <Tag color="red">执行失败</Tag> </p>
           </Col>
         </Row>
         <Row>

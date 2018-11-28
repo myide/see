@@ -33,7 +33,7 @@
         <Modal
             v-model="sqlContentModal"
             width="650"
-            title="SQL语句"
+            :title="sqlContentTitle"
             @on-cancel="cancel">
             <div>
               <Scroll height=450>
@@ -102,6 +102,7 @@
           search:'',
           daterange:''
         },
+        sqlContentTitle:'',
         sqlContent:[],
         sqlContentModal: false,
         sqlList:[],
@@ -109,7 +110,6 @@
         columnsSqlList: [
           {
             title: 'ID',
-            key: 'id',
             width: 60,
             render: (h, params) => {
               return h('router-link', {props:{to:'/inceptionsql/'+params.row.id}}, params.row.id)
@@ -118,7 +118,6 @@
 
           {
             title: '提交时间',
-            key: '',
             width: 150,
             render: (h, params) => {
               return h('div', [
@@ -134,7 +133,6 @@
 
           {
             title: '环境',
-            key: 'env',
             width: 120,
             render: (h, params) => {
               const envMap = {
@@ -153,7 +151,6 @@
 
           {
             title: 'SQL语句',
-            key: '',
             width: 150,
             render: (h, params) => {
               return h('div', [
@@ -167,6 +164,7 @@
                     click: () => {
                       this.sqlContent = getSqlContent(params.row.sql_content)
                       this.sqlContentModal = true
+                      this.sqlContentTitle = 'SQL语句' + '（工单ID: ' + params.row.id + '）'
                     }
                   }
                 }, '语句')
@@ -176,8 +174,7 @@
 
           {
             title: '流程',
-            key: '',
-            width: 120,
+            width: 100,
             render: (h, params) => {
               const statusMap = {
                 1:'success',
@@ -214,11 +211,11 @@
 
           {
             title: '备注',
-            key: 'remark',
+            width: 100,
             render: (h, params) => {
               let remark = params.row.remark
               if (remark.length >= 6){
-                var abbreviatedRemark = params.row.remark.slice(0,6) + '...'
+                var abbreviatedRemark = params.row.remark.slice(0,4) + '...'
               } else {
                 var abbreviatedRemark = remark
               }
@@ -232,11 +229,12 @@
 
           {
             title: '工单状态',
-            key: '',
-            width: 100,
+            width: 120,
             render: (h, params) => {
               let status = params.row.status
-              if (status == -3) {
+              if (status == -4) {
+                return h('div', [h(Tag,{props:{color:'red'}}, '回滚失败')])
+              } else if (status == -3) {
                 return h('div', [h(Tag,{props:{}}, '已回滚')])
               } else if (status == -2) {
                 return h('div', [h(Tag,{props:{}}, '已暂停')])
@@ -247,9 +245,8 @@
               } else if (status == 1) {
                 return h('div', [h(Tag,{props:{color:'yellow'}}, '已放弃')])
               } else if (status == 2) {
-                return h('div', [h(Tag,{props:{color:'red'}}, '失败')])
-              }
-
+                return h('div', [h(Tag,{props:{color:'red'}}, '执行失败')])
+              } 
             }
           },
 
@@ -260,12 +257,12 @@
           
           {
             title: '操作',
-            key: 'action',
             width: 150,
             align: 'center',
             render: (h, params) => {
               const id = params.row.id
               const status = params.row.status
+              const rollbackable = params.row.rollback_able
               const type = params.row.type
               const handleable = params.row.handleable
               const is_manual_review = params.row.is_manual_review
@@ -285,7 +282,7 @@
               } else {
                 var ddItem = []
               }
-              return h('div', {style:{display: status == -3 || status == 1 || (type == 'select' && status == 0 ) ? 'none' : 'display'}}, [
+              return h('div', {style:{display: status == -4 || status == -3 || status == 1 || (status == 0 && type == 'select') || (status == 0 && rollbackable == 0) ? 'none' : 'display'}}, [
                 h(Dropdown,
                 {
                   style: {marginLeft: '20px'},
@@ -317,11 +314,11 @@
         return this.stepStatusMap[status]['color']
       },
 
-      alertSuccess (title, sqlid, execute_time, affected_rows) {
+      alertSuccess (title, paramId, execute_time, affected_rows) {
         this.$Notice.success({
           title: title,
           render: h => {
-            let id = h('p', {}, 'ID：' + sqlid) 
+            let id = h('p', {}, 'ID：' + paramId) 
             let time = execute_time ? h('p', {}, '耗时（秒）：' + execute_time) : ''
             let rows = affected_rows ? h('p', {}, '影响的行数：' + affected_rows) : ''
             let subtags = [id, time, rows]
@@ -330,13 +327,13 @@
         });
       },
 
-      alertWarning (title, sqlid, msg) {
+      alertWarning (title, paramId) {
         this.$Notice.warning({
           title: title,
           duration: 0,
           render: h => {
-            let id = h('p', {}, 'ID：' + sqlid) 
-            let desc = h('p', {}, 'Msg：' + msg) 
+            let id = h('p', {}, 'ID：' + paramId) 
+            let desc = h('p', {}, '具体查看工单详情') 
             let subTags = [id, desc]
             return h('div', subTags)
           }
@@ -362,7 +359,6 @@
         let id = params.row.id
         SqlAction(id, action)
         .then(response => {
-          console.log(response)
           const status = response.data.status
           const data = response.data.data
           if (status == 0) {
@@ -376,8 +372,7 @@
               this.alertSuccess('审批驳回', id, '')
             }
           } else {
-            let msg = response.data.msg
-            this.alertWarning('任务失败', id, msg)
+            this.alertWarning('任务失败', id)
           } 
           this.handleGetSqlList()
         })

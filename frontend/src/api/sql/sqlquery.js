@@ -12,3 +12,11 @@ export function GetTableInfo(id, tableName) {
 export function GetSqlAdvisor(id, sql) {
     return axios.get(dbConfs + id + '/sql_advisor/?sql=' + sql);
 }
+
+export function GetSqlSOAR(id, params) {
+    return axios({
+        url: dbConfs + id + '/sql_soar/',
+        method: 'get',
+        params
+    })
+}

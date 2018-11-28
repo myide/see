@@ -134,7 +134,7 @@ export const appRouter = [{
 
     {
         path: '/target',
-        icon: 'shuffle',
+        icon: 'earth',
         title: '目标库管理',
         name: 'target',
         component: Main,
