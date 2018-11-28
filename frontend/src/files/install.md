@@ -287,7 +287,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
 ```bash
 mkdir -p /usr/local/SOAR/bin/
 cp /usr/local/seevenv/see-master/frontend/src/files/soar /usr/local/SOAR/bin
-mod +x /usr/local/SOAR/bin/soar
+chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
