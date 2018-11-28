@@ -250,19 +250,8 @@ npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即�
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 
-### 7 设置
-##### 7.1 设置inception参数
-修改文件 /usr/local/seevenv/see-master/backend/utils/sqltools.py
-```
-# 找到此处的参数，修改其为实际的值
-    self.inception_ipaddr = '127.0.0.1'
-    self.user = 'root'
-    self.passwd = '123456'
-    self.port = 3306
-```
-
-### 8 解决python3下pymysql对inception支持的问题
-##### 8.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+### 7 解决python3下pymysql对inception支持的问题
+##### 7.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
 ```
 # 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
 
@@ -281,7 +270,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
             self.client_flag |= CLIENT.MULTI_RESULTS
 
 ```
-##### 8.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
+##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
 ```
 # 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
 
@@ -294,7 +283,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
         pass  
 ```
 
-### 9 启动所有服务
+### 8 启动所有服务
 ```bash
 # mysql  3306端口
 /etc/init.d/mysqld start
