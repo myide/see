@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.db.models import Count, Q
 from rest_framework.response import Response
+from utils.baseviews import ReturnFormatMixin as res
 from utils.baseviews import MaxSizePagination, BaseView
 from sqlmng.models import Inceptsql
 from sqlmng.serializers import *
@@ -82,10 +83,11 @@ class ChartViewSet(BaseView):
         return index_data
 
     def list(self, request, *args, **kwargs):
-        self.ret['data']['user_info'] = self.get_user_info()
-        self.ret['data']['count_data'] = self.get_count_data()
-        self.ret['data']['sql_status_data'] = self.get_status_data()
-        self.ret['data']['sql_trend_data'] = self.get_trend_data()
-        self.ret['data']['sql_today_data'] = self.get_today_data()
-        self.ret['data']['sql_type_data'] = self.get_type_data()
-        return Response(self.ret)
+        ret = res.get_ret()
+        ret['data']['user_info'] = self.get_user_info()
+        ret['data']['count_data'] = self.get_count_data()
+        ret['data']['sql_status_data'] = self.get_status_data()
+        ret['data']['sql_trend_data'] = self.get_trend_data()
+        ret['data']['sql_today_data'] = self.get_today_data()
+        ret['data']['sql_type_data'] = self.get_type_data()
+        return Response(ret)

@@ -226,6 +226,12 @@ INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 
+#optimize设置
+OPTIMIZE_SETTINGS = {
+    'sqladvisor_cli': '/usr/bin/sqladvisor',
+    'soar_cli': '/usr/local/SOAR/bin/soar'
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 

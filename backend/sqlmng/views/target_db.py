@@ -2,6 +2,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from utils.baseviews import BaseView
+from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import SqlQuery
 from utils.permissions import IsSuperUser
 from sqlmng.serializers import *
@@ -14,6 +15,7 @@ class DbViewSet(BaseView):
     serializer_class = DbSerializer
     permission_classes = [IsSuperUser]
     search_fields = ['name','host','port','user','remark']
+    ret = res.get_ret()
 
     def get_queryset(self):
         env = self.request.GET.get('env')
@@ -27,6 +29,15 @@ class DbViewSet(BaseView):
         instance = self.get_object()
         sql = request.GET.get('sql')
         res = SqlQuery(instance).sql_advisor(sql)
+        self.ret['results'] = res
+        return Response(self.ret)
+
+    @detail_route()
+    def sql_soar(self, request, *args, **kwargs):
+        instance = self.get_object()
+        sql = request.GET.get('sql')
+        soar_type = request.GET.get('soar_type')
+        res = SqlQuery(instance).sql_soar(sql, soar_type)
         self.ret['results'] = res
         return Response(self.ret)
 

@@ -4,7 +4,9 @@ from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 
 class RenderFile(object):
+
     path = settings.MEDIA.get('sql_file_path')
+
     def create_file(self, params, content):
         pk, sfx = params.get('pk'), params.get('sfx')
         file_name = '{}.{}'.format(pk, sfx)

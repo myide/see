@@ -74,19 +74,23 @@ class Inception(object):
         res = self.manual()[3:]
         return [index_info[0] for index_info in res]
 
-class SqlQuery(object):
-    def __init__(self, instance):
-        self.instance = instance
-        self.pc = prpcrypt()
+class SoarParams(object):
+    allow_online = '-allow-online-as-test'
+    only_syntax = '-only-syntax-check'
+    fingerprint = '-report-type=fingerprint'
+    pretty = '-report-type=pretty'
 
-    def decrypt_password(self, password):
-        return self.pc.decrypt(password)
+class SqlQuery(object):
+
+    def __init__(self, instance):
+        self.db = instance
+        self.password = prpcrypt.decrypt(self.db.password)
+        self.soar_cli = settings.OPTIMIZE_SETTINGS.get('soar_cli')
+        self.sqladvisor_cli = settings.OPTIMIZE_SETTINGS.get('sqladvisor_cli')
 
     def main(self, sql):
-        db = self.instance
-        password = self.decrypt_password(db.password)
         try:
-            conn = pymysql.connect(host=db.host, port=int(db.port), user=db.user, passwd=password, db=db.name, charset='utf8')
+            conn = pymysql.connect(host=self.db.host, port=int(self.db.port), user=self.db.user, passwd=self.password, db=self.db.name, charset='utf8')
             conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(sql)
@@ -95,7 +99,7 @@ class SqlQuery(object):
         return cur.fetchall()
 
     def get_tables(self):
-        sql = 'show tables;'.format(self.instance.name)
+        sql = 'SHOW TABLES;'.format(self.db.name)
         res = self.main(sql)
         tables = [i[0] for i in res]
         return tables
@@ -105,10 +109,15 @@ class SqlQuery(object):
         table_info = self.main(sql)[0][1]
         return table_info
 
-    def sql_advisor(self, sql):
-        db = self.instance
-        password = self.decrypt_password(db.password)
-        cmd_path = '/usr/bin/sqladvisor'
-        cmd = "{} -h {} -P {}  -u {} -p '{}' -d {} -q '{};' -v 1".format(cmd_path, db.host, db.port, db.user, password, db.name, sql)
+    def cmd_res(self, cmd):
         res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         return res.stdout.read()
+
+    def sql_advisor(self, sql):
+        cmd = "{} -h {} -P {}  -u {} -p '{}' -d {} -q '{};' -v 1".format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, sql)
+        return self.cmd_res(cmd)
+
+    def sql_soar(self, sql, soar_type):
+        cmd = "echo '{}' | {} -test-dsn='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
+        return self.cmd_res(cmd)
+

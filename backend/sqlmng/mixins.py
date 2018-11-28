@@ -8,9 +8,10 @@ from django.conf import settings
 from utils.tasks import send_mail
 from utils.basemixins import AppellationMixins
 from utils.dbcrypt import prpcrypt
+from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import Inception
-from .models import *
 from .data import inception_conn
+from .models import *
 
 class FixedDataMixins(object):
 
@@ -51,6 +52,7 @@ class ChangeSpecialCharacterMixins(object):
         return forbiddens
 
 class InceptionConn(object):
+
     error_tag = 'error'
     model = InceptionConnection
 
@@ -72,12 +74,12 @@ class InceptionConn(object):
         )
 
 class CheckConn(InceptionConn):
-    pc = prpcrypt()
+
     conf = configparser.ConfigParser()
     file_path = settings.INCEPTION_SETTINGS.get('file_path')
 
     def check(self, request):
-        res = {'status':0, 'data':''}
+        ret = res.get_ret()
         request_data = request.data
         check_type = request_data.get('check_type')
         if check_type == 'inception_conn':
@@ -97,7 +99,7 @@ class CheckConn(InceptionConn):
                     'host': instance.host,
                     'port': instance.port,
                     'user': instance.user,
-                    'password': self.pc.decrypt(instance.password)
+                    'password': prpcrypt.decrypt(instance.password)
                 }
             elif check_type == 'create_target_db':
                 params = request_data
@@ -106,12 +108,11 @@ class CheckConn(InceptionConn):
         lines = popen.stdout.readlines()
         last_item = lines[-1].decode('gbk')
         if self.error_tag in last_item.lower():
-            res['status'] = -1
-            res['data'] = last_item
-        return res
+            ret['status'] = -1
+            ret['data'] = last_item
+        return ret
 
 class HandleInceptionSettingsMixins(InceptionConn):
-
     backup_variables = [
         'inception_remote_backup_host',
         'inception_remote_backup_port',
@@ -147,10 +148,10 @@ class HandleInceptionSettingsMixins(InceptionConn):
 
 class ActionMixins(AppellationMixins):
 
-    pc = prpcrypt()
     type_select_tag = 'select'
     action_type_execute = '--enable-execute'
     action_type_check = '--enable-check'
+    success_tag = 'Execute Successfully\nBackup successfully'
 
     def get_reject_step(self, instance):
         user = self.request.user
@@ -178,7 +179,7 @@ class ActionMixins(AppellationMixins):
         return instance.is_manual_review
 
     def get_db_addr(self, user, password, host, port, actiontype):
-        password = self.pc.decrypt(password)
+        password = prpcrypt.decrypt(password)
         dbaddr = '--user={}; --password={}; --host={}; --port={}; {};'.format(user, password, host, port, actiontype)
         return dbaddr
 

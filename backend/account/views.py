@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from utils.permissions import IsSuperUser
 from utils.basemixins import PromptMixins
 from utils.baseviews import MaxSizePagination, BaseView
+from utils.baseviews import ReturnFormatMixin as res
 from .serializers import *
 
 # Create your views here.
@@ -65,9 +66,10 @@ class PersonalCenterViewSet(PromptMixins, BaseView):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
+        ret = res.get_ret()
         request_data = request.data
         new_pass = self.check_password(request_data)
         instance = request.user
         instance.set_password(new_pass)
         instance.save()
-        return Response(self.ret)
+        return Response(ret)

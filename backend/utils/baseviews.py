@@ -4,7 +4,10 @@ from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
 
 class ReturnFormatMixin(object):
-    ret = {'status': 0, 'msg': '', 'data': {}}
+
+    @classmethod
+    def get_ret(cls):
+        return {'status': 0, 'msg': '', 'data': {}}
 
 class BasePagination(PageNumberPagination):
     page_size_query_param = 'pagesize'
@@ -17,7 +20,7 @@ class DefaultPagination(BasePagination):
 class MaxSizePagination(BasePagination):
     page_size = 1000
 
-class BaseView(ReturnFormatMixin, viewsets.ModelViewSet):
+class BaseView(viewsets.ModelViewSet):
     queryset = None
     serializer_class = None
     permission_classes = []

@@ -1,9 +1,11 @@
 #coding=utf8
+import re
 import json
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
+from utils.baseviews import ReturnFormatMixin as res
 from utils.basemixins import PromptMixins
 from utils.sqltools import Inception, SqlQuery
 from utils.basecomponent import DateEncoder
@@ -43,6 +45,10 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
         if type == self.type_select_tag:
             raise ParseError(self.type_warning)
 
+    def check_rollbackable(self, instance):
+        if not instance.rollback_able:
+            raise ParseError(self.not_rollback_able)
+
     def handle_approve(self, call_type, status, step_number):
         instance = self.get_object()
         if self.has_flow(instance):
@@ -63,40 +69,44 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
 
     @detail_route()
     def execute(self, request, *args, **kwargs):
+        ret = res.get_ret()
         instance = self.get_object()
         if instance.status != -1:
-            self.ret = {'status': -2, 'msg':self.executed}
-            return Response(self.ret)
+            ret = {'status': -2, 'msg':self.executed}
+            return Response(ret)
         affected_rows = 0
         instance.status = 0
         if instance.type == self.type_select_tag:
             sql_query = SqlQuery(instance.db)
             data = sql_query.main(instance.sql_content)
             affected_rows = len(data)
-            instance.handle_result = json.dumps([list(row) for row in data], cls=DateEncoder)
+            instance.handle_result_execute = json.dumps([list(row) for row in data], cls=DateEncoder)
         else:
             execute_time = 0
             opids = []
-            success_sqls, exception_sqls, handle_result = self.check_execute_sql(instance.db.id, instance.sql_content, self.action_type_execute)
+            rollback_able = False
+            success_sqls, exception_sqls, handle_result_execute = self.check_execute_sql(instance.db.id, instance.sql_content, self.action_type_execute)
             for success_sql in success_sqls:
                 instance.rollback_db = success_sql[8]
                 affected_rows += success_sql[6]
                 execute_time += float(success_sql[9])
-                opids.append(success_sql[7].replace("'", ""))
+                if re.findall(self.success_tag, success_sql[3]):
+                    rollback_able = True
+                    opids.append(success_sql[7].replace("'", ""))
             if exception_sqls:
                 instance.status = 2
                 instance.execute_errors = exception_sqls
-                self.ret['status'] = -1
+                ret['status'] = -1
             instance.rollback_opid = opids
-            instance.handle_result = handle_result
-            self.ret['msg'] = exception_sqls
-            self.ret['data']['execute_time'] = '%.3f' % execute_time
+            instance.rollback_able = rollback_able
+            instance.handle_result_execute = handle_result_execute
+            ret['data']['execute_time'] = '%.3f' % execute_time
         instance.exe_affected_rows = affected_rows
-        self.ret['data']['affected_rows'] = affected_rows
+        ret['data']['affected_rows'] = affected_rows
         self.mail(instance, self.action_type_execute)
         self.replace_remark(instance)
         self.handle_approve(2,1,2)
-        return Response(self.ret)
+        return Response(ret)
 
     @detail_route()
     def reject(self, request, *args, **kwargs):
@@ -105,34 +115,48 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
         self.replace_remark(instance)
         role_step = self.get_reject_step(instance)
         self.handle_approve(3,3,role_step)
-        return Response(self.ret)
+        return Response(res.get_ret())
 
     @detail_route()
     def approve(self, request, *args, **kwargs):
         self.handle_approve(1,1,1)
-        return Response(self.ret)
+        return Response(res.get_ret())
 
     @detail_route()
     def disapprove(self, request, *args, **kwargs):
         self.handle_approve(1,2,1)
-        return Response(self.ret)
+        return Response(res.get_ret())
 
     @detail_route()
     def rollback(self, request, *args, **kwargs):
+        ret = res.get_ret()
         instance = self.get_object()
         self.filter_select_type(instance)
+        self.check_rollbackable(instance)
         dbobj = instance.db
         rollback_opid_list = instance.rollback_opid
         rollback_db = instance.rollback_db
         back_sqls = ''
-        for opid in eval(rollback_opid_list)[1:]:
+        for opid in eval(rollback_opid_list):
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
             back_content = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
             back_sqls += Inception(back_content, rollback_db).get_back_sql()
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type_execute)
         execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
-        instance.status = -3
-        instance.roll_affected_rows = self.ret['data']['affected_rows'] = len(execute_results) - 1
+        success_num = 0
+        for result in execute_results:
+            if result[4] == 'None':
+                success_num += 1
+        if success_num != len(execute_results):
+            ret['status'] = -1
+            status = -4
+            roll_affected_rows = None
+        else:
+            status = -3
+            roll_affected_rows = ret['data']['affected_rows'] = len(execute_results) - 1
+        instance.status = status
+        instance.handle_result_rollback = json.dumps(execute_results)
+        instance.roll_affected_rows = roll_affected_rows
         self.replace_remark(instance)
-        return Response(self.ret)
+        return Response(ret)

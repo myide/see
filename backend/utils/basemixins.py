@@ -27,7 +27,6 @@ class PromptMixins(object):
     forbidden_words = '禁用关键字 '
     exception_sqls = 'SQL语法错误 '
     not_exists_group = '用户的组不存在 '
-    not_exists_target_db = '目标数据库不存在 '
     executed = 'SQL已执行过'
     approve_warning = '此工单无需重复审批'
     reject_warning = '该工单当前的流转状态不在您这里，无法放弃'
@@ -37,17 +36,18 @@ class PromptMixins(object):
     type_warning = '回滚类型错误(SELECT)'
     old_password_warning = '旧密码错误'
     new_rep_password_warning = '重复密码错误'
+    not_exists_target_db = '目标数据库不存在'
+    not_rollback_able = '此类型的SQL不可被回滚'
 
 class SetEncryptMixins(object):
-    pc = prpcrypt()
     parameter = 'password'
     def create(self, validated_data):
         password = validated_data.get(self.parameter)
-        validated_data[self.parameter] = self.pc.encrypt(password)
+        validated_data[self.parameter] = prpcrypt.encrypt(password)
         return super(SetEncryptMixins, self).create(validated_data)
 
     def update(self, instance, validated_data):
         password = validated_data.get(self.parameter)
         if password != instance.password:
-            validated_data[self.parameter] = self.pc.encrypt(password)
+            validated_data[self.parameter] = prpcrypt.encrypt(password)
         return super(SetEncryptMixins, self).update(instance, validated_data)
