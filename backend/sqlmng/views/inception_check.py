@@ -35,11 +35,10 @@ class InceptionCheckView(PromptMixins, ChangeSpecialCharacterMixins, ActionMixin
 
     def create_step(self, instance, users_id):
         if self.is_manual_review and instance.env == self.env_prd:
-            instance_id = instance.id
             users_id.append(None)
             for index, uid in enumerate(users_id):
                 status = 1 if index == 0 else 0
-                step_serializer = self.serializer_step(data={'work_order':instance_id, 'user':uid, 'status':status})
+                step_serializer = self.serializer_step(data={'work_order':instance.workorder_id, 'user':uid, 'status':status})
                 step_serializer.is_valid(raise_exception=True)
                 step_serializer.save()
 
