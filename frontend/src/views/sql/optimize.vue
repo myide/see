@@ -11,7 +11,7 @@
       <Row>            
         <Col span="12">
           <div>
-            <Alert show-icon>查询表结构</Alert>
+            <Alert show-icon>数据库表结构</Alert>
             <Row>
               <Col span="12">
                 <Cascader :data="targetDbs" trigger="hover" @on-change="handleGetTables" placeholder="选择数据库"></Cascader>
@@ -34,14 +34,14 @@
               <FormItem label="优化类型" prop="type">
                 <RadioGroup v-model="optimizeType">
                   <Radio label="SOAR"></Radio>
-                  <Radio label="SQLadvisor"></Radio>
+                  <Radio label="SQLAdvisor"></Radio>
                 </RadioGroup>
               </FormItem>
               <FormItem label="SQL语句" prop="sql">
                 <editor v-model="checkData.sql" @init="editorInit" @setCompletions="setCompletions"></editor>
               </FormItem>
               <FormItem label="操作">
-                <div v-if="optimizeType=='SQLadvisor'">
+                <div v-if="optimizeType=='SQLAdvisor'">
                   <Row>
                     <Col span="12">
                       <center>
@@ -262,7 +262,7 @@
       },
 
       handleCheckSql () {
-        this.query_type = ' / SQLadvisor 优化建议'
+        this.query_type = ' / SQLAdvisor 优化建议'
         GetSqlAdvisor(this.database, this.checkData.sql)
         .then(
           response => {

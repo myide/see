@@ -245,7 +245,7 @@
               } else if (status == 1) {
                 return h('div', [h(Tag,{props:{color:'yellow'}}, '已放弃')])
               } else if (status == 2) {
-                return h('div', [h(Tag,{props:{color:'red'}}, '执行失败')])
+                return h('div', [h(Tag,{props:{color:'red'}}, '任务失败')])
               } 
             }
           },
@@ -333,7 +333,7 @@
           duration: 0,
           render: h => {
             let id = h('p', {}, 'ID：' + paramId) 
-            let desc = h('p', {}, '具体查看工单详情') 
+            let desc = h('p', {}, '具体查看工单详情[inception结果]') 
             let subTags = [id, desc]
             return h('div', subTags)
           }

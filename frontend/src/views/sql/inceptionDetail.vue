@@ -235,15 +235,15 @@
           });
         },
 
-        alertWarning (title, sqlid, msg) {
+        alertWarning (title, paramId) {
           this.$Notice.warning({
             title: title,
             duration: 0,
             render: h => {
-              let id = h('p', {}, 'ID：' + sqlid) 
-              let desc = h('p', {}, '信息：' + msg) 
-              let subtags = [id, desc]
-              return h('div', subtags)
+              let id = h('p', {}, 'ID：' + paramId) 
+              let desc = h('p', {}, '具体查看工单详情[inception结果]') 
+              let subTags = [id, desc]
+              return h('div', subTags)
             }
           });
         },
@@ -320,7 +320,7 @@
               this.handleGetSqlDetail()
             } else {
               let msg = response.data.msg
-              this.alertWarning('执行失败', id, msg)
+              this.alertWarning('任务失败', id)
             } 
           })
         },
