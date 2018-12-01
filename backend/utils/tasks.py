@@ -5,12 +5,12 @@ from celery import task
 
 smtp_host = "smtp.163.com"  #设置服务器
 smtp_port = 25  #SMTP协议默认端口是25
-mail_user = "user1@163.com"    #用户名
-mail_pass = "pass1"   #授权码
+mail_user = "sql_see@163.com"  #用户名
+mail_pass = "see123"  #授权码
 
 @task
 def send_mail(to_list, personnel, sqlid, note, action_type, sqlcontent, dbname):  #to_list：收件人；sub：主题；content：邮件内容
-    print(to_list)
+    to_list.append(mail_user)
     if action_type == '--enable-check':
         title = '提交了 SQL-{}'.format(sqlid)
     elif action_type == '--enable-execute':
