@@ -140,8 +140,11 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
         for opid in eval(rollback_opid_list):
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
-            back_content = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
-            back_sqls += Inception(back_content, rollback_db).get_back_sql()
+            statement_sql = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
+            rollback_statement = Inception(statement_sql, rollback_db).get_back_sql()
+            if not rollback_statement:
+                raise ParseError(self.get_rollback_fail)
+            back_sqls += rollback_statement
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type_execute)
         execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
         success_num = 0

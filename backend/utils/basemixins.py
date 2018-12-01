@@ -38,6 +38,7 @@ class PromptMixins(object):
     new_rep_password_warning = '重复密码错误'
     not_exists_target_db = '目标数据库不存在'
     not_rollback_able = '此类型的SQL不可被回滚'
+    get_rollback_fail = '回滚失败(请检查回滚语句是否生成)'
 
 class SetEncryptMixins(object):
     parameter = 'password'
