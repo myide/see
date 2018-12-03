@@ -12,14 +12,14 @@ mail_pass = "see123"  #授权码
 def send_mail(to_list, personnel, sqlid, note, action_type, sqlcontent, dbname):  #to_list：收件人；sub：主题；content：邮件内容
     to_list.append(mail_user)
     if action_type == '--enable-check':
-        title = '提交了 SQL-{}'.format(sqlid)
+        title = '提交了 SQL工单-{}'.format(sqlid)
     elif action_type == '--enable-execute':
-        title = '已执行 SQL-{}'.format(sqlid)
+        title = '已执行 SQL工单-{}'.format(sqlid)
     sqlhtml = ''
     for s in sqlcontent[0:1024].split(';'):
         if s:
             sqlhtml = sqlhtml + '<div>' + s + ';' + '</div>'
-    contenthtml = "<span style='margin-right:20px'>{} {}</span> <a href='http://sql.aaa.com/sql/{}'>【查看详情】</a> <p>备注：{}</p> <p>数据库（线上环境）：{} </p>".format(personnel, title, sqlid, note, dbname)
+    contenthtml = "<span style='margin-right:20px'>{} {}</span> <a href='http://sql.aaa.com/inceptionsql/{}'>【查看详情】</a> <p>备注：{}</p> <p>数据库（生产环境）：{} </p>".format(personnel, title, sqlid, note, dbname)
     if len(sqlcontent) > 1024:
         sqlhtml = sqlhtml + '<div>' + '略... ...（内容比较多，可查看详情）'  + '</div>'
     msg = MIMEText(contenthtml + sqlhtml, _subtype='html', _charset='utf-8')    #创建一个实例，这里设置为html格式邮件
