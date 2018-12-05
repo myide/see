@@ -240,6 +240,7 @@ python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
 ```bash
 cnpm install
+cnpm install --save vue-markdown
 cnpm install --save-dev vue2-ace-editor
 cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392864c7a469cf5dcd875b88b93d4a
 npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即是打包后产生的前端文件，用于nginx部署
