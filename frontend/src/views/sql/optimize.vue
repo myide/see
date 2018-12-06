@@ -9,7 +9,7 @@
   <div>
     <Card>
       <Row>            
-        <Col span="12">
+        <Col span="10">
           <div>
             <Alert show-icon>数据库表结构</Alert>
             <Row>
