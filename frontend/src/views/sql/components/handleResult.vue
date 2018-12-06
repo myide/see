@@ -15,10 +15,20 @@
 
 <template>
     <div>
-      <div>
+      <div v-if="row.type=='select'">
+        <Row>
+          <Col span="24">
+            <Scroll height=220>       
+              <div class="wrapper">
+                <div class="inner" v-for="(item, index) in handleResultExecute" :value="item.value" :key="index">{{ item.value }}</div>
+              </div>
+            </Scroll>
+          </Col>
+        </Row>   
+      </div>
 
+      <div v-else>
         <Tabs @on-click="changeTab">
-            
           <TabPane label="Inception审核" name="handle_result_check">
             <Row>
               <Col span="24">

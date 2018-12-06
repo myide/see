@@ -85,14 +85,12 @@
         </Col>
 
         <Col span="12">
-            <Alert show-icon style='margin-left:12%'>
+            <Alert show-icon style='margin-left:6%'>
               <Icon type="ios-lightbulb-outline" slot="icon"></Icon>
                 查询结果 {{query_type}}
             </Alert>
             <div style='margin-left:50px'>
-              <pre>
-                <div> {{query_result}}</div>
-              </pre>
+              <vue-markdown :source="query_result"> </vue-markdown>
             </div>
         </Col>
       </Row>
@@ -108,9 +106,10 @@
   import {GetTableList, GetTableInfo, GetSqlAdvisor, GetSqlSOAR} from '@/api/sql/sqlquery'
   import editor from '../my-components/sql/editor'
   import copyright from '../my-components/public/copyright'
+  import VueMarkdown from 'vue-markdown'
 
   export default {
-    components: {editor, copyright},
+    components: {editor, copyright, VueMarkdown},
     data () {
       return {
         spinShow: false,
