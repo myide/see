@@ -103,9 +103,9 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
             ret['data']['execute_time'] = '%.3f' % execute_time
         instance.exe_affected_rows = affected_rows
         ret['data']['affected_rows'] = affected_rows
-        self.mail(instance, self.action_type_execute)
         self.replace_remark(instance)
         self.handle_approve(2,1,2)
+        self.mail(instance, self.action_type_execute)
         return Response(ret)
 
     @detail_route()
@@ -115,16 +115,19 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
         self.replace_remark(instance)
         role_step = self.get_reject_step(instance)
         self.handle_approve(3,3,role_step)
+        self.mail(instance, self.reject.__name__)
         return Response(res.get_ret())
 
     @detail_route()
     def approve(self, request, *args, **kwargs):
         self.handle_approve(1,1,1)
+        self.mail(self.get_object(), self.approve.__name__)
         return Response(res.get_ret())
 
     @detail_route()
     def disapprove(self, request, *args, **kwargs):
         self.handle_approve(1,2,1)
+        self.mail(self.get_object(), self.disapprove.__name__)
         return Response(res.get_ret())
 
     @detail_route()
@@ -162,4 +165,5 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
         instance.handle_result_rollback = json.dumps(execute_results)
         instance.roll_affected_rows = roll_affected_rows
         self.replace_remark(instance)
+        self.mail(instance, self.rollback.__name__)
         return Response(ret)
