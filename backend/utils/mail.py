@@ -8,6 +8,7 @@ class Mail(object):
     smtp_port = 25  # SMTP协议默认端口是25
     mail_user = "sql_see@163.com"  # 用户名
     mail_pass = "see123"  # 授权码
+    see_addr = 'http://xxx.xxx.xxx.xxx:81'  # see项目访问地址
 
     @classmethod
     def get_desc(cls, action_type):
@@ -29,7 +30,7 @@ class Mail(object):
         for s in sqlcontent[0:1024].split(';'):
             if s:
                 sql_html = sql_html + '<div>' + s + ';' + '</div>'
-        content_html = "<span style='margin-right:20px'>{} {}</span> <a href='http://sql.aaa.com/inceptionsql/{}'>【查看详情】</a> <p>备注：{}</p> <p>数据库（生产环境）：{} </p>".format(personnel, title, sqlid, note, dbname)
+        content_html = "<span style='margin-right:20px'>{} {}</span> <a href='{}/inceptionsql/{}'>【查看详情】</a> <p>备注：{}</p> <p>数据库（生产环境）：{} </p>".format(personnel, title, cls.see_addr, sqlid, note, dbname)
         if len(sqlcontent) > 1024:
             sql_html = sql_html + '<div>' + '略... ...（内容较多，可查看详情）' + '</div>'
         return title, content_html, sql_html, to_list
