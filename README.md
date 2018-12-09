@@ -79,7 +79,6 @@
 | 武松 | see |
 | 宋江 | see |
 | 晁盖 | see |
-| see | see |
 
 ## 安装文档
 - [安装文档](https://github.com/myide/see/blob/master/frontend/src/files/install.md)
