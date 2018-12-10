@@ -72,6 +72,9 @@ class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
+    def get_commiter(self, instance):
+        return {'id':instance.id, 'username':instance.username}
+
     def get_leader(self, env, instance):
         leader_obj = instance.leader if env == self.env_prd else instance
         leader = {'id':leader_obj.id, 'username':leader_obj.username} if leader_obj else {}
@@ -95,9 +98,6 @@ class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
                 }
                 db_list.append(row)
         return db_list
-
-    def get_commiter(self, instance):
-        return {'id':instance.id, 'username':instance.username}
 
     def to_representation(self, instance):
         env = self.context['request'].GET.get('env')
@@ -150,4 +150,10 @@ class InceptionConnectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InceptionConnection
+        fields = '__all__'
+
+class MailActionsSettingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MailActions
         fields = '__all__'

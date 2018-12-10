@@ -5,7 +5,7 @@ from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
 from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
-from sqlmng.data import variables
+from sqlmng.data import variables, mail_actions
 from sqlmng.serializers import *
 from sqlmng.models import *
 
@@ -35,10 +35,13 @@ class PersonalSettingsViewSet(BaseView):
         return User.objects.filter(id=self.request.user.id)
 
     def create(self, request, *args, **kwargs):
-        # save user
         request_data = request.data
         instance = request.user
-        user_serializer = self.serializer_class(instance, data={'leader':request_data.get('leader')})
+        data = {
+            'leader': request_data.get('leader'),
+            'admin_mail': request_data.get('admin_mail')
+        }
+        user_serializer = self.serializer_class(instance, data=data)
         user_serializer.is_valid()
         user_serializer.save()
         cluster = request_data.get('cluster')
@@ -63,23 +66,41 @@ class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, 
         self.set_variable(request)
         return Response(res.get_ret())
 
+class MailActionsSettingsViewSet(FixedDataMixins, BaseView):
+    '''
+        发邮件对应的动作
+    '''
+    serializer_class = MailActionsSettingsSerializer
+    permission_classes = [IsSuperUser]
+    source_data = mail_actions
+
+    def create(self, request, *args, **kwargs):
+        model = self.serializer_class.Meta.model
+        model.objects.all().update(value=False)
+        model.objects.filter(name__in=request.data).update(value=True)
+        return Response(res.get_ret())
+
 class InceptionConnectionViewSet(BaseView):
     '''
-        Inception 连接
+        Inception连接信息
     '''
     queryset = InceptionConnection.objects.all()
     serializer_class = InceptionConnectionSerializer
     permission_classes = [IsSuperUser]
 
 class InceptionBackupView(HandleInceptionSettingsMixins, APIView):
-
+    '''
+        Inception备份信息
+    '''
     def get(self, request, *args, **kwargs):
         ret = res.get_ret()
         ret['data'] = self.get_inception_backup()
         return Response(ret)
 
 class ConnectionCheckView(CheckConn, APIView):
-
+    '''
+        检查连接(Inception连接/Inception备份库/目标库)
+    '''
     def post(self, request, *args, **kwargs):
         res = self.check(request)
         return Response(res)

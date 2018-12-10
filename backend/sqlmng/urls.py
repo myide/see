@@ -15,6 +15,7 @@ from .views.settings import \
     PersonalSettingsViewSet, \
     InceptionVariablesViewSet, \
     InceptionConnectionViewSet, \
+    MailActionsSettingsViewSet, \
     InceptionBackupView, \
     ConnectionCheckView
 
@@ -29,6 +30,7 @@ router.register(r'personalsettings', PersonalSettingsViewSet, base_name='Persona
 router.register(r'authrules', AuthRulesViewSet, base_name='AuthRulesViewSet')
 router.register(r'suggestion', SuggestionViewSet, base_name='SuggestionViewSet')
 router.register(r'dbcluster', DbClusterViewSet, base_name='DbClusterViewSet')
+router.register(r'mailactions', MailActionsSettingsViewSet, base_name='MailActionsSettingsViewSet')
 router.register(r'inception/variables', InceptionVariablesViewSet, base_name='InceptionVariablesViewSet')
 router.register(r'inception/connection', InceptionConnectionViewSet, base_name='InceptionConnectionViewSet')
 

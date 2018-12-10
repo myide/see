@@ -15,11 +15,13 @@ class SelectDataView(AppellationMixins, BaseView):
     serializer_user = UserSerializer
 
     def create(self, request, *args, **kwargs):
+        ret = res.get_ret()
         env = request.data.get('env')
         cluster = request.data.get('cluster') or None
-        qs = self.queryset.filter(env=env, cluster_id=cluster)
-        ret = res.get_ret()
-        ret['data']['dbs'] = self.serializer_class(qs, many=True).data
+        qs_db = self.queryset.filter(env=env, cluster_id=cluster)
+        qs_admin = self.serializer_user.Meta.model.objects.filter(is_superuser=True)
+        ret['data']['dbs'] = self.serializer_class(qs_db, many=True).data
+        ret['data']['admins'] = self.serializer_user(qs_admin, many=True).data
         userobj = request.user
         user_data = self.serializer_user(userobj).data
         ret['data']['commiter'] = user_data

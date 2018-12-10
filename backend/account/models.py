@@ -9,7 +9,8 @@ class User(AbstractUser):
         ('developer_manager', u'经理'),
         ('developer', u'研发'),
     )
-    leader = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE, related_name='fans')
+    leader = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE, related_name='leader_devs')
+    admin_mail = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE, related_name='admin_devs')
     role = models.CharField(max_length=32, default='developer', choices=ROLES)
     remark = models.CharField(max_length=128, default='', blank=True)
 

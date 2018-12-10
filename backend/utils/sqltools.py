@@ -120,4 +120,3 @@ class SqlQuery(object):
     def sql_soar(self, sql, soar_type):
         cmd = "echo '{}' | {} -test-dsn='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
         return self.cmd_res(cmd)
-

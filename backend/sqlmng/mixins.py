@@ -219,12 +219,14 @@ class ActionMixins(AppellationMixins):
             raise ParseError({self.exception_sqls: exception_sqls})
         return (success_sqls, exception_sqls, json.dumps(result))
 
-    def mail(self, sqlobj, mailtype):
-        if sqlobj.env == self.env_prd:
-            username = self.request.user.username
+    def mail(self, sqlobj, mail_type):
+        mail_action = MailActions.objects.get(name=mail_type)
+        if (sqlobj.env == self.env_prd) and mail_action.value:
+            user = self.request.user
             treater = sqlobj.treater
             commiter = sqlobj.commiter
-            mailto_users = [treater, commiter]
+            admin_mail = user.admin_mail
+            mailto_users = [treater, commiter, admin_mail]
             mailto_users = list(set(mailto_users))
             mailto_list = [u.email for u in User.objects.filter(username__in = mailto_users)]
-            send_mail.delay(mailto_list, username, sqlobj.id, sqlobj.remark, mailtype, sqlobj.sql_content, sqlobj.db.name)
+            send_mail.delay(mailto_list, user.username, sqlobj.id, sqlobj.remark, mail_type, sqlobj.sql_content, sqlobj.db.name)

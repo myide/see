@@ -43,10 +43,6 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
             elif uri in approve_perms:
                 if approve_user != user:
                     raise PermissionDenied(PromptMixins.require_same)
-        if uri in reject_perms:
-            current_step = ActionMixins.get_current_step(obj)
-            commiter = 'commiter_true' if obj.commiter == user.username else 'commiter_false'
-            return self.parse_result(current_step in step_rules[role][commiter], PromptMixins.reject_warning)
         return self.check_perm(env, is_manual_review, role, uri)
 
     def check_perm(self, env, is_manual_review, role, uri):

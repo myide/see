@@ -69,7 +69,6 @@ class Suggestion(Basemodel):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
 
 class Strategy(Basemodel):
-    users = models.ManyToManyField(User, null=True, blank=True)
     is_manual_review = models.BooleanField(default=False, verbose_name='有流程')
 
 class ForbiddenWords(Basemodel):
@@ -104,3 +103,7 @@ class InceptionVariables(Basemodel):
 class InceptionConnection(Basemodel):
     host = models.CharField(max_length=64, null=True, blank=True, default='127.0.0.1')
     port = models.CharField(max_length=6, null=True, blank=True, default=6669)
+
+class MailActions(Basemodel):
+    value = models.BooleanField(default=False, verbose_name='是否发送')
+    desc_cn = models.CharField(max_length=128, null=True, blank=True)
