@@ -1,3 +1,9 @@
+<style scoped>
+  .left20 {
+    margin-left: 20px
+  }
+</style>
+
 <template>
   <div>
     <Card>
@@ -27,6 +33,11 @@
                   <Option v-for="item in leaderList" :value="item.id" :key="item.id">{{ item.username }}</Option>
                 </Select>
               </FormItem>
+              <FormItem label="管理员组收件人" v-if="showLeader">
+                <Select v-model="personalSettings.admin_mail" filterable>
+                  <Option v-for="item in adminList" :value="item.id" :key="item.id">{{ item.username }}</Option>
+                </Select>
+              </FormItem>
               <FormItem label="操作">
                 <Button type="primary" @click='handleCreatePersonalSettings'>保存</Button>
               </FormItem>
@@ -36,10 +47,25 @@
         <Col span="8">
           <div style="margin-left:20px">
             <Alert type="warning" show-icon closable>
-                订阅设置
+              <b>订阅设置</b>
             <template slot="desc">
+              <p class="left20">
+                您可以在设置里指定常用的数据库及leader，提交工单时只显示这些数据供您选择。
+              </p>
               <p>
-                您可以在设置里指定常用的数据库及leader，审核工单时只显示这些数据供您选择。
+                <b>1</b>.  关于工单核准人
+              </p>
+              <p class="left20">
+                <b>1.1</b>. 研发角色：工单核准人是同组的经理（角色/组 在用户管理里设置）。
+              </p>
+              <p class="left20">
+                <b>1.2</b>. 经理/总监/管理员角色：工单核准人是自己。
+              </p>
+              <p>
+                <b>2</b>.  关于管理员组收件人
+              </p>
+              <p class="left20">
+                <b>2.1</b>. 指定接收工单邮件的管理员。
               </p>
             </template>
             </Alert>
@@ -53,6 +79,7 @@
 </template>
 <script>
   import {GetSelectData, GetPersonalSettings, CreatePersonalSettings} from '@/api/sql/check'
+  import {GetMailActions, SetMailActions} from '@/api/sql/mailactions'
   import {GetClusterList} from '@/api/sql/cluster'
   import copyright from '../my-components/public/copyright'
   
@@ -64,13 +91,15 @@
         dbList:[],
         clusterList:[],
         leaderList:[],
+        adminList:[],
         queryParams:{
           cluster:'',
           env:'prd'
         },
         personalSettings:{
           dbs:[],  // id list
-          leader:null  // id
+          leader:null,  // id
+          admin_mail:null
         },
       }
     },
@@ -97,12 +126,12 @@
         return res
       },
 
-      getLeader (instance) {
-        let leader = null
+      getLeaderID (instance) {
+        let leaderID = null
         if (instance != null) {
-          leader = instance.id
+          leaderID = instance.id
         }
-        return leader
+        return leaderID
       },
 
       handleInitData () {
@@ -120,6 +149,11 @@
         this.handleGetPersonalSettings()
       },
 
+      handleGetMailActions () {
+        
+
+      },
+
       handleGetPersonalSettings () {
         GetPersonalSettings({env:this.queryParams.env})
         .then(
@@ -127,7 +161,8 @@
             const data = response.data.results[0]
             this.personalSettings.dbs = this.getDbList(data.db_list)
             if (this.queryParams.env == 'prd') {
-              this.personalSettings.leader = this.getLeader(data.leader)
+              this.personalSettings.leader = this.getLeaderID(data.leader)
+              this.personalSettings.admin_mail = data.admin_mail
             }
           }
         )
@@ -139,6 +174,7 @@
         .then(response => {
           this.dbList = response.data.data.dbs
           this.leaderList = response.data.data.treaters
+          this.adminList = response.data.data.admins
         })
       },
 

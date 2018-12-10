@@ -1,3 +1,10 @@
+<style scoped>
+  .left20 {
+    margin-left: 20px
+  }
+
+</style>
+
 <template>
   <div>
     <Card>
@@ -21,33 +28,27 @@
         <Col span="8">
           <div style="margin-left:20px">
             <Alert type="warning" show-icon closable>
-                SQL语句禁用词
+              <b>SQL语句禁用词</b>
             <template slot="desc">
-              可指定不允许语句中出现的词，对包含禁词的SQL语句，后端会做拦截处理。
+              <p class="left20">
+                可指定不允许语句中出现的词，对包含禁词的SQL语句，后端会做拦截处理。
+              </p>
             </template>
             </Alert>
           </div>
         </Col>
-
       </Row>
 
       <Row>            
         <Col span="12">
-          <Alert show-icon>设置审批方式</Alert>
+          <Alert show-icon>设置工单流</Alert>
           <div>
             <Form class="step-form" :label-width="100">
-              <FormItem label="开启审批流">
-                <i-switch v-model="strategy.is_manual_review" @on-change="change" />
-              </FormItem>
-              <FormItem label="SQL工单 操作人" v-show="strategy.is_manual_review">
-                <Select v-model="strategy.users" multiple filterable>
-                  <Option v-for="item in userList" :value="item.id" :key="item.id">{{ item.username }}</Option>
-                </Select>
-              </FormItem>
-              <FormItem label="操作">
-                <div>
-                  <Button type="primary" @click="handleWriteStrategy">提交</Button>
-                </div>
+              <FormItem label="工单流">
+                <i-switch size="large" v-model="strategy.is_manual_review" @on-change="handleWriteStrategy">
+                  <span slot="open">开启</span>
+                  <span slot="close">关闭</span>
+                </i-switch>
               </FormItem>
             </Form>
             
@@ -55,16 +56,66 @@
         </Col>
 
         <Col span="8">
-          <div style="margin-left:20px">
+          <div class="left20">
             <Alert type="warning" show-icon closable>
-                设置审批方式
-            <template slot="desc">
-              可选择开启或关闭审批流，开启后工单需要审批人通过后，由管理员执行；关闭后工单由审批人直接执行。
-            </template>
+              <b>工单流</b>
+              <template slot="desc">
+                <p class="left20">
+                  <b>1</b>. 关闭流程，工单流: 提交人 --- 核准人 。
+                </p>
+                <p class="left20">
+                  <b>2</b>. 开启流程，工单流: 提交人 --- 核准人 --- 管理员 。
+                </p>
+              </template>
             </Alert>
           </div>
         </Col>
       </Row>
+
+     <Row>            
+        <Col span="12">
+          <Alert show-icon>设置邮件提醒</Alert>
+          <div>
+            <Form class="step-form" :label-width="100">
+              <FormItem label="选择操作">
+                <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
+                  <Checkbox
+                    :indeterminate="indeterminate"
+                    :value="checkAll"
+                    @click.prevent.native="handleCheckAll">全选</Checkbox>
+                </div>
+                <CheckboxGroup v-model="actions_checked" @on-change="checkAllGroupChange">
+                  <Checkbox label="审核"></Checkbox>
+                  <Checkbox label="放弃"></Checkbox>
+                  <Checkbox label="执行"></Checkbox>
+                  <Checkbox label="回滚"></Checkbox>
+                  <Checkbox label="审批通过"></Checkbox>
+                  <Checkbox label="审批拒绝"></Checkbox>
+                </CheckboxGroup>
+              </FormItem>
+              <FormItem label="操作">
+                <div>
+                  <Button type="primary" @click="handleSetMailActions">提交</Button>
+                </div>
+              </FormItem>
+            </Form>
+          </div>
+        </Col>
+
+        <Col span="8">
+          <div class="left20">
+            <Alert type="warning" show-icon closable>
+              <b>邮件提醒</b>
+              <template slot="desc">
+                <p class="left20">
+                  &nbsp;&nbsp; 对于生产环境的数据库，发生选择的动作时，工单相关人员将收到邮件提醒。
+                </p>
+              </template>
+            </Alert>
+          </div>
+        </Col>
+      </Row>
+
     </Card>
     <copyright> </copyright>
   </div>
@@ -72,6 +123,7 @@
 <script>
   import {GetStrategyList, UpdateStrategy, CreateStrategy} from '@/api/sql/strategy'
   import {GetFWList, UpdateFW, CreateFW} from '@/api/sql/forbiddenwords'
+  import {GetMailActions, SetMailActions} from '@/api/sql/mailactions'
   import {GetUserList} from '@/api/account/account'
   import copyright from '../my-components/public/copyright'
 
@@ -80,6 +132,11 @@
     data () {
       return {
         readonly:true,
+        res:[],
+        actions:[],
+        indeterminate: true,
+        checkAll: false,
+        actions_checked: [],
         forbiddenWords:{
           id:'',
           forbidden_words:''
@@ -88,9 +145,11 @@
         strategy:{
           id:'',
           is_manual_review:false,
-          users:[]
         },
-
+        getParams:{
+          page:1,
+          pagesize:10,
+        },
       }
     },
 
@@ -98,9 +157,81 @@
       this.handleGetUsers()
       this.handleGetFWList()
       this.handleGetStrategyList()
+      this.handleGetMailActions()
     },
 
     methods: {
+
+      handleCheckAll () {
+        if (this.indeterminate) {
+          this.checkAll = false;
+        } else {
+          this.checkAll = !this.checkAll;
+        }
+        this.indeterminate = false;
+        if (this.checkAll) {
+          this.actions_checked = this.actions;
+        } else {
+          this.actions_checked = [];
+        }
+      },
+
+      checkAllGroupChange (data) {
+        if (data.length === this.actions.length) {
+          this.indeterminate = false;
+          this.checkAll = true;
+        } else if (data.length > 0) {
+          this.indeterminate = true;
+          this.checkAll = false;
+        } else {
+          this.indeterminate = false;
+          this.checkAll = false;
+        }
+      },
+
+      getActionName() {
+        let actions_checked = []
+        for (let i in this.actions_checked) {
+          let item = this.actions_checked[i]
+          for (let j in this.res) {
+            let row = this.res[j]
+            if (row.desc_cn == item) {
+              actions_checked.push(row.name)
+              break
+            }
+          }
+        }
+        return actions_checked
+      },
+
+      handleGetMailActions() {
+        GetMailActions(this.getParams)
+        .then(
+          response => {
+            this.res = response.data.results
+            this.actions = []
+            this.actions_checked = []
+            for (let i in this.res) {
+              let item = this.res[i]
+              this.actions.push(item.desc_cn)
+              if (item.value == true) {
+                this.actions_checked.push(item.desc_cn)
+              }
+            }
+          }
+        )
+      },
+
+      handleSetMailActions () {
+        let data = this.getActionName()
+        console.log(data)
+        SetMailActions(data)
+        .then(
+          response => {
+            console.log(response)
+            this.handleNotice(response)
+        })
+      },
 
       notice (title, msg) {
         this.$Notice.success({
@@ -117,10 +248,6 @@
           let msg = '设置 保存成功'
           this.notice(title, msg)
         }
-      },
-
-      change (status) {
-        this.$Message.info('开关状态：' + status);
       },
 
       editHandle () {

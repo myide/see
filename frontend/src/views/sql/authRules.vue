@@ -1,7 +1,13 @@
 <style scoped>
-    .spaceLeft {
-        margin-left: 20px;
-    }
+  .left20 {
+    margin-left: 20px;
+  }
+  .left40 {
+    margin-left: 40px;
+  }
+  .left60 {
+    margin-left: 60px;
+  }
 </style>
 
 <template>
@@ -17,42 +23,67 @@
             </Tabs>
           </div>
         </Col>       
-        <Col span="10">
-          <div class='spaceLeft'>
+        <Col span="12">
+          <div class='left20'>
             <Alert type="warning" show-icon closable>
-                <b>附加规则</b>
+              <b>平台使用步骤</b>
                 <template slot="desc">
-                      <p> 对于有审批流程的工单，有如下的规则：</p>
-                      <p>
-                        <b>1. 关于审批类的操作</b>
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>1.1</b>. 需要当前用户是工单的审批人
-                      </p>
+                  <p class='left20'>
+                    <b>1</b>. 创建组/用户
+                  </p>
+                  <p class='left20'>
+                    <b>2</b>. 平台流程设置
+                  </p>
+                  <p class='left20'>
+                    <b>3</b>. 创建目标数据库/集群
+                  </p>
+                  <p class='left20'>
+                    <b>4</b>. SQL工单设置
+                  </p>
+                  <p class='left20'>
+                    <b>5</b>. 提交SQL工单及后续处理
+                  </p>
+                </template>
+            </Alert>
+          </div>
 
-                      <p>
-                        <b>2. 关于执行类的操作</b>
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>2.1</b>. 需要工单已经被审批通过
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>2.2</b>. 需要审批人与执行人（当前用户）不能相同
-                      </p>
-
-                      <p>
-                        <b>3. 关于放弃工单的操作</b>
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>3.1</b>. 工单有无流程均可做放弃操作
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>3.2</b>. 有流程时，不可做越步放弃，只能放弃流转到本人的工单
-                      </p>
-                      <p class='spaceLeft'>
-                        <b>   </b>  例：研发不能放弃已流转到经理的工单，管理员不能放弃还没流转到自己的工单
-                      </p>
-
+          <div class='left20'>
+            <Alert type="warning" show-icon closable>
+                <b>流程说明</b>
+                <template slot="desc">
+                  <p class='left20'>
+                    <b>1</b>. 测试环境
+                  </p>
+                  <p class="left40">
+                    <b>1.1</b>. 提交人发起 --- 提交人执行
+                  </p>
+                  <p class='left20'>
+                    <b>2</b>. 生产环境
+                  </p>
+                  <p class='left40'>
+                    <b>2.1</b>. 无流程
+                  </p>
+                  <p class='left60'>
+                    研发： 研发发起 --- 经理执行 
+                  </p>
+                  <p class='left60'>
+                    其它角色： 本用户发起 --- 本用户执行 
+                  </p>
+                  <p class='left40'>
+                    <b>2.2</b>. 有流程
+                  </p>
+                  <p class='left60'>
+                    研发： 研发发起 --- 经理核准 --- 管理员执行
+                  </p>
+                  <p class='left60'>
+                    经理： 经理发起 --- 经理核准 --- 管理员执行
+                  </p>
+                  <p class='left60'>
+                    总监： 总监发起 --- 总监核准 --- 管理员执行
+                  </p>
+                  <p class='left60'>
+                    管理员：管理员发起 --- 管理员本人核准 --- 其它管理员执行
+                  </p>
                 </template>
             </Alert>
           </div>
