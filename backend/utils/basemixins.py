@@ -39,6 +39,7 @@ class PromptMixins(object):
     not_exists_target_db = '目标数据库不存在'
     not_rollback_able = '此类型的SQL不可被回滚'
     get_rollback_fail = '回滚失败(请检查回滚语句是否生成)'
+    personal_variable_error = '请选择集群和目标数据库'
 
 class SetEncryptMixins(object):
     parameter = 'password'

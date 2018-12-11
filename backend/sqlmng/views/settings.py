@@ -1,7 +1,9 @@
 #coding=utf8
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
+from utils.basemixins import PromptMixins
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
 from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
@@ -25,7 +27,7 @@ class StrategyViewSet(BaseView):
     serializer_class = StrategySerializer
     permission_classes = [IsSuperUser]
 
-class PersonalSettingsViewSet(BaseView):
+class PersonalSettingsViewSet(PromptMixins, BaseView):
     '''
         审核工单的用户个性化设置
     '''
@@ -34,24 +36,30 @@ class PersonalSettingsViewSet(BaseView):
     def get_queryset(self):
         return User.objects.filter(id=self.request.user.id)
 
+    def check_data(self, request_data):
+        cluster = request_data.get('cluster')
+        dbs = request_data.get('dbs')
+        env = request_data.get('env')
+        if not (cluster and dbs):
+            raise ParseError(self.personal_variable_error)
+        return cluster, dbs, env
+
     def create(self, request, *args, **kwargs):
         request_data = request.data
-        instance = request.user
+        user = request.user
         data = {
             'leader': request_data.get('leader'),
             'admin_mail': request_data.get('admin_mail')
         }
-        user_serializer = self.serializer_class(instance, data=data)
+        user_serializer = self.serializer_class(user, data=data)
         user_serializer.is_valid()
         user_serializer.save()
-        cluster = request_data.get('cluster')
-        dbs = request_data.get('dbs')
-        env = request_data.get('env')
-        alter_qs = instance.dbconf_set.filter(cluster=cluster, env=env)
+        cluster, dbs, env = self.check_data(request_data)
+        alter_qs = user.dbconf_set.filter(cluster=cluster, env=env)
         for obj in alter_qs:
-            instance.dbconf_set.remove(obj)
+            user.dbconf_set.remove(obj)
         for db_id in dbs:
-            instance.dbconf_set.add(db_id)
+            user.dbconf_set.add(db_id)
         return Response(res.get_ret())
 
 class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, BaseView):
