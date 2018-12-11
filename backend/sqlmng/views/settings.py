@@ -46,6 +46,7 @@ class PersonalSettingsViewSet(PromptMixins, BaseView):
 
     def create(self, request, *args, **kwargs):
         request_data = request.data
+        cluster, dbs, env = self.check_data(request_data)
         user = request.user
         data = {
             'leader': request_data.get('leader'),
@@ -54,7 +55,6 @@ class PersonalSettingsViewSet(PromptMixins, BaseView):
         user_serializer = self.serializer_class(user, data=data)
         user_serializer.is_valid()
         user_serializer.save()
-        cluster, dbs, env = self.check_data(request_data)
         alter_qs = user.dbconf_set.filter(cluster=cluster, env=env)
         for obj in alter_qs:
             user.dbconf_set.remove(obj)
