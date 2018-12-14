@@ -109,14 +109,21 @@ class SqlQuery(object):
         table_info = self.main(sql)[0][1]
         return table_info
 
+    def get_user_drop_priv(self):
+        sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' and Host='{}'".format(self.db.user, self.db.host)
+        priv = self.main(sql)[0][0]
+        return '-online-dsn' if priv == 'N' else '-test-dsn'
+
     def cmd_res(self, cmd):
         res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         return res.stdout.read()
 
     def sql_advisor(self, sql):
-        cmd = "{} -h {} -P {}  -u {} -p '{}' -d {} -q '{};' -v 1".format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, sql)
+        cmd = "{} -h {} -P {} -u {} -p '{}' -d {} -q '{};' -v 1".format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, sql)
         return self.cmd_res(cmd)
 
     def sql_soar(self, sql, soar_type):
-        cmd = "echo '{}' | {} -test-dsn='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
+        dsn = self.get_user_drop_priv()
+        cmd = "echo '{}' | {} {}='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
         return self.cmd_res(cmd)
+
