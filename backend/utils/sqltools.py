@@ -110,7 +110,7 @@ class SqlQuery(object):
         return table_info
 
     def get_user_drop_priv(self):
-        sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' and Host='{}'".format(self.db.user, self.db.host)
+        sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, self.db.host)
         priv = self.main(sql)[0][0]
         return '-online-dsn' if priv == 'N' else '-test-dsn'
 
