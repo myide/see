@@ -25,7 +25,7 @@
             </Form>
           </div>
         </Col>       
-        <Col span="8">
+        <Col span="12">
           <div style="margin-left:20px">
             <Alert type="warning" show-icon closable>
               <b>SQL语句禁用词</b>
@@ -55,16 +55,16 @@
           </div>
         </Col>
 
-        <Col span="8">
+        <Col span="12">
           <div class="left20">
             <Alert type="warning" show-icon closable>
               <b>工单流</b>
               <template slot="desc">
                 <p class="left20">
-                  <b>1</b>. 关闭流程，工单流: 提交人 --- 核准人 。
+                  <b>1</b>. 关闭，工单流: 提交人 --- 核准人 。
                 </p>
                 <p class="left20">
-                  <b>2</b>. 开启流程，工单流: 提交人 --- 核准人 --- 管理员 。
+                  <b>2</b>. 开启，工单流: 提交人 --- 核准人 --- 管理员 。
                 </p>
               </template>
             </Alert>
@@ -77,7 +77,7 @@
           <Alert show-icon>设置邮件提醒</Alert>
           <div>
             <Form class="step-form" :label-width="100">
-              <FormItem label="选择操作">
+              <FormItem label="选择事件">
                 <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
                   <Checkbox
                     :indeterminate="indeterminate"
@@ -102,13 +102,13 @@
           </div>
         </Col>
 
-        <Col span="8">
+        <Col span="12">
           <div class="left20">
             <Alert type="warning" show-icon closable>
               <b>邮件提醒</b>
               <template slot="desc">
                 <p class="left20">
-                  &nbsp;&nbsp; 对于生产环境的数据库，发生选择的动作时，工单相关人员将收到邮件提醒。
+                  &nbsp;&nbsp; 对于生产环境的数据库，发生选择的事件时，工单相关人员将收到邮件提醒。
                 </p>
               </template>
             </Alert>

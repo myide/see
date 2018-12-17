@@ -44,7 +44,7 @@
             </Form>
           </div>
         </Col>       
-        <Col span="8">
+        <Col span="12">
           <div style="margin-left:20px">
             <Alert type="warning" show-icon closable>
               <b>订阅设置</b>

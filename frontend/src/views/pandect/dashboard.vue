@@ -10,16 +10,11 @@
                     <Col :md="12" :lg="24" :style="{marginBottom: '10px'}">
                         <Card>
                             <Row type="flex" class="user-infor">
-                                <Col span="8">
-                                    <Row class-name="made-child-con-middle" type="flex" align="middle">
-                                       <!-- <img class="avator-img" :src="avatorPath" /> -->
-                                    </Row>
-                                </Col>
-                                <Col span="16" style="padding-left:6px;">
+                                <Col span="24" style="padding-left:6px;">
                                     <Row class-name="made-child-con-middle" type="flex" align="middle">
                                         <div>
-                                            <b class="card-user-infor-name">{{userInfo.username}}</b>
-                                            <p><span style="margin-right:20px" v-show="userInfo.group">属组：{{userInfo.group}}</span> <span>身份：{{identity}} </span></p>
+                                            <b class="card-user-infor-name" style="margin-left:50%">{{userInfo.username}}</b>
+                                            <p><span style="margin-right:20px">身份：{{identity}} </span> <span>属组：{{userInfo.group}} </span></p>
                                         </div>
                                     </Row>
                                 </Col>
