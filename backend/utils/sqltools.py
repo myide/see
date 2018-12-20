@@ -111,7 +111,10 @@ class SqlQuery(object):
 
     def get_user_drop_priv(self):
         sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, self.db.host)
-        priv = self.main(sql)[0][0]
+        try:
+            priv = self.main(sql)[0][0]
+        except Exception:
+            priv = 'N'
         return '-online-dsn' if priv == 'N' else '-test-dsn'
 
     def cmd_res(self, cmd):
