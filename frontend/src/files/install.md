@@ -284,7 +284,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
         pass  
 ```
 
-### 8 INSTALL SOAR
+### 8 安装SOAR
 ```bash
 mkdir -p /usr/local/SOAR/bin/
 cp /usr/local/seevenv/see-master/frontend/src/files/soar /usr/local/SOAR/bin
@@ -292,7 +292,15 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
-### 9 启动所有服务
+### 9 对接统一认证
+```bash
+需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py
+注意：
+1. 该方法的参数一般为 username, password
+2. 根据请求接口的结果(成功/失败)，定义authenticate的返回值(True/False)即可
+```
+
+### 10 启动所有服务
 ```bash
 # mysql  3306端口
 /etc/init.d/mysqld start
