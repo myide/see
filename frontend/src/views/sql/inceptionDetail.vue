@@ -252,7 +252,7 @@
           this.modalAction.id = this.row.id
           this.modalAction.action = name
           this.modalAction.show = true
-          this.modalAction.content = this.descMap[name].name + ' 此工单?'
+          this.modalAction.content = this.descMap[name].name + ' 工单?'
         },
 
         getStepData () {

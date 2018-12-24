@@ -78,7 +78,7 @@
         <Row>
           <Col span="12">
             <FormItem label="系统身份：" prop="systemAccount">
-              <CheckboxGroup v-model="createUserForm.sysaccount">
+              <CheckboxGroup v-model="createSysaccount">
                 <Checkbox label="is_active">已激活</Checkbox>
                 <Checkbox label="is_staff">登录后台</Checkbox>
                 <Checkbox label="is_superuser">管理员</Checkbox>
@@ -108,8 +108,8 @@
             </FormItem>
           </Col>
           <Col span="12">
-            <FormItem label="新密码：" prop="password">
-              <Input type="password" v-model="updateUserForm.newpassword"></Input>
+            <FormItem label="密码：" prop="password">
+              <Input type="password" v-model="updateUserForm.password"></Input>
             </FormItem>
           </Col>
         </Row>
@@ -147,7 +147,7 @@
         <Row>
           <Col span="12">
             <FormItem label="系统身份：">
-              <CheckboxGroup v-model="updateUserForm.sysaccount">
+              <CheckboxGroup v-model="updateSysaccount">
                 <Checkbox label="is_active">已激活</Checkbox>
                 <Checkbox label="is_staff">登录后台</Checkbox>
                 <Checkbox label="is_superuser">管理员</Checkbox>
@@ -228,12 +228,13 @@
           modal:false,
           permissions:[],
         },
+        baseAuth:['is_active', 'is_staff', 'is_superuser'],
         // 创建用户数据
+        createSysaccount:['is_active', 'is_staff'],
         createUserForm: {
           username:'',
           password:'',
           email:'',
-          sysaccount:['is_active', 'is_staff'],
           role:'developer',
           groups:[],
         },
@@ -243,14 +244,13 @@
           email: [{ required: true, message: '邮箱不能为空', trigger: 'blur' }],
         },
         // 修改用户数据
+        updateSysaccount:[],
         updateUserForm: {
           id: '',
           username:'',
           password:'',
-          newpassword:'',
           email:'',
           permissionList:[],  //  此处赋值'' ，会引起 vue.esm.js:591 [Vue warn]: Invalid prop: type check failed for prop "data". Expected Array, got String.
-          sysaccount:[],
           role:'',
           groups:[],
         },
@@ -365,7 +365,6 @@
                           this.updateUserForm.email = params.row.email
                           this.updateUserForm.groups = JSON.stringify(params.row.groups) == "{}" ? [] : [params.row.groups.id]
                           this.updateUserForm.password = params.row.password
-                          this.updateUserForm.newpassword = ''
                           // 系统身份
                           let sysaccount = []
                           if (params.row.is_superuser == true) {
@@ -377,7 +376,7 @@
                           if (params.row.is_staff == true) {
                             sysaccount.push('is_staff')
                           }
-                          this.updateUserForm.sysaccount = sysaccount
+                          this.updateSysaccount = sysaccount
                           // 用户的权限数据
                           let perms = []
                           let userperms = params.row.perms
@@ -471,7 +470,6 @@
       },
 
       groupsFormat (grouplist) {
-        console.log(grouplist)
         let groups = []
         grouplist.map( (item) => {
           groups.push({
@@ -481,7 +479,6 @@
         })
         this.groupList = groups
         this.createUserForm.groups = groups.length > 0 ? [groups[0].value] : [] // 设置 groups 默认值 
-        console.log(this.createUserForm.groups)
       },
 
       handleChangeCreate (newTargetKeys) {
@@ -496,12 +493,23 @@
         return data.label.indexOf(query) > -1;
       },
 
+      getSysaccount (sysaccount, data) {
+        for (let auth in this.baseAuth){
+          data[this.baseAuth[auth]] = 0
+        }
+        for (let acc in sysaccount){
+          data[sysaccount[acc]] = 1
+        }
+        return data
+      },
       handleCreateUser () {
         this.$refs.createUserForm.validate((valid) => {
           if (!valid) {
             return
           }
+          let sysaccount = this.createSysaccount
           let data = this.createUserForm
+          data = this.getSysaccount(sysaccount, data)
           data.user_permissions = this.targetKeysCreate
           CreateUser(data)
           .then(response => {
@@ -513,24 +521,20 @@
             }
             this.handleGetUserList()
           })
-          .catch(error => {
-            console.log(error)
-          })
         })
       },
-
       handleUpdateUser () {
         this.$refs.updateUserForm.validate((valid) => {
           if (!valid) {
             return
           }
+          let sysaccount = this.updateSysaccount
           let data = this.updateUserForm
+          data = this.getSysaccount(sysaccount, data)
           data.user_permissions = this.targetKeysupdate
           delete data.permissionList
-          console.log('----- ', data)
           UpdateUser(this.updateUserForm.id, data)
           .then(response => {
-            console.log(response)
             let httpstatus = response.status
             if (httpstatus == 200) {
               let title = '服务器提示'
@@ -538,9 +542,6 @@
               this.notice(title, msg)
             }
             this.handleGetUserList()
-          })
-          .catch(error => {
-            console.log(error)
           })
         })
       },
@@ -557,9 +558,6 @@
           }
           this.handleGetUserList()
         })
-        .catch(error => {
-          console.log(error)
-        })
       },
 
       handleGetPermissonList () {
@@ -568,9 +566,6 @@
           console.log(response)
           let permissonlist = response.data.results
           this.permsFormat(permissonlist)
-        })
-        .catch(error => {
-          console.log(error)
         })
       },
 
@@ -581,18 +576,12 @@
           this.userList = response.data.results
           this.total = response.data.count
         })
-        .catch(error => {
-          console.log(error)
-        })
       },
 
       handleGetGroupList () {
         GetGroupList(this.getParams)
         .then(response => {
           this.groupsFormat(response.data.results)
-        })
-        .catch(error => {
-          console.log(error)
         })
       },
 
