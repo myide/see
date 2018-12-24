@@ -292,7 +292,7 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
-### 9 对接统一认证
+### 9 对接统一认证系统
 ```bash
 需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py,
 修改authenticate的内容为自定义的方法即可。
