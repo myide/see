@@ -11,4 +11,5 @@ router.register(r'personal', PersonalCenterViewSet, base_name='PersonalCenterVie
 
 urlpatterns = [
     url(r'^', include(router.urls)),
+    url(r'^unitaryauth/$', UnitaryAuthView.as_view())
 ]

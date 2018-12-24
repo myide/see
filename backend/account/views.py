@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib.auth import authenticate
-from rest_framework.exceptions import ParseError
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.exceptions import ParseError, AuthenticationFailed
 from rest_framework.response import Response
 from utils.permissions import IsSuperUser
 from utils.basemixins import PromptMixins
 from utils.baseviews import MaxSizePagination, BaseView
 from utils.baseviews import ReturnFormatMixin as res
+from utils.unitaryauth import UnitaryAuth
 from .serializers import *
 
 # Create your views here.
@@ -73,3 +78,23 @@ class PersonalCenterViewSet(PromptMixins, BaseView):
         instance.set_password(new_pass)
         instance.save()
         return Response(ret)
+
+class UnitaryAuthView(UnitaryAuth, APIView):
+    '''
+        接入统一登录
+    '''
+    serializer_class = UserSerializer
+    authentication_classes = ()
+    permission_classes = ()
+
+    def post(self, request, *args, **kwargs):
+        if not self.authenticate:
+            raise AuthenticationFailed
+        user_query = self.serializer_class.Meta.model.objects.filter(username=request.data.get('username'))
+        if user_query:
+            serializer = self.serializer_class(user_query[0], data=request.data)
+        else:
+            serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

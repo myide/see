@@ -22,37 +22,16 @@ class UserSerializer(serializers.ModelSerializer):
             ret['perms'] = perms
         return ret
 
-    def create_sysaccount(self, validated_data):
-        sys_account = validated_data.pop('sysaccount',[])
-        for account in sys_account:
-            validated_data[account] = 1
-        return validated_data
-
-    def update_sysaccount(self, validated_data):
-        default_account = {
-            'is_active':0,
-            'is_staff':0,
-            'is_superuser':0
-        }
-        sys_account = validated_data.pop('sysaccount',[])
-        for account in sys_account:
-            if account in default_account:
-                default_account[account] = 1
-        validated_data.update(default_account)
-        return validated_data
-
     def create(self, validated_data):
-        instance = super(UserSerializer, self).create(self.create_sysaccount(validated_data))
+        instance = super(UserSerializer, self).create(validated_data)
         instance.set_password(validated_data['password'])
         instance.save()
         return instance
 
     def update(self, instance, validated_data):
-        validated_data.pop('password')
-        newpassword = validated_data.pop('newpassword')
-        if newpassword:
-            instance.set_password(newpassword)
-        validated_data = self.update_sysaccount(validated_data)
+        password = validated_data.pop('password', None)
+        if instance.password != password:
+            instance.set_password(password)
         return super(UserSerializer, self).update(instance, validated_data)
 
 class GroupSerializer(serializers.ModelSerializer):
