@@ -294,7 +294,8 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ### 9 对接统一认证
 ```bash
-需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py
+需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py,
+修改authenticate的内容为自定义的方法即可。
 注意：
 1. 该方法的参数一般为 username, password
 2. 根据请求接口的结果(成功/失败)，定义authenticate的返回值(True/False)即可
