@@ -1,7 +1,7 @@
 <style scoped>
-    .inner {
-      margin-top:20px
-    }
+  .inner {
+    margin-top:20px
+  }
 </style>
 
 <template>
@@ -215,7 +215,6 @@
           GetSuggestionList(params)
           .then(
             response => {
-              console.log(response)
               this.res = response
               this.count = response.data.count
             }
@@ -328,7 +327,6 @@
         handleGetSqlDetail () {
           GetSqlDetail(this.$route.params.id)
           .then(response => {
-            console.log(response)
             this.row = response.data
             this.steps = this.row.steps
             this.handle_result_check = this.parseHandleResult(this.row.handle_result_check)

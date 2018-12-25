@@ -1,16 +1,16 @@
 <style scoped>
-    .wrapper {
-        background-color:black;
-        color:white 
-    }
-    .inner {
-        margin-bottom: 10px;
-        margin-left: 10px
-    }
-    .totalDesc {
-       margin-left: 10px;
-       color: #7b7b7b
-    }
+  .wrapper {
+      background-color:black;
+      color:white 
+  }
+  .inner {
+      margin-bottom: 10px;
+      margin-left: 10px
+  }
+  .totalDesc {
+      margin-left: 10px;
+      color: #7b7b7b
+  }
 </style>
 
 <template>
@@ -82,7 +82,7 @@ import axios from '../../../libs/http';
 export default {
   props: ['row', 'handleResultCheck', 'handleResultExecute', 'handleResultRollback'],
   created() {
-    console.log(this.handleResultCheck, this.handleResultExecute, this.handleResultRollback)
+    this.tabName = this.row.type == 'select' ? 'handle_result_execute' : 'handle_result_check'
   },
 
   data () {

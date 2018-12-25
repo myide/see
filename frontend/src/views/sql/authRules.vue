@@ -184,7 +184,6 @@
         GetAuthRules(this.getParams)
         .then(
           response => {
-            console.log(response)
             this.authRules = response.data.results
           }
         )
