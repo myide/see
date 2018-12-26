@@ -126,6 +126,7 @@ class SqlQuery(object):
         return self.cmd_res(cmd)
 
     def sql_soar(self, sql, soar_type):
+        sql = sql.replace('"', '\'')
         dsn = self.get_user_drop_priv()
         cmd = "echo '{}' | {} {}='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
         return self.cmd_res(cmd)
