@@ -66,11 +66,12 @@ class InceptionConn(object):
         return 'mysql -h{} -P{}'.format(obj.host, obj.port)
 
     def get_mysql_conn(self, params):
-        return 'mysql -h{} -P{} -u{} -p{} -e "show databases" '.format(
+        return 'mysql -h{} -P{} -u{} -p{} -e "use {}" '.format(
             params.get('host'),
             params.get('port'),
             params.get('user'),
-            params.get('password')
+            params.get('password'),
+            params.get('db')
         )
 
 class CheckConn(InceptionConn):
@@ -96,6 +97,7 @@ class CheckConn(InceptionConn):
                 db_id = request_data.get('id')
                 instance = Dbconf.objects.get(id=db_id)
                 params = {
+                    'db': instance.name,
                     'host': instance.host,
                     'port': instance.port,
                     'user': instance.user,
@@ -106,13 +108,14 @@ class CheckConn(InceptionConn):
             cmd = self.get_mysql_conn(params)
         popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         lines = popen.stdout.readlines()
-        last_item = lines[-1].decode('gbk')
+        last_item = lines[-1].decode('gbk') if len(lines) > 0 else ''
         if self.error_tag in last_item.lower():
             ret['status'] = -1
             ret['data'] = last_item
         return ret
 
 class HandleInceptionSettingsMixins(InceptionConn):
+
     backup_variables = [
         'inception_remote_backup_host',
         'inception_remote_backup_port',
