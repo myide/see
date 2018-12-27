@@ -24,19 +24,19 @@ class DbViewSet(BaseView):
             queryset = queryset.filter(env=env)
         return queryset
 
-    @detail_route()
+    @detail_route(methods=['post'])
     def sql_advisor(self, request, *args, **kwargs):
         instance = self.get_object()
-        sql = request.GET.get('sql')
+        sql = request.data.get('sql')
         res = SqlQuery(instance).sql_advisor(sql)
         self.ret['results'] = res
         return Response(self.ret)
 
-    @detail_route()
+    @detail_route(methods=['post'])
     def sql_soar(self, request, *args, **kwargs):
         instance = self.get_object()
-        sql = request.GET.get('sql')
-        soar_type = request.GET.get('soar_type')
+        sql = request.data.get('sql')
+        soar_type = request.data.get('soar_type')
         res = SqlQuery(instance).sql_soar(sql, soar_type)
         self.ret['results'] = res
         return Response(self.ret)

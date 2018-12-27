@@ -50,7 +50,7 @@ class Inception(object):
             result = "Mysql Error {}: {}".format(e.args[0], e.args[1])
         return {'result': result, 'status': status}
 
-    def manual(self):
+    def manual(self):  # 查询回滚库/表
         conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
         conn.autocommit(True)
         cur = conn.cursor()
@@ -88,7 +88,7 @@ class SqlQuery(object):
         self.soar_cli = settings.OPTIMIZE_SETTINGS.get('soar_cli')
         self.sqladvisor_cli = settings.OPTIMIZE_SETTINGS.get('sqladvisor_cli')
 
-    def main(self, sql):
+    def main(self, sql):   # 查询目标库/表结构
         try:
             conn = pymysql.connect(host=self.db.host, port=int(self.db.port), user=self.db.user, passwd=self.password, db=self.db.name, charset='utf8')
             conn.autocommit(True)
@@ -97,6 +97,9 @@ class SqlQuery(object):
         except Exception as e:
             raise ParseError(e)
         return cur.fetchall()
+
+    def handle_sql(self, sql):
+        return sql.replace('"', '\'')
 
     def get_tables(self):
         sql = 'SHOW TABLES;'.format(self.db.name)
@@ -122,12 +125,10 @@ class SqlQuery(object):
         return res.stdout.read()
 
     def sql_advisor(self, sql):
-        cmd = "{} -h {} -P {} -u {} -p '{}' -d {} -q '{};' -v 1".format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, sql)
+        cmd = '{} -h {} -P {} -u {} -p "{}" -d {} -q "{};" -v 1'.format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, self.handle_sql(sql))
         return self.cmd_res(cmd)
 
     def sql_soar(self, sql, soar_type):
-        sql = sql.replace('"', '\'')
         dsn = self.get_user_drop_priv()
-        cmd = "echo '{}' | {} {}='{}:{}@{}:{}/{}' {}".format(sql, self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
+        cmd = 'echo "{}" | {} {}="{}:{}@{}:{}/{}" {}'.format(self.handle_sql(sql), self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
         return self.cmd_res(cmd)
-
