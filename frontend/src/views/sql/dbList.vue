@@ -311,10 +311,11 @@
           }
           const data = {
             check_type: 'create_target_db',
-            host:this.createDbForm.host,
-            port:this.createDbForm.port,
-            user:this.createDbForm.user,
-            password:this.createDbForm.password,
+            db: this.createDbForm.name,
+            host: this.createDbForm.host,
+            port: this.createDbForm.port,
+            user: this.createDbForm.user,
+            password: this.createDbForm.password,
           }
           this.handleCheckConn(data)
         })
@@ -332,8 +333,8 @@
         CheckConn(data)
         .then(
           res => {
-            console.log(res)
             const status = res.data.status
+            const data = res.data.data
             if (status == 0) {
                 this.$Message.success(
                     {
@@ -344,8 +345,8 @@
             } else {
                 this.$Message.warning(
                     {
-                        content:'连接失败',
-                        duration: 3
+                        content:'连接失败 （' + data + '）',
+                        duration: 8
                     }
                 )
             }
@@ -387,11 +388,7 @@
       handleDeleteDb () {
         DeleteDb(this.deleteId)
         .then(res => {
-          console.log(res)
           this.initData()
-        })
-        .catch(error => {
-          console.log(error)
         })
       },
      
@@ -412,7 +409,6 @@
         GetClusterList(this.getClusterParams)
         .then(
           res => {
-            console.log(res)
             this.spinShow = false
             this.clusterList = res.data.results
           }
@@ -422,7 +418,6 @@
       cancel () {
         Message.info('Clicked cancel');
       }
-
 
     },
 

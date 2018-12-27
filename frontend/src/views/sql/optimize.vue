@@ -249,7 +249,10 @@
             return
           }
           this.query_type = ' / SQLAdvisor 优化建议'
-          GetSqlAdvisor(this.database, this.checkData.sql)
+          let data = {
+            sql:this.checkData.sql
+          }
+          GetSqlAdvisor(this.database, data)
           .then(
             response => {
               this.spinShow = false
@@ -270,6 +273,7 @@
             sql:this.checkData.sql,
             soar_type:soar_type
           }
+          console.log('----- ', data)
           GetSqlSOAR(this.database, data)
           .then(
             response => {

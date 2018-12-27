@@ -80,19 +80,22 @@
 import axios from '../../../libs/http';
 
 export default {
+
   props: ['row', 'handleResultCheck', 'handleResultExecute', 'handleResultRollback'],
+  
   created() {
     this.tabName = this.row.type == 'select' ? 'handle_result_execute' : 'handle_result_check'
+    this.dataLength = this.row.type == 'select' ? this.handleResultExecute.length : this.handleResultCheck.length
   },
 
   data () {
     return {
-      tabName:'handle_result_check',
-      dataLength:this.handleResultCheck.length,
+      tabName:'',
+      dataLength:0,
       handleMap:{
         handle_result_check:this.handleResultCheck ? this.handleResultCheck : [],
         handle_result_execute:this.handleResultExecute ? this.handleResultExecute : [],
-        handle_result_rollback:this.handleResultRollback ? this.handleResultRollback: []
+        handle_result_rollback:this.handleResultRollback ? this.handleResultRollback : []
       },
     }
   },

@@ -302,8 +302,8 @@
             HandleCheckConn (data) {
                 CheckConn(data)
                 .then(res => {
-                    console.log(res)
                     const status = res.data.status
+                    const data = res.data.data
                     if (status == 0) {
                         this.$Message.success(
                             {
@@ -314,8 +314,8 @@
                     } else {
                         this.$Message.warning(
                             {
-                                content:'连接失败',
-                                duration: 3
+                                content:'连接失败 （' + data + '）',
+                                duration: 8
                             }
                         )
                     }

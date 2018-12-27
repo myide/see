@@ -9,14 +9,18 @@ export function GetTableInfo(id, tableName) {
     return axios.get(dbConfs + id + '/table_info/?table_name=' + tableName);
 }
 
-export function GetSqlAdvisor(id, sql) {
-    return axios.get(dbConfs + id + '/sql_advisor/?sql=' + sql);
+export function GetSqlAdvisor (id, data) {
+    return axios({
+        url: dbConfs + id + '/sql_advisor/',
+        method: 'post',
+        data: data
+    });
 }
 
-export function GetSqlSOAR(id, params) {
+export function GetSqlSOAR (id, data) {
     return axios({
         url: dbConfs + id + '/sql_soar/',
-        method: 'get',
-        params
-    })
+        method: 'post',
+        data: data
+    });
 }
