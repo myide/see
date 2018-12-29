@@ -91,8 +91,9 @@ class CheckConn(InceptionConn):
             if check_type == 'inception_backup':
                 self.conf.read(self.file_path)
                 password = self.conf.get('inception', 'inception_remote_system_password')
-                request_data['password'] = password
                 params = request_data
+                params['password'] = password
+                params['db'] = 'inception'
             elif check_type == 'update_target_db':
                 db_id = request_data.get('id')
                 instance = Dbconf.objects.get(id=db_id)
@@ -115,7 +116,6 @@ class CheckConn(InceptionConn):
         return ret
 
 class HandleInceptionSettingsMixins(InceptionConn):
-
     backup_variables = [
         'inception_remote_backup_host',
         'inception_remote_backup_port',

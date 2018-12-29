@@ -232,6 +232,15 @@ OPTIMIZE_SETTINGS = {
     'soar_cli': '/usr/local/SOAR/bin/soar'
 }
 
+# 邮件设置
+MAIL = {
+    'smtp_host': 'smtp.163.com',  # 邮件服务器
+    'smtp_port': 25,  # SMTP协议默认端口是25
+    'mail_user': 'sql_see@163.com',  # 邮件用户名
+    'mail_pass': 'see123',  # 授权码
+    'see_addr': 'http://xxx.xxx.xxx.xxx:81',  # see项目访问地址
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 

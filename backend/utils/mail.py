@@ -1,14 +1,13 @@
 # coding=utf-8
 import smtplib
 from email.mime.text import MIMEText
+from django.conf import settings
 
 class Mail(object):
-
-    smtp_host = "smtp.163.com"  # 设置服务器
-    smtp_port = 25  # SMTP协议默认端口是25
-    mail_user = "sql_see@163.com"  # 用户名
-    mail_pass = "see123"  # 授权码
-    see_addr = 'http://xxx.xxx.xxx.xxx:81'  # see项目访问地址
+    '''
+        修改邮件配置: sqlweb/settings.py
+    '''
+    locals().update(settings.MAIL)
 
     @classmethod
     def get_desc(cls, action_type):
@@ -36,16 +35,17 @@ class Mail(object):
         return title, content_html, sql_html, to_list
 
     @classmethod
-    def send(cls, to_list, personnel, sqlid, note, action_type, sqlcontent, dbname):  # to_list：收件人；sub：主题；content：邮件内容
+    def send(cls, to_list, personnel, sqlid, note, action_type, sqlcontent, dbname):
         title, content_html, sql_html, to_list = cls.get_mail_template(to_list, action_type, sqlid, sqlcontent, personnel, note, dbname)
-        msg = MIMEText(content_html + sql_html, _subtype='html', _charset='utf-8')  # 创建一个实例，这里设置为html格式邮件
-        msg['Subject'] = '{} {} [{}]'.format(personnel, title, note)  # 设置主题
+        msg = MIMEText(content_html + sql_html, _subtype='html', _charset='utf-8')
+        msg['Subject'] = '{} {} {}'.format(personnel, title, note)
         msg['From'] = cls.mail_user
         msg['To'] = ";".join(to_list)
         try:
             smtp = smtplib.SMTP(cls.smtp_host, cls.smtp_port)
-            smtp.login(cls.mail_user, cls.mail_pass)  # 登陆服务器
-            smtp.sendmail(cls.mail_user, to_list, msg.as_string())  # 发送邮件
+            smtp.starttls()
+            smtp.login(cls.mail_user, cls.mail_pass)
+            smtp.sendmail(cls.mail_user, to_list, msg.as_string())
             smtp.quit()
             return True
         except Exception as e:
