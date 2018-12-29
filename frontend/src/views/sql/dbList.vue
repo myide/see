@@ -43,20 +43,20 @@
               <Option value="test" >测试</Option>
             </Select>
           </FormItem>
-          <FormItem label="数据库名：" prop="name">
-            <Input v-model="createDbForm.name"></Input>
-          </FormItem>
           <FormItem label="地址：" prop="host">
-            <Input v-model="createDbForm.host"></Input>
+            <Input v-model="createDbForm.host" placeholder="mysql地址"></Input>
           </FormItem>
           <FormItem label="端口：" prop="port">
-            <Input v-model="createDbForm.port"></Input>
+            <Input v-model="createDbForm.port" placeholder="mysql端口"></Input>
           </FormItem>
           <FormItem label="用户名：" prop="user">
-            <Input v-model="createDbForm.user"></Input>
+            <Input v-model="createDbForm.user" placeholder="mysql用户名"></Input>
           </FormItem>
           <FormItem label="密码：" prop="password">
-            <Input v-model="createDbForm.password" type="password"></Input>
+            <Input v-model="createDbForm.password" type="password" placeholder="mysql密码"></Input>
+          </FormItem>
+          <FormItem label="库名：" prop="name">
+            <Input v-model="createDbForm.name" placeholder="mysql实际的库名"></Input>
           </FormItem>
           <FormItem label="备注：" prop="remark">
             <Input v-model="createDbForm.remark"></Input>
@@ -85,20 +85,20 @@
               <Option value="test" >测试</Option>
             </Select>
           </FormItem>
-          <FormItem label="数据库名：" prop="name">
-            <Input v-model="updateDbForm.name"></Input>
-          </FormItem>
           <FormItem label="地址：" prop="host">
-            <Input v-model="updateDbForm.host"></Input>
+            <Input v-model="updateDbForm.host" placeholder="mysql地址"></Input>
           </FormItem>
           <FormItem label="端口：" prop="port">
-            <Input v-model="updateDbForm.port"></Input>
+            <Input v-model="updateDbForm.port" placeholder="mysql端口"></Input>
           </FormItem>
           <FormItem label="用户名：" prop="user">
-            <Input v-model="updateDbForm.user"></Input>
+            <Input v-model="updateDbForm.user" placeholder="mysql用户名"></Input>
           </FormItem>
           <FormItem label="密码：" prop="password">
-            <Input v-model="updateDbForm.password" type="password"></Input>
+            <Input v-model="updateDbForm.password" type="password" placeholder="mysql密码"></Input>
+          </FormItem>
+          <FormItem label="库名：" prop="name">
+            <Input v-model="updateDbForm.name" placeholder="mysql实际的库名"></Input>
           </FormItem>
           <FormItem label="备注：" prop="remark">
             <Input v-model="updateDbForm.remark"></Input>

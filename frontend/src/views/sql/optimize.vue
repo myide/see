@@ -273,7 +273,6 @@
             sql:this.checkData.sql,
             soar_type:soar_type
           }
-          console.log('----- ', data)
           GetSqlSOAR(this.database, data)
           .then(
             response => {
