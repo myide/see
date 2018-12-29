@@ -226,7 +226,7 @@ INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 
-#optimize设置
+# SQL优化设置
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
     'soar_cli': '/usr/local/SOAR/bin/soar'
