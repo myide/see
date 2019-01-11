@@ -5,6 +5,6 @@ daemon = True
 # worker数量
 workers = 2
 # 错误日志路径
-errorlog = '/tmp/gunicorn.error.log'
+errorlog = 'logs/gunicorn.error.log'
 # 访问日志路径
-accesslog = '/tmp/gunicorn.access.log'
+accesslog = 'logs/gunicorn.access.log'
