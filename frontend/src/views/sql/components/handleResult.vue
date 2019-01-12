@@ -20,7 +20,7 @@
           <Col span="24">
             <Scroll height=220>       
               <div class="wrapper">
-                <div class="inner" v-for="(item, index) in handleResultExecute" :value="item.value" :key="index">{{ item.value }}</div>
+                <div class="inner" v-for="(item, index) in handleResultExecute" :value="item.value" :key="index">{{ item.value.replace(/^\"|\"$/g,'') }}</div>
               </div>
             </Scroll>
           </Col>

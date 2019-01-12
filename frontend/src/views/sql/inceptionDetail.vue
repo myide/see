@@ -282,7 +282,6 @@
         },
 
         parseHandleResult(handle_result){
-          console.log(handle_result, typeof(handle_result))
           if (handle_result == "") {
             return
           }

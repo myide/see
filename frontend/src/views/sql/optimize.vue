@@ -80,7 +80,7 @@
               <Icon type="ios-lightbulb-outline" slot="icon"></Icon>
                 查询结果 {{query_type}}
             </Alert>
-            <div style='margin-left:50px'>
+            <div style='margin-left:50px; overflow:auto'>
               <vue-markdown :source="query_result"> </vue-markdown>
             </div>
         </Col>

@@ -10,11 +10,14 @@
     <Card>
       <Row>            
         <Col span="12">
-          <Alert show-icon>设置禁用词</Alert>
+          <Alert show-icon>SQL审核设置</Alert>
           <div>
             <Form class="step-form" :label-width="100">
+              <FormItem label="SQL条数限制">
+                <Slider v-model="sqlsettings.sql_count_limit" :max="10000"></Slider>
+              </FormItem>
               <FormItem label="SQL语句禁用词">
-                <Input v-model="forbiddenWords.forbidden_words" :readonly="readonly" type="textarea" :rows="4" placeholder="SQL语句里不允许出现的词，多个以空格分隔" />
+                <Input v-model="sqlsettings.forbidden_words" :readonly="readonly" type="textarea" :rows="3" placeholder="SQL语句里不允许出现的词，多个以空格分隔" />
               </FormItem>
               <FormItem label="操作">
                 <div>
@@ -28,11 +31,14 @@
         <Col span="12">
           <div style="margin-left:20px">
             <Alert type="warning" show-icon closable>
-              <b>SQL语句禁用词</b>
+              <b>SQL审核设置</b>
             <template slot="desc">
-              <p class="left20">
-                可指定不允许语句中出现的词，对包含禁词的SQL语句，后端会做拦截处理。
-              </p>
+                <p class="left20">
+                  <b>1</b>. 限制每个工单的SQL语句数量；默认1000，最大可设置10000。
+                </p>
+                <p class="left20">
+                  <b>2</b>. 可指定不允许语句中出现的词，对包含禁词的SQL语句，后端会做拦截处理。
+                </p>
             </template>
             </Alert>
           </div>
@@ -122,7 +128,7 @@
 </template>
 <script>
   import {GetStrategyList, UpdateStrategy, CreateStrategy} from '@/api/sql/strategy'
-  import {GetFWList, UpdateFW, CreateFW} from '@/api/sql/forbiddenwords'
+  import {GetFWList, UpdateFW, CreateFW} from '@/api/sql/sqlsettings'
   import {GetMailActions, SetMailActions} from '@/api/sql/mailactions'
   import {GetUserList} from '@/api/account/account'
   import copyright from '../my-components/public/copyright'
@@ -137,8 +143,9 @@
         indeterminate: true,
         checkAll: false,
         actions_checked: [],
-        forbiddenWords:{
+        sqlsettings:{
           id:'',
+          sql_count_limit:'',
           forbidden_words:''
         },
         userList:[],
@@ -301,7 +308,7 @@
             console.log(response)
             const results = response.data.results
             if (results.length > 0) {
-              this.forbiddenWords = results[0]
+              this.sqlsettings = results[0]
             }
           }
         )
@@ -326,8 +333,8 @@
       },
 
       handleWriteFW () {
-        const id = this.forbiddenWords.id 
-        const data = this.forbiddenWords
+        const id = this.sqlsettings.id 
+        const data = this.sqlsettings
         if (id == '') {
           CreateFW (data)  
           .then(
