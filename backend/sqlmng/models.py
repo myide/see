@@ -54,6 +54,7 @@ class Inceptsql(Basemodel):
     treater = models.CharField(max_length=64)
     status = models.IntegerField(default=-1, choices=STATUS)
     execute_errors = models.TextField(default='', null=True, blank=True)
+    #execute_time = models.CharField(max_length = 11)
     exe_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     roll_affected_rows = models.CharField(max_length=10, null=True, blank=True)
     rollback_opid = models.TextField(null=True, blank=True)
@@ -71,8 +72,9 @@ class Suggestion(Basemodel):
 class Strategy(Basemodel):
     is_manual_review = models.BooleanField(default=False, verbose_name='有流程')
 
-class ForbiddenWords(Basemodel):
-    forbidden_words = models.TextField(null=True, blank=True)
+class SqlSettings(Basemodel):
+    forbidden_words = models.TextField(null=True, blank=True, default='')
+    sql_count_limit = models.IntegerField(null=True, blank=True, default=1000)
 
 class AuthRules(Basemodel):
     ROLES = (

@@ -10,7 +10,7 @@ from .views.auth_rules import AuthRulesViewSet
 from .views.suggestion import SuggestionViewSet
 from .views.db_cluster import DbClusterViewSet
 from .views.settings import \
-    ForbiddenWordsViewSet, \
+    SqlSettingsViewSet, \
     StrategyViewSet, \
     PersonalSettingsViewSet, \
     InceptionVariablesViewSet, \
@@ -24,7 +24,7 @@ router.register(r'dbconfs', DbViewSet, base_name='DbViewSet')
 router.register(r'inceptions', InceptionMainView, base_name='InceptionMainView')
 router.register(r'inceptioncheck', InceptionCheckView, base_name='InceptionCheckView')
 router.register(r'autoselects', SelectDataView, base_name='SelectDataView')
-router.register(r'forbiddenwords', ForbiddenWordsViewSet, base_name='ForbiddenWordsViewSet')
+router.register(r'sqlsettings', SqlSettingsViewSet, base_name='SqlSettingsViewSet')
 router.register(r'strategy', StrategyViewSet, base_name='StrategyViewSet')
 router.register(r'personalsettings', PersonalSettingsViewSet, base_name='PersonalSettingsViewSet')
 router.register(r'authrules', AuthRulesViewSet, base_name='AuthRulesViewSet')

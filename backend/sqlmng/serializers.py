@@ -20,7 +20,7 @@ class InceptionSerializer(serializers.ModelSerializer):
         steps = instance.workorder.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
-            updatetime = step.updatetime if step.status != 0 else ''
+            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
             group = self.get_step_user_group(step.user)
             data.append(
                 {
@@ -52,10 +52,10 @@ class DbSerializer(SetEncryptMixins, serializers.ModelSerializer):
         ret['cluster'] = {'id':cluster.id, 'name':cluster.name} if cluster else {}
         return ret
 
-class ForbiddenWordsSerializer(serializers.ModelSerializer):
+class SqlSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = ForbiddenWords
+        model = SqlSettings
         fields = '__all__'
 
 class StrategySerializer(serializers.ModelSerializer):

@@ -20,7 +20,7 @@ class InceptionCheckView(PromptMixins, ChangeSpecialCharacterMixins, ActionMixin
     serializer_step = StepSerializer
 
     def check_forbidden_words(self, sql_content):
-        forbidden_instance = ForbiddenWords.objects.first()
+        forbidden_instance = SqlSettings.objects.first()
         if forbidden_instance:
             forbidden_word_list = [fword for fword in self.convert(forbidden_instance.forbidden_words)]
             forbidden_words = [fword for fword in forbidden_word_list if re.search(re.compile(fword, re.I), sql_content)]
@@ -53,8 +53,18 @@ class InceptionCheckView(PromptMixins, ChangeSpecialCharacterMixins, ActionMixin
         if not Dbconf.objects.filter(id=db):
             raise ParseError({self.not_exists_target_db})
 
+    def check_count(self, request_data):
+        sql_settings = SqlSettings.objects.first()
+        sql_content = request_data.get('sql_content')
+        sql_list = sql_content.split(';')
+        sql_list_count = len(sql_list) - 1
+        sql_count_limit = sql_settings.sql_count_limit
+        if sql_count_limit < sql_list_count:
+            raise ParseError({self.sql_count_exceed.format(sql_list_count, sql_count_limit)})
+
     def create(self, request, *args, **kwargs):
         request_data = request.data
+        self.check_count(request_data)
         self.check_db(request_data)
         request_data['group'] = self.check_user_group(request)
         request_data['treater'] = request_data.pop('treater_username')

@@ -7,17 +7,17 @@ from utils.basemixins import PromptMixins
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
 from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
-from sqlmng.data import variables, mail_actions
+from sqlmng.data import variables, mail_actions, sql_settings
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class ForbiddenWordsViewSet(BaseView):
+class SqlSettingsViewSet(FixedDataMixins, BaseView):
     '''
-        设置SQL语句中需拦截的字段
+        设置SQL语句的属性（数量，拦截的字段）
     '''
-    queryset = ForbiddenWords.objects.all()
-    serializer_class = ForbiddenWordsSerializer
+    serializer_class = SqlSettingsSerializer
     permission_classes = [IsSuperUser]
+    source_data = sql_settings
 
 class StrategyViewSet(BaseView):
     '''
@@ -45,6 +45,7 @@ class PersonalSettingsViewSet(PromptMixins, BaseView):
         return cluster, dbs, env
 
     def create(self, request, *args, **kwargs):
+        # save user
         request_data = request.data
         cluster, dbs, env = self.check_data(request_data)
         user = request.user

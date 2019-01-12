@@ -388,3 +388,10 @@ inception_conn = [
 		'port':6669
 	}
 ]
+
+sql_settings = [
+	{
+		'forbidden_words':'',
+		'sql_count_limit':1000
+	}
+]

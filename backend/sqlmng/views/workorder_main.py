@@ -80,7 +80,7 @@ class InceptionMainView(PromptMixins, ActionMixins, BaseView):
             sql_query = SqlQuery(instance.db)
             data = sql_query.main(instance.sql_content)
             affected_rows = len(data)
-            instance.handle_result_execute = json.dumps([list(row) for row in data], cls=DateEncoder)
+            instance.handle_result_execute = json.dumps([str(row) for row in data], cls=DateEncoder)
         else:
             execute_time = 0
             opids = []

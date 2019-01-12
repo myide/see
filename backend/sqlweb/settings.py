@@ -45,7 +45,7 @@ AUTH_USER_MODEL = 'account.User'
 SECRET_KEY = 'by#cphl_dh+7e(eeg#cd52@5k=6*@lwy^u4*5qmi+nof_$wl&^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -299,7 +299,7 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_LOG_DIR, "see.error.log"),
-            'maxBytes': 1024 * 1024 * 50, 
+            'maxBytes': 1024 * 1024 * 50,
             'backupCount': 5,
             'formatter': 'standard',
             'encoding': 'utf-8',
