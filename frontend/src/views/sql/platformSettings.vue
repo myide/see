@@ -10,7 +10,7 @@
     <Card>
       <Row>            
         <Col span="12">
-          <Alert show-icon>SQL审核设置</Alert>
+          <Alert show-icon>SQL审核</Alert>
           <div>
             <Form class="step-form" :label-width="100">
               <FormItem label="SQL条数限制">
@@ -47,7 +47,7 @@
 
       <Row>            
         <Col span="12">
-          <Alert show-icon>设置工单流</Alert>
+          <Alert show-icon>工单流</Alert>
           <div>
             <Form class="step-form" :label-width="100">
               <FormItem label="工单流">
@@ -64,7 +64,7 @@
         <Col span="12">
           <div class="left20">
             <Alert type="warning" show-icon closable>
-              <b>工单流</b>
+              <b>工单流设置</b>
               <template slot="desc">
                 <p class="left20">
                   <b>1</b>. 关闭，工单流: 提交人 --- 核准人 。
@@ -80,7 +80,7 @@
 
      <Row>            
         <Col span="12">
-          <Alert show-icon>设置邮件提醒</Alert>
+          <Alert show-icon>邮件提醒</Alert>
           <div>
             <Form class="step-form" :label-width="100">
               <FormItem label="选择事件">
@@ -111,7 +111,7 @@
         <Col span="12">
           <div class="left20">
             <Alert type="warning" show-icon closable>
-              <b>邮件提醒</b>
+              <b>邮件提醒设置</b>
               <template slot="desc">
                 <p class="left20">
                   &nbsp;&nbsp; 对于生产环境的数据库，发生选择的事件时，工单相关人员将收到邮件提醒。
@@ -145,7 +145,7 @@
         actions_checked: [],
         sqlsettings:{
           id:'',
-          sql_count_limit:'',
+          sql_count_limit:0,
           forbidden_words:''
         },
         userList:[],
