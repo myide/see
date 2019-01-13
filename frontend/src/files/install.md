@@ -292,7 +292,20 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
-### 9 对接统一认证系统
+### 9 邮件设置
+打开文件 /usr/local/seevenv/see-master/backend/sqlweb/settings.py,找到以下设置并修改
+```bash
+MAIL = {
+    'smtp_host': 'smtp.163.com',  # 邮件服务器
+    'smtp_port': 25,  # SMTP协议默认端口是25
+    'mail_user': 'sql_see@163.com',  # 邮件用户名
+    'mail_pass': 'see123',  # 授权码
+    'see_addr': 'http://xxx.xxx.xxx.xxx:81',  # see项目访问地址
+}
+
+```
+
+### 10 对接统一认证系统
 ```bash
 需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py,
 修改authenticate的内容为自定义的方法即可。
@@ -301,7 +314,7 @@ chmod +x /usr/local/SOAR/bin/soar
 2. 根据请求接口的结果(成功/失败)，定义authenticate的返回值(True/False)即可
 ```
 
-### 10 启动所有服务
+### 11 启动所有服务
 ```bash
 # mysql  3306端口
 /etc/init.d/mysqld start
