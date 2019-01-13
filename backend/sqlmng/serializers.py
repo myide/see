@@ -20,7 +20,7 @@ class InceptionSerializer(serializers.ModelSerializer):
         steps = instance.workorder.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
-            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
+            updatetime = step.updatetime if step.status != 0 else ''
             group = self.get_step_user_group(step.user)
             data.append(
                 {
