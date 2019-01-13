@@ -56,8 +56,13 @@
 - API文档
     - 各接口生成自动化的API文档，对接外部需求
     
+- 登录
+    - 支持see系统登录
+    - 支持自定义公司统一认证中心(sso)登录
+
 - 通知
     - E-mail邮件推送
+
 - 其他
     - DashBoard数据报表展示
 
@@ -84,9 +89,9 @@
 
 ## 界面展示
 
-- Dashboard审计
+- 邮件提醒
 
-![image](https://github.com/myide/see/blob/master/frontend/src/images/github/dashboard.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/mail.png)
 
 - SQL查询
 
@@ -112,14 +117,17 @@
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/list.png)
 
-- 工单设置
+- 平台设置
 
-![image](https://github.com/myide/see/blob/master/frontend/src/images/github/platsettings.png)
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/plantformsettings.png)
 
 - 用户管理
 
 ![image](https://github.com/myide/see/blob/master/frontend/src/images/github/user.png)
 
+- Dashboard审计
+
+![image](https://github.com/myide/see/blob/master/frontend/src/images/github/dashboard.png)
 
 ## 交流学习
 - QQ群 630791951
