@@ -68,6 +68,7 @@ class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, 
         Inception 变量
     '''
     serializer_class = InceptionVariablesSerializer
+    permission_classes = [IsSuperUser]
     search_fields = ['name']
     source_data = variables
 
