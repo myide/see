@@ -42,6 +42,7 @@ class PromptMixins(object):
     personal_variable_error = '请选择集群和目标数据库'
     get_content_fail = '文件内容为空，无法下载'
     sql_count_exceed = 'SQL条数({}), 已超出限制({})'
+    rules_warning = '请先浏览 流程设置 页面'
 
 class SetEncryptMixins(object):
     parameter = 'password'

@@ -55,6 +55,8 @@ class InceptionCheckView(PromptMixins, ChangeSpecialCharacterMixins, ActionMixin
 
     def check_count(self, request_data):
         sql_settings = SqlSettings.objects.first()
+        if not sql_settings:
+            raise ParseError({self.rules_warning})
         sql_content = request_data.get('sql_content')
         sql_list = sql_content.split(';')
         sql_list_count = len(sql_list) - 1
