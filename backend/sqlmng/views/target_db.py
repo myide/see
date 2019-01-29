@@ -24,7 +24,7 @@ class DbViewSet(BaseView):
             queryset = queryset.filter(env=env)
         return queryset
 
-    @detail_route(methods=['post'])
+    @detail_route(methods=['post'], permission_classes=[])
     def sql_advisor(self, request, *args, **kwargs):
         instance = self.get_object()
         sql = request.data.get('sql')
@@ -32,7 +32,7 @@ class DbViewSet(BaseView):
         self.ret['results'] = res
         return Response(self.ret)
 
-    @detail_route(methods=['post'])
+    @detail_route(methods=['post'], permission_classes=[])
     def sql_soar(self, request, *args, **kwargs):
         instance = self.get_object()
         sql = request.data.get('sql')
