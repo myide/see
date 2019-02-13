@@ -1,10 +1,9 @@
-//import axios from '../libs/http';
-import axios from 'axios'
+import axios from 'axios';
 
 const authUrl = '/api/api-token-auth/';
-const UnifiedAuthUrl = '/api/account/unitaryauth/'
+const unifiedAuthUrl = '/api/account/unitaryauth/';
 
-export function Login(data) {
+export function Login (data) {
     return axios({
         url: authUrl,
         method: 'post',
@@ -12,9 +11,9 @@ export function Login(data) {
     });
 };
 
-export function UnifiedAuth(data) {
+export function UnifiedAuth (data) {
     return axios({
-        url: UnifiedAuthUrl,
+        url: unifiedAuthUrl,
         method: 'post',
         data: data
     });
