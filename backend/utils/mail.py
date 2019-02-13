@@ -1,12 +1,10 @@
-#coding=utf-8
+# coding=utf-8
 import smtplib
 from email.mime.text import MIMEText
 from django.conf import settings
 
 class Mail(object):
-    '''
-        修改邮件配置: sqlweb/settings.py
-    '''
+
     locals().update(settings.MAIL)
 
     @classmethod
@@ -42,12 +40,11 @@ class Mail(object):
         msg['From'] = cls.mail_user
         msg['To'] = ";".join(to_list)
         try:
-            smtp = smtplib.SMTP(cls.smtp_host, cls.smtp_port)
-            smtp.starttls()
-            smtp.login(cls.mail_user, cls.mail_pass)
-            smtp.sendmail(cls.mail_user, to_list, msg.as_string())
-            smtp.quit()
-            return True
+            server = smtplib.SMTP(cls.smtp_host, cls.smtp_port, timeout=cls.timeout)
+            server.starttls()
         except Exception as e:
             print(e)
-            return False
+            server = smtplib.SMTP_SSL(cls.smtp_host, cls.smtp_port, timeout=cls.timeout)
+        server.login(cls.mail_user, cls.mail_pass)
+        server.sendmail(cls.mail_user, to_list, msg.as_string())
+        server.quit()

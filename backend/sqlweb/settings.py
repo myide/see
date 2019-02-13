@@ -15,19 +15,6 @@ pymysql.install_as_MySQLdb()
 import os
 import datetime
 
-# CELERY
-import djcelery
-from celery import Celery, platforms
-platforms.C_FORCE_ROOT = True
-djcelery.setup_loader()
-BROKER_URL = 'redis://127.0.0.1:6379/0'  # redis broker
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'  # redis backend
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/Los_Angeles'
-CELERY_ENABLE_UTC = True
-CELERY_IMPORTS = ("utils.tasks",)
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -221,23 +208,24 @@ MEDIA = {
     'sql_file_path': 'files/download/sql/handle_result/'
 }
 
-# inception settings
+# inception
 INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 
-#optimize设置
+#optimize
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
     'soar_cli': '/usr/local/SOAR/bin/soar'
 }
 
-# 邮件设置
+# 邮件
 MAIL = {
     'smtp_host': 'smtp.163.com',  # 邮件服务器
-    'smtp_port': 25,  # SMTP协议默认端口是25
+    'smtp_port': 465,  # SMTP协议默认端口是25
     'mail_user': 'sql_see@163.com',  # 邮件用户名
     'mail_pass': 'see123',  # 授权码
+    'timeout': 10,  # 超时时间, 单位:秒
     'see_addr': 'http://xxx.xxx.xxx.xxx:81',  # see项目访问地址
 }
 
@@ -252,16 +240,33 @@ USE_I18N = True
 
 USE_L10N = True
 
+USE_TZ = False
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
 
+# CELERY
+import djcelery
+from celery import platforms
+from celery.schedules import crontab
+platforms.C_FORCE_ROOT = True
+djcelery.setup_loader()
+BROKER_URL = 'redis://127.0.0.1:6379/0'  # redis broker
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'  # redis backend
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+CELERY_IMPORTS = ('utils.tasks')
+
+# LOG
 BASE_LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': False, 
     'formatters': {
         'standard': {
             'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
@@ -316,7 +321,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['default', 'console', 'error'],
+            'handlers': ['default', 'console', 'error'], 
             'level': 'DEBUG',
             'propagate': True,
         },
