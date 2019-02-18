@@ -45,5 +45,5 @@ def cron_task():
     cron_user, _ = User.objects.get_or_create(username=username)
     for instance in crontab_tasks:
         step_admin = HandleAction(instance).steps[1]
-        if step_admin.status == 1:  # admin 通过的
+        if step_admin.status == 1:
             task_worker.delay(instance.id, 3, action_type, cron_user.id)

@@ -50,7 +50,7 @@ class Inception(object):
             result = "Mysql Error {}: {}".format(e.args[0], e.args[1])
         return {'result': result, 'status': status}
 
-    def manual(self):  # 查询回滚库/表
+    def manual(self):
         conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
         conn.autocommit(True)
         cur = conn.cursor()
@@ -88,7 +88,7 @@ class SqlQuery(object):
         self.soar_cli = settings.OPTIMIZE_SETTINGS.get('soar_cli')
         self.sqladvisor_cli = settings.OPTIMIZE_SETTINGS.get('sqladvisor_cli')
 
-    def main(self, sql):   # 查询目标库/表结构
+    def main(self, sql): 
         try:
             conn = pymysql.connect(host=self.db.host, port=int(self.db.port), user=self.db.user, passwd=self.password, db=self.db.name, charset='utf8')
             conn.autocommit(True)

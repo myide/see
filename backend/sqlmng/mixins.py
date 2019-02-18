@@ -197,13 +197,13 @@ class ActionMixins(PromptMixins, AppellationMixins):
     def handle_workflow(self, call_type, status, step_number, instance=None):
         instance = instance or self.get_object()
         if self.has_flow(instance):
-            if call_type == 1:  # 1 审批类的, 2 执行, 3 放弃
+            if call_type == 1:
                 self.check_approve_status(instance)
                 if status == 1:
                     self.save_instance(instance.workorder, True)
             step_instance = instance.workorder.step_set.order_by('id')[step_number]
             self.save_instance(step_instance, status)
-            if call_type == 3:  # 放弃工单，需要把当前step以后的step置为终止状态（-1）
+            if call_type == 3:
                 steps = instance.workorder.step_set.all()
                 steps_behind = steps.filter(id__gt=step_instance.id)
                 for step in steps_behind:
