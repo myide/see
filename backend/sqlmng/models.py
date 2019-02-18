@@ -30,13 +30,16 @@ class Dbconf(Basemodel):
 
 class Inceptsql(Basemodel):
     STATUS = (
-        (-4, u'回滚失败'),
-        (-3, u'已回滚'),
+        (-3, u'回滚成功'),
         (-2, u'已暂停'),
         (-1, u'待执行'),
         (0, u'执行成功'),
         (1, u'已放弃'),
-        (2, u'任务失败'),
+        (2, u'任务异常'),
+        (3, u'审批通过'),
+        (4, u'审批驳回'),
+        (5, u'已定时'),
+        (6, u'执行中')
     )
     ENVS = (
         ('prd', u'生产环境'),
@@ -54,12 +57,13 @@ class Inceptsql(Basemodel):
     treater = models.CharField(max_length=64)
     status = models.IntegerField(default=-1, choices=STATUS)
     execute_errors = models.TextField(default='', null=True, blank=True)
-    #execute_time = models.CharField(max_length = 11)
-    exe_affected_rows = models.CharField(max_length=10, null=True, blank=True)
-    roll_affected_rows = models.CharField(max_length=10, null=True, blank=True)
+    execute_time = models.CharField(max_length = 32, null=True, blank=True)
+    rollback_time = models.CharField(max_length = 32, null=True, blank=True)
+    affected_rows = models.CharField(max_length=16, null=True, blank=True)
     rollback_opid = models.TextField(null=True, blank=True)
-    rollback_db = models.CharField(max_length=100, null=True, blank=True)
+    rollback_db = models.CharField(max_length=128, null=True, blank=True)
     rollback_able = models.BooleanField(default=False, verbose_name='可回滚')
+    cron_time = models.CharField(max_length=64, null=True, blank=True)
     handle_result = models.TextField(default='', null=True, blank=True, verbose_name='处理详情')
     handle_result_check = models.TextField(default='', null=True, blank=True, verbose_name='审核详情')
     handle_result_execute = models.TextField(default='', null=True, blank=True, verbose_name='执行详情')
@@ -90,6 +94,7 @@ class AuthRules(Basemodel):
     role = models.CharField(max_length=32, choices=ROLES)
     env = models.CharField(max_length=8, choices=ENVS)
     reject = models.BooleanField()
+    cron = models.BooleanField()
     execute = models.BooleanField()
     rollback = models.BooleanField()
     approve = models.BooleanField()
@@ -104,7 +109,7 @@ class InceptionVariables(Basemodel):
 
 class InceptionConnection(Basemodel):
     host = models.CharField(max_length=64, null=True, blank=True, default='127.0.0.1')
-    port = models.CharField(max_length=6, null=True, blank=True, default=6669)
+    port = models.CharField(max_length=5, null=True, blank=True, default=6669)
 
 class MailActions(Basemodel):
     value = models.BooleanField(default=False, verbose_name='是否发送')

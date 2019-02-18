@@ -9,11 +9,11 @@ class AppellationMixins(object):
     env_prd = 'prd'
 
     action_desc_map = {
-        'execute': '代执行',
-        'reject': '代放弃',
-        'rollback': '代回滚',
-        'approve':'代审批通过',
-        'disapprove': '代审批驳回',
+        'execute': ' 代执行',
+        'reject': ' 代放弃',
+        'rollback': ' 代回滚',
+        'approve':' 代审批通过',
+        'disapprove': ' 代审批驳回',
     }
 
     reject_steps = {
@@ -28,12 +28,12 @@ class PromptMixins(object):
     exception_sqls = 'SQL语法错误 '
     not_exists_group = '用户的组不存在 '
     executed = 'SQL已执行过'
-    approve_warning = '此工单无需重复审批'
+    approve_warning = '无法重复审批'
     reject_warning = '该工单当前的流转状态不在您这里，无法放弃'
     require_handleable = '该工单未审批通过，无法操作'
     require_different = '执行人和审批人相同，无法操作'
     require_same = '您不是该工单的审批人，无法审批'
-    type_warning = '回滚类型错误(SELECT)'
+    type_warning = 'SELECT语句无法回滚'
     old_password_warning = '旧密码错误'
     new_rep_password_warning = '重复密码错误'
     not_exists_target_db = '目标数据库不存在'
@@ -43,6 +43,11 @@ class PromptMixins(object):
     get_content_fail = '文件内容为空，无法下载'
     sql_count_exceed = 'SQL条数({}), 已超出限制({})'
     rules_warning = '请先浏览 流程设置 页面'
+    select_count_warning = '无法查询多条语句'
+    action_status_warning_execute = '无法重复执行'
+    action_status_warning_rollback = '无法重复回滚'
+    invalid_date_warning = '错误的日期格式({})'
+    task_locked = '该任务已锁定(工单ID:{})'
 
 class SetEncryptMixins(object):
     parameter = 'password'

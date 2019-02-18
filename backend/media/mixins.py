@@ -42,7 +42,7 @@ class DownloadBaseView(PromptMixins, RenderFile, APIView):
     def check_content(self):
         content = self.get_content()
         if not content:
-            raise ParseError({self.get_content_fail})
+            raise ParseError(self.get_content_fail)
         return content
 
     def get(self, request, *args, **kwargs):

@@ -7,7 +7,7 @@ from utils.basemixins import PromptMixins
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
 from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
-from sqlmng.data import variables, mail_actions, sql_settings
+from sqlmng.data import *
 from sqlmng.serializers import *
 from sqlmng.models import *
 
@@ -45,15 +45,9 @@ class PersonalSettingsViewSet(PromptMixins, BaseView):
         return cluster, dbs, env
 
     def create(self, request, *args, **kwargs):
-        # save user
-        request_data = request.data
-        cluster, dbs, env = self.check_data(request_data)
+        cluster, dbs, env = self.check_data(request.data)
         user = request.user
-        data = {
-            'leader': request_data.get('leader'),
-            'admin_mail': request_data.get('admin_mail')
-        }
-        user_serializer = self.serializer_class(user, data=data)
+        user_serializer = self.serializer_class(user, data=request.data)
         user_serializer.is_valid()
         user_serializer.save()
         alter_qs = user.dbconf_set.filter(cluster=cluster, env=env)
