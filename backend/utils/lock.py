@@ -23,11 +23,11 @@ class RedisLock(object):
     @classmethod
     def locked(cls, key):
         now = int(time.time())
-        if cls.set_lock(key, now):  # 加锁成功
+        if cls.set_lock(key, now):
             return True
         else:
             lock_time = cls.redis_client.get(key)
-            if now > int(lock_time) + cls.timeout:  # （比较当前时间和锁的时间）如果已过期，释放锁
+            if now > int(lock_time) + cls.timeout:
                 cls.delete_lock(key)
-                return cls.set_lock(key, now)  # 重新加锁
+                return cls.set_lock(key, now)
             return False
