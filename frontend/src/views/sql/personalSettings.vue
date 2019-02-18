@@ -38,6 +38,9 @@
                   <Option v-for="item in adminList" :value="item.id" :key="item.id">{{ item.username }}</Option>
                 </Select>
               </FormItem>
+              <FormItem label="邮件扩展" v-if="showLeader">
+                <Input v-model="personalSettings.mail_list_extend" type="textarea" :rows="3" placeholder="其它需要收件的邮箱地址，多个以空格分隔" />
+              </FormItem>
               <FormItem label="操作">
                 <Button type="primary" @click='handleCreatePersonalSettings'>保存</Button>
               </FormItem>
@@ -99,7 +102,8 @@
         personalSettings:{
           dbs:[],  // id list
           leader:null,  // id
-          admin_mail:null
+          admin_mail:null,
+          mail_list_extend:''
         },
       }
     },
@@ -163,6 +167,7 @@
             if (this.queryParams.env == 'prd') {
               this.personalSettings.leader = this.getLeaderID(data.leader)
               this.personalSettings.admin_mail = data.admin_mail
+              this.personalSettings.mail_list_extend = data.mail_list_extend
             }
           }
         )

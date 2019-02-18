@@ -54,7 +54,8 @@
             <p> <b>环境：</b> </p>
           </Col>
           <Col span="10">
-            <p> {{row.env}} </p>
+            <Tag v-if="row.env == 'prd'" type="border" color="orange">生产</Tag>
+            <Tag v-if="row.env == 'test'" type="border" color="gray">测试</Tag>
           </Col>
           <Col span="2">
             <p> <b>工单状态：</b>  </p>
@@ -64,9 +65,12 @@
             <p v-if="row.status == -3" > <Tag>已回滚</Tag> </p>
             <p v-else-if="row.status == -2" > <Tag>已暂停</Tag> </p>
             <p v-else-if="row.status == -1" > <Tag color="blue">待执行</Tag> </p>
-            <p v-else-if="row.status == 0" > <Tag color="green">成功</Tag> </p>
+            <p v-else-if="row.status == 0" > <Tag color="green">执行成功</Tag> </p>
             <p v-else-if="row.status == 1" > <Tag color="yellow">已放弃</Tag> </p>
-            <p v-else-if="row.status == 2" > <Tag color="red">任务失败</Tag> </p>
+            <p v-else-if="row.status == 2" > <Tag color="red">任务异常</Tag> </p>
+            <p v-else-if="row.status == 3" > <Tag color="blue">审批通过</Tag> </p>
+            <p v-else-if="row.status == 4" > <Tag color="yellow">审批驳回</Tag> </p>
+            <p v-else-if="row.status == 5" > <Tag color="blue">已定时</Tag> </p>
           </Col>
         </Row>
         <Row>
