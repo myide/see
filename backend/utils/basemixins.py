@@ -9,6 +9,7 @@ class AppellationMixins(object):
     env_prd = 'prd'
 
     action_desc_map = {
+        'select': ' 代执行',
         'execute': ' 代执行',
         'reject': ' 代放弃',
         'rollback': ' 代回滚',
