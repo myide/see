@@ -276,7 +276,7 @@ CELERYBEAT_SCHEDULE = {
 }
 CELERY_BUSINESS_PARAMS = {
     'username':'定时处理器',
-    'action_type': 'execute',
+    'handle_type': 'execute',
     'date_format': '%Y-%m-%d %H:%M'
 }
 

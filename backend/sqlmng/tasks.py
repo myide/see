@@ -46,4 +46,5 @@ def cron_task():
     for instance in crontab_tasks:
         step_admin = HandleAction(instance).steps[1]
         if step_admin.status == 1:
-            task_worker.delay(instance.id, 3, action_type, cron_user.id)
+            handle_type = instance.type or handle_type
+            task_worker.delay(instance.id, 3, handle_type, cron_user.id)
