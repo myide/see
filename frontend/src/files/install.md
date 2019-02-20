@@ -329,6 +329,7 @@ redis-server /etc/redis.conf
 /usr/local/nginx/sbin/nginx
 
 # see  8090端口
+source /usr/local/seevenv/bin/activate
 cd /usr/local/seevenv/see-master/backend
 nohup python manage.py celery worker -c 10 -B --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
