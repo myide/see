@@ -139,6 +139,7 @@
       },
 
       handleInitData () {
+        this.handleSelect()
         this.handleGetClusterList()
         this.handleGetPersonalSettings()
       },

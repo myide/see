@@ -32,11 +32,12 @@
                 操作
                 <Icon type="arrow-down-b"></Icon>
               </Button>
-              <DropdownMenu v-if="row.status == -1"  slot="list">
+              <DropdownMenu v-if="row.status == -1 || row.status == 3 || row.status == 4 || row.status == 5"  slot="list">
                 <DropdownItem name='execute'>执行</DropdownItem>
                 <DropdownItem name='reject'>放弃</DropdownItem>
                 <DropdownItem name='approve' v-if="showItem">审批通过</DropdownItem>
                 <DropdownItem name='disapprove' v-if="showItem">审批驳回</DropdownItem>
+                <DropdownItem name='cron'>定时执行</DropdownItem>
               </DropdownMenu>
               <DropdownMenu v-else-if="row.status == 0"  slot="list">
                 <DropdownItem name='rollback'>回滚</DropdownItem>
@@ -77,13 +78,36 @@
         </div>
     </Modal>  
 
+    <Modal
+        v-model="cronForm.modal"
+        width="600"
+        :title="cronForm.title"
+        @on-ok="handleSetCron"
+        @on-cancel="cancel">
+        <div>
+          <Form ref="cronForm" :model="cronForm" :rules="ruleCronForm" :label-width="100">
+            <FormItem label="工单ID:">
+              <div>{{cronForm.id}}</div>
+            </FormItem>
+            <FormItem label="定时时刻:" prop="time">
+              <DatePicker type="date" placeholder="选择日期" style="width: 200px" v-model="cronForm.date"></DatePicker>
+              <TimePicker format="HH:mm" placeholder="选择时间" style="width: 112px" v-model="cronForm.time"></TimePicker>
+            </FormItem>
+            <FormItem label="说明:">
+              <div>管理员可以对审批通过的工单设置定时，到时间将自动执行</div>
+            </FormItem>                
+          </Form> 
+        </div>
+    </Modal>
+
   </div>
 </template>
 
 <script>
     import {GetSuggestionList} from '@/api/sql/suggestion'
-    import {GetSqlDetail, SqlAction} from '@/api/sql/inception'
+    import {GetSqlDetail, SqlAction, SetCron} from '@/api/sql/inception'
     import {getSqlContent, handleBadgeData} from '@/utils/sql/inception'
+    import {formatDate} from '@/utils/base/date'
     import copyRight from '../my-components/public/copyright'
     import baseInfo from './components/baseInfo'
     import sqlContentInfo from './components/sqlContentInfo'
@@ -144,8 +168,20 @@
             reject: {name: '放弃'},
             rollback: {name: '回滚'},
             approve: {name: '审批通过'},
-            disapprove: {name: '审批驳回'}
-          }
+            disapprove: {name: '审批驳回'},
+            cron: {name: '定时执行'}
+          },
+          cronForm:{
+            modal:false,
+            title:'设置定时',
+            id:null,
+            date:'',
+            time:'',
+          },
+          ruleCronForm: {
+            time: [{ required: true, message: '时间不能为空', trigger: 'blur' }],          
+          },
+
         }
       },
 
@@ -153,9 +189,14 @@
         this.handleGetSqlDetail()
       },
 
+      destroyed () {
+        clearInterval(this.intervalTask),function() {  // 停止定时任务
+    　　	qy();
+    　　}　
+      },
       computed: {
         showBtn: function () {
-          if (this.row.status == -4 || this.row.status == -3 || this.row.status == 1 || (this.row.type == 'select' && this.row.status == 0 ) || this.row.rollback_able == 0 ) {
+          if (this.row.status == -3 || this.row.status == 1 || (this.row.type == 'select' && this.row.status == 0 ) ) {
             return false
           } else {
             return true
@@ -163,7 +204,8 @@
         }, 
         showItem: function () {
           const row = this.row
-          if (row.is_manual_review == true && row.env == 'prd' && row.status != -2 && row.handleable == false) {
+          //if (row.is_manual_review == true && row.env == 'prd' && row.status != -2 && row.handleable == false) {
+          if (row.is_manual_review == true) {
             return true
           } else {
             return false
@@ -199,7 +241,6 @@
         getColor(status){
           return this.stepStatusMap[status]['color']
         },
-
         is_has_flow (row) {
           const env = row.env
           const is_manual_review = row.is_manual_review
@@ -220,7 +261,17 @@
             }
           )
         },
-
+        alertCronSet (paramId, cron_time) {
+          this.$Notice.success({
+            title: '设置成功',
+            render: h => {
+              let id = h('p', {}, 'ID：' + paramId) 
+              let time = cron_time ? h('p', {}, '定时执行时间：' + cron_time) : ''
+              let subtags = [id, time]
+              return h('div', subtags)
+            }
+          });
+        },
         alertSuccess (title, sqlid, execute_time, affected_rows) {
           this.$Notice.success({
             title: title,
@@ -233,7 +284,6 @@
             }
           });
         },
-
         alertWarning (title, paramId) {
           this.$Notice.warning({
             title: title,
@@ -247,13 +297,32 @@
           });
         },
 
+        initCron () {
+          this.cronForm.modal = true
+          this.cronForm.id = this.row.id
+          let cron_time = this.row.cron_time
+          let date = ''
+          let time = ''
+          if (cron_time) {
+            let date_time = cron_time.split(' ')
+            date = date_time[0]
+            time = date_time[1]
+          }
+          this.cronForm.date = date
+          this.cronForm.time = time
+        },
+
         showAction (name) {
+          console.log(name)
+          if (name == 'cron') {
+            this.initCron()
+            return
+          }
           this.modalAction.id = this.row.id
           this.modalAction.action = name
           this.modalAction.show = true
           this.modalAction.content = this.descMap[name].name + ' 工单?'
         },
-
         getStepData () {
           if (this.is_has_flow(this.row) == false ) {
             return false
@@ -266,7 +335,6 @@
             if (statusCode != 0 && statusCode != -1) {
               current += 1
             }
-
             const desc = ' [' + this.stepStatusMap[statusCode]['desc'] + '] '
             const dateTime = item.updatetime.split('.')[0].replace('T',' ')
             this.stepList.push(
@@ -280,8 +348,7 @@
           let currentStatus = this.steps[current].status 
           this.stepCurrentStatus = this.stepStatusMap[currentStatus]['stepStatus']  // 数字转换成组件状态
         },
-
-        parseHandleResult(handle_result){
+        parseHandleResult (handle_result){
           if (handle_result == "") {
             return
           }
@@ -297,7 +364,6 @@
           }
           return ret
         },
-
         handleAction () {
           let id = this.modalAction.id
           let action = this.modalAction.action
@@ -305,21 +371,51 @@
           .then(response => {
             const status = response.data.status
             const data = response.data.data
-            if (status == 0) {
+            this.qy(response.data.id, action)
+          })
+        },
+
+        qy (id, action){
+          let that = this;
+          that.intervalTask = setInterval (function () {  // 定时任务，每秒1次
+            that.querytask(id, action)
+          }, 1000)
+        },
+        querytask (id, action) {
+          GetSqlDetail(id)
+          .then(response => {
+            console.log(response)
+            let status = response.data.status
+            let id = response.data.id
+            let execute_time = response.data.execute_time
+            let affected_rows = response.data.affected_rows
+            if (status != 6) {  // 停止的条件
+              clearInterval(this.intervalTask),function() {  // 停止定时任务
+      　　		   qy();
+      　　		 }
               if (action == 'execute') {
-                this.alertSuccess('执行成功', id, data.execute_time, data.affected_rows)
+                if (status == 0) {
+                  this.alertSuccess('执行成功', id, execute_time, affected_rows)
+                } else {
+                  this.alertWarning('任务异常', id)
+                }
               } else if (action == 'rollback') {
-                this.alertSuccess('回滚成功', id, '', data.affected_rows)
+                if (status == -3) {
+                  this.alertSuccess('回滚成功', id, execute_time, affected_rows)
+                } else {
+                  this.alertWarning('任务异常', id)
+                }
               } else if (action == 'approve') {
-                this.alertSuccess('审批通过', id, '', '')
+                if (status == 3) {
+                  this.alertSuccess('审批通过', id, '')
+                }
               } else if (action == 'disapprove') {
-                this.alertSuccess('审批驳回', id, '', '')
-              } 
+                if (status == 4) {
+                  this.alertSuccess('审批驳回', id, '')
+                }
+              }
               this.handleGetSqlDetail()
-            } else {
-              let msg = response.data.msg
-              this.alertWarning('任务失败', id)
-            } 
+            }
           })
         },
 
@@ -338,6 +434,21 @@
             this.flag = true
           })
         },
+        handleSetCron () {
+          let cron_time = formatDate(this.cronForm.date) + ' ' + this.cronForm.time
+          let data = {cron_time:cron_time}
+          let id = this.cronForm.id
+          let action = 'cron'
+          console.log(11111)
+          SetCron(id, action, data)
+          .then(response => {
+            const status = response.status
+            if (status == 200) {
+              this.alertCronSet(id, data.cron_time)
+            }
+            this.handleGetSqlList()
+          })
+        }
 
       }
     }    

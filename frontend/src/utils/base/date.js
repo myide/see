@@ -23,3 +23,7 @@ export function formatDate (date) {
     day = convertNumber(day);
     return year + '-' + month + '-' + day;
 }
+
+export function formatTime (time) {
+    return time.split('.')[0].replace('T',' ')
+}

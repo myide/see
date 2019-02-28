@@ -229,11 +229,12 @@
           {
               title: '端口',
               key: 'port',
-              width: 100
+              width: 80
           },
           {
               title: '用户名',
               key: 'user',
+              width: 120
           },
           {
             title: '环境',

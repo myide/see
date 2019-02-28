@@ -2,6 +2,7 @@ import axios from '../../libs/http';
 
 const dbConfs = '/api/sqlmng/dbconfs/';
 const checkConnUrl = '/api/sqlmng/inception/conncheck/'
+const GetDatabasesUrl = '/api/sqlmng/inception/showdatabases/'
 
 export function GetDbList(params) {
     return axios({
@@ -41,3 +42,12 @@ export function CheckConn(data) {
         data: data
     });
 }
+
+export function GetDatabases(data) {
+    return axios({
+        url: GetDatabasesUrl,
+        method: 'post',
+        data: data
+    });
+}
+

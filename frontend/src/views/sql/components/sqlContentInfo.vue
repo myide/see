@@ -23,5 +23,3 @@ export default {
   props: ['sqlContent'],
 }
 </script>
-
-

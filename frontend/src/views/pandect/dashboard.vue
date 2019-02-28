@@ -195,7 +195,7 @@ export default {
                         } else if (status == 1) {
                             return h('div', [h(Tag,{props:{color:'yellow'}}, '已放弃')])
                         } else if (status == 2) {
-                            return h('div', [h(Tag,{props:{color:'red'}}, '执行失败')])
+                            return h('div', [h(Tag,{props:{color:'red'}}, '任务异常')])
                         }
                     }
                 },

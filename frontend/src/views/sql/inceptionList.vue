@@ -251,11 +251,15 @@
             render: (h, params) => {
               let status = params.row.status
               if (status == -3) {
-                return h('div', [h(Tag,{props:{}}, '已回滚')])
+                return h('div', [h(Tag,{props:{}}, '回滚成功')])
               } else if (status == -2) {
                 return h('div', [h(Tag,{props:{}}, '已暂停')])
               } else if (status == -1) {
-                return h('div', [h(Tag,{props:{color:'blue'}}, '待执行')])
+                let tag = '待执行'
+                if (params.row.is_manual_review == true) {
+                  tag = '待审批'
+                }
+                return h('div', [h(Tag,{props:{color:'blue'}}, tag)])
               } else if (status == 0) {
                 return h('div', [h(Tag,{props:{color:'green'}}, '执行成功')])
               } else if (status == 1) {
@@ -282,7 +286,6 @@
               const status = params.row.status
               const rollbackable = params.row.rollback_able
               const type = params.row.type
-              const handleable = params.row.handleable
               const is_manual_review = params.row.is_manual_review
               let popcss = {
                 width:170,
@@ -292,16 +295,16 @@
                 var ddItem = [ 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'执行 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('execute', params)} } }, [h(DropdownItem, {}, '执行')] ) ]) , 
                   h('div' , {}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'放弃 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('reject', params)} } }, [h(DropdownItem, {}, '放弃')] ) ]),
-                  h('div' , {style:{display: is_manual_review == false || handleable == true  || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
-                  h('div' , {style:{display: is_manual_review == false || handleable == true  || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
-                  h('div' , {style:{display: is_manual_review == false || handleable == true  || status == -2 ? 'none' : 'display'}}, [h(Button, {props: {type: 'default',size: 'small'},style: {marginRight: '12px'},on: {click: () => {this.initCron(params.row) }}}, [h(DropdownItem, {}, '定时执行')] )]),
+                  h('div' , {style:{display: is_manual_review == false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批通过 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('approve', params)} } }, [h(DropdownItem, {}, '审批通过')] ) ]),
+                  h('div' , {style:{display: is_manual_review == false || status == -2 ? 'none' : 'display'}}, [h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.place, transfer:true, title:'审批驳回 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('disapprove', params)} } }, [h(DropdownItem, {}, '审批驳回')] ) ]),
+                  h('div' , {}, [h(Button, {props: {type: 'default',size: 'small'},style: {marginRight: '12px'},on: {click: () => {this.initCron(params.row) }}}, [h(DropdownItem, {}, '定时执行')] )]),
                 ]
               } else if (status == 0){
                 var ddItem = [ h(Poptip,{props:{confirm:true, placement:popcss.place, width:popcss.width, transfer:true, title:'回滚 工单(' + id + ') ？'}, on:{'on-ok': () => {this.handleAction('rollback', params)} } }, [h(DropdownItem, {}, '回滚')] ) ]
               } else {
                 var ddItem = []
               }
-              return h('div', {style:{display: status == -3 || status == 1 || (status == 0 && type == 'select') || (status == 0 && rollbackable == 0) ? 'none' : 'display'}}, [
+              return h('div', {style:{display: status == -3 || status == 1 || status == 2 || (status == 0 && type == 'select') || (status == 0 && rollbackable == 0) ? 'none' : 'display'}}, [
                 h(Dropdown,
                 {
                   style: {marginLeft: '20px'},
@@ -351,8 +354,8 @@
         this.$Notice.success({
           title: '设置成功',
           render: h => {
-            let id = h('div', {}, 'ID：' + paramId) 
-            let time = cron_time ? h('div', {}, '定时执行时间：' + cron_time) : ''
+            let id = h('p', {}, 'ID：' + paramId) 
+            let time = cron_time ? h('p', {}, '定时执行时间：' + cron_time) : ''
             let subtags = [id, time]
             return h('div', subtags)
           }
@@ -378,7 +381,6 @@
       },
 
       initCron (rows) {
-        console.log(rows)
         this.cronForm.modal = true
         this.cronForm.id = rows.id
         let cron_time = rows.cron_time
@@ -400,8 +402,9 @@
         let action = 'cron'
         SetCron(id, action, data)
         .then(response => {
-          const status = response.data.status
-          if (status == 0) {
+          console.log(response)
+          const status = response.status
+          if (status == 200) {
             this.alertCronSet(id, data.cron_time)
           }
           this.handleGetSqlList()
@@ -429,13 +432,11 @@
       },
 
       qy (id, action){
-        console.log(action)
         let that = this;
         that.intervalTask = setInterval (function () {  // 定时任务，每秒1次
           that.querytask(id, action)
         }, 1000)
       },
-
       querytask (id, action) {
         GetSqlDetail(id)
         .then(response => {
@@ -478,7 +479,6 @@
                 break
               }
             }
-            console.log(this.sqlList)
           }
         })
       },

@@ -27,44 +27,55 @@
     <Spin size="large" fix v-if="spinShow"></Spin>
     <Modal
         v-model="createModal"
-        width="450"
+        width="800"
         title="创建数据库配置"
         @on-ok="handleCreateDb"
         @on-cancel="cancel">
-        <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
-          <FormItem label="所属集群：" prop="cluster">
-            <Select v-model="createDbForm.cluster" filterable>
-              <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="环境：" prop="env">
-            <Select v-model="createDbForm.env">
-              <Option value="prd" >生产</Option>
-              <Option value="test" >测试</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="地址：" prop="host">
-            <Input v-model="createDbForm.host" placeholder="mysql地址"></Input>
-          </FormItem>
-          <FormItem label="端口：" prop="port">
-            <Input v-model="createDbForm.port" placeholder="mysql端口"></Input>
-          </FormItem>
-          <FormItem label="用户名：" prop="user">
-            <Input v-model="createDbForm.user" placeholder="mysql用户名"></Input>
-          </FormItem>
-          <FormItem label="密码：" prop="password">
-            <Input v-model="createDbForm.password" type="password" placeholder="mysql密码"></Input>
-          </FormItem>
-          <FormItem label="库名：" prop="name">
-            <Input v-model="createDbForm.name" placeholder="mysql实际的库名"></Input>
-          </FormItem>
-          <FormItem label="备注：" prop="remark">
-            <Input v-model="createDbForm.remark"></Input>
-          </FormItem>
-          <FormItem label="连接测试">
-              <Button type="info" shape="circle" @click="createCheckConn">连接</Button>
-          </FormItem>             
-        </Form>  
+        <div>
+          <Row>
+            <Col span="12">
+              <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
+                <FormItem label="所属集群：" prop="cluster">
+                  <Select v-model="createDbForm.cluster" filterable>
+                    <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="环境：" prop="env">
+                  <Select v-model="createDbForm.env">
+                    <Option value="prd" >生产</Option>
+                    <Option value="test" >测试</Option>
+                  </Select>
+                </FormItem>
+                <FormItem label="地址：" prop="host">
+                  <Input v-model="createDbForm.host" placeholder="mysql地址"></Input>
+                </FormItem>
+                <FormItem label="端口：" prop="port">
+                  <Input v-model="createDbForm.port" placeholder="mysql端口"></Input>
+                </FormItem>
+                <FormItem label="用户名：" prop="user">
+                  <Input v-model="createDbForm.user" placeholder="mysql用户名"></Input>
+                </FormItem>
+                <FormItem label="密码：" prop="password">
+                  <Input v-model="createDbForm.password" type="password" placeholder="mysql密码"></Input>
+                </FormItem>
+                <FormItem label="获取数据库">
+                  <Button type="info" shape="circle" @click="createCheckConn">连接</Button>
+                </FormItem>             
+              </Form>
+            </Col>
+            
+            <Col span="12">
+              <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
+                <FormItem label="数据库：" prop="cluster">
+                  <Select v-model="databases" filterable multiple :placeholder="selectPlaceholder">
+                    <Option v-for="item in databaseList" :value="item" :key="item">{{ item }}</Option>
+                  </Select>
+                </FormItem>
+              </Form>
+            </Col>
+            
+          </Row>
+        </div>
       </Modal>      
 
     <Modal
@@ -124,7 +135,7 @@
 </template>
 <script>
   import {Button, Table, Modal, Message, Tag} from 'iview';
-  import {GetDbList, UpdateDb, CreateDb, DeleteDb, CheckConn} from '@/api/sql/dbs'
+  import {GetDbList, UpdateDb, CreateDb, DeleteDb, CheckConn, GetDatabases} from '@/api/sql/dbs'
   import {GetClusterList} from '@/api/sql/cluster'
   import copyright from '../my-components/public/copyright'
 
@@ -137,7 +148,10 @@
         createModal: false,
         updateModal: false,
         search: '',
+        selectPlaceholder:'空',
         // 数据库配置数据
+        databaseList:[],
+        databases:[],
         createDbForm: {
           cluster:'',
           env: 'prd',
@@ -175,27 +189,29 @@
         },
         columnsDbList: [
           {
-              title: '数据库名',
-              key: 'name'
+            title: '数据库名',
+            key: 'name'
           },
           {
-              title: '所属集群',
-              render: (h, params) => {
-                const clusterName = params.row.cluster.name
-                return h('div', {}, clusterName)
+            title: '所属集群',
+            render: (h, params) => {
+              const clusterName = params.row.cluster.name
+              return h('div', {}, clusterName)
             }
           },
           {
-              title: '数据库地址',
-              key: 'host'
+            title: '数据库地址',
+            key: 'host'
           },
           {
-              title: '端口',
-              key: 'port'
+            title: '端口',
+            key: 'port',
+            width: 80,
           },
           {
-              title: '用户名',
-              key: 'user'
+            title: '用户名',
+            key: 'user',
+            width: 120,
           },
           {
             title: '环境',
@@ -299,25 +315,33 @@
         this.initData()
       },
 
-      sizeChange(size){
+      sizeChange (size){
         this.getDbParams.pagesize = size
         this.initData()
       },
 
       createCheckConn () {
+        console.log(111)
         this.$refs.createDbForm.validate((valid) => {
           if (!valid) {
             return
           }
+          console.log(222)
           const data = {
-            check_type: 'create_target_db',
-            db: this.createDbForm.name,
+            //check_type: 'create_target_db',
+            //db: this.createDbForm.name,
             host: this.createDbForm.host,
             port: this.createDbForm.port,
             user: this.createDbForm.user,
             password: this.createDbForm.password,
           }
-          this.handleCheckConn(data)
+          GetDatabases(data)
+          .then(
+          res => {
+            console.log(res)
+            this.databaseList = res.data.data
+            this.selectPlaceholder = "请选择"
+          })
         })
       },
 
@@ -358,7 +382,22 @@
           if (!valid) {
             return
           }
-          CreateDb(this.createDbForm)  
+          let data = []
+          for (let dbName of this.databases) {
+            console.log(dbName)
+            //let item = this.createDbForm
+            let item = {}
+            item.name = dbName
+            item.env = this.createDbForm.env
+            item.cluster = this.createDbForm.cluster
+            item.host = this.createDbForm.host
+            item.port = this.createDbForm.port
+            item.user = this.createDbForm.user
+            item.password = this.createDbForm.password            
+            data.push(item)
+          }
+          console.log(data)
+          CreateDb(data)  
           .then(
             res => {
               this.initData()

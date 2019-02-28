@@ -152,11 +152,7 @@
         strategy:{
           id:'',
           is_manual_review:false,
-        },
-        getParams:{
-          page:1,
-          pagesize:10,
-        },
+        }
       }
     },
 
@@ -168,7 +164,6 @@
     },
 
     methods: {
-
       handleCheckAll () {
         if (this.indeterminate) {
           this.checkAll = false;
@@ -182,8 +177,8 @@
           this.actions_checked = [];
         }
       },
-
       checkAllGroupChange (data) {
+        console.log(data)
         if (data.length === this.actions.length) {
           this.indeterminate = false;
           this.checkAll = true;
@@ -195,7 +190,6 @@
           this.checkAll = false;
         }
       },
-
       getActionName() {
         let actions_checked = []
         for (let i in this.actions_checked) {
@@ -204,6 +198,9 @@
             let row = this.res[j]
             if (row.desc_cn == item) {
               actions_checked.push(row.name)
+              if (row.desc_cn == '执行') {
+                actions_checked.push('select')
+              }
               break
             }
           }
@@ -212,7 +209,7 @@
       },
 
       handleGetMailActions() {
-        GetMailActions(this.getParams)
+        GetMailActions({pagesize:1000})
         .then(
           response => {
             this.res = response.data.results
@@ -247,7 +244,6 @@
           desc: msg
         });
       },
-
       handleNotice (response) {
         let httpstatus = response.status
         if (httpstatus == 200 || httpstatus == 201) {
@@ -265,7 +261,6 @@
         this.readonly = true
         this.handleWriteFW()
       },
-
       handleGetStrategyList () {
         GetStrategyList({})
         .then(
@@ -278,7 +273,6 @@
           }
         )
       },
-
       handleWriteStrategy () {
         const id = this.strategy.id 
         const data = this.strategy
@@ -300,7 +294,6 @@
           )
         }
       },
-
       handleGetFWList () {
         GetFWList({})
         .then(
