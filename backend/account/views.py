@@ -79,6 +79,7 @@ class PersonalCenterViewSet(PromptMixins, BaseView):
         instance.save()
         return Response(ret)
 
+#class UnitaryAuthView(UnitaryAuth, CreateModelMixin, GenericViewSet):
 class UnitaryAuthView(UnitaryAuth, APIView):
     '''
         接入统一登录

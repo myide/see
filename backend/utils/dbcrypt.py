@@ -1,8 +1,6 @@
 #coding=utf-8
 from cryptography.fernet import Fernet
 
-##  key = base64.urlsafe_b64encode(os.urandom(32))  生成key
-
 class prpcrypt:
 
     key = 'P30cMRRBa9kF3YNYpeKNmlUquLsX6ssOuBdy4yZe8wU='

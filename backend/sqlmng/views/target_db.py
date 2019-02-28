@@ -1,16 +1,18 @@
 #coding=utf8
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from rest_framework_bulk.drf3.mixins import BulkCreateModelMixin
 from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import SqlQuery
 from utils.permissions import IsSuperUser
+from sqlmng.mixins import CheckStatusMixins, ActionMixins, MailMixin
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class DbViewSet(BaseView):
+class DbViewSet(BulkCreateModelMixin, BaseView):
     '''
-        目标数据库的CURD
+        目标数据库CURD
     '''
     serializer_class = DbSerializer
     permission_classes = [IsSuperUser]
@@ -55,3 +57,57 @@ class DbViewSet(BaseView):
         table_info = SqlQuery(instance).get_table_info(table_name)
         self.ret['results'] = table_info
         return Response(self.ret)
+
+class DbWorkOrderViewSet(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
+    '''
+        数据库工单CURD
+    '''
+    serializer_class = DbWorkOrderSerializer
+    permission_classes = []
+    search_fields = ['name','remark']
+
+    def get_queryset(self):
+        queryset = DatabaseWorkOrder.objects.all()
+        user = self.request.user
+        if not user.is_superuser:
+            queryset = queryset.filter(commiter=user)
+        return queryset
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        self.handle_mail(self.db_order_apply, instance)
+
+    def perform_update(self, serializer):
+        if self.get_object().status:
+            raise ParseError(self.not_edit_status)
+        serializer.save()
+
+    def handle_mail(self, db_order_type, instance=None):
+        instance = instance or self.get_object()
+        self.mail(instance, db_order_type, self.request.user, self.name_mail_db_order)
+
+    def handle_order(self):
+        instance = self.get_object()
+        self.check_status(instance)
+        serializer = self.get_serializer(instance, data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
+
+    @detail_route(methods=['post'], permission_classes=[IsSuperUser])
+    def database_order_approve(self, request, *args, **kwargs):
+        serializer = self.handle_order()
+        self.handle_mail(self.db_order_approve)
+        return Response(serializer.data)
+
+    @detail_route(methods=['post'], permission_classes=[IsSuperUser])
+    def database_order_disapprove(self, request, *args, **kwargs):
+        serializer = self.handle_order()
+        self.handle_mail(self.db_order_disapprove)
+        return Response(serializer.data)
+
+    @detail_route(methods=['post'], permission_classes=[])
+    def database_order_reject(self, request, *args, **kwargs):
+        serializer = self.handle_order()
+        self.handle_mail(self.db_order_reject)
+        return Response(serializer.data)

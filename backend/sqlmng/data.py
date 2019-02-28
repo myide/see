@@ -381,12 +381,16 @@ mail_actions = [
         'desc_cn':'执行'
 	},
 	{
+		'name': 'select',
+        'desc_cn':'查询'
+	},
+	{
 		'name': 'approve',
         'desc_cn':'审批通过'
 	},
 	{
 		'name': 'disapprove',
-        'desc_cn':'审批拒绝'
+        'desc_cn':'审批驳回'
 	},
 	{
 		'name': 'reject',
@@ -396,6 +400,22 @@ mail_actions = [
 		'name': 'rollback',
         'desc_cn':'回滚'
 	},
+	{
+		'name': 'db_order_apply',
+        'desc_cn':'申请数据库工单'
+	},
+	{
+		'name': 'db_order_approve',
+        'desc_cn':'审核数据库工单'
+	},
+	{
+		'name': 'db_order_disapprove',
+        'desc_cn':'驳回数据库工单'
+	},
+	{
+		'name': 'db_order_reject',
+        'desc_cn':'放弃数据库工单'
+	}
 ]
 
 inception_conn = [

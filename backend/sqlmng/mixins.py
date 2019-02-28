@@ -1,5 +1,6 @@
 #coding=utf8
 import re
+import copy
 import time
 import json
 import subprocess
@@ -7,11 +8,11 @@ import configparser
 from rest_framework.exceptions import ParseError
 from django.conf import settings
 from utils.tasks import send_mail
-from utils.basemixins import AppellationMixins, PromptMixins
+from utils.basemixins import HttpMixins, AppellationMixins, PromptMixins
 from utils.dbcrypt import prpcrypt
 from utils.basecomponent import DateEncoder
 from utils.baseviews import ReturnFormatMixin as res
-from utils.sqltools import Inception, SqlQuery
+from utils.sqltools import Inception, SqlQuery, AutoQuery
 from utils.lock import RedisLock
 from utils.wrappers import timer
 from .data import inception_conn
@@ -31,7 +32,6 @@ class FixedDataMixins(object):
         return queryset
 
 class ChangeSpecialCharacterMixins(object):
-
     special_character_list = ['*']
     transference_character = '\\'
 
@@ -39,10 +39,9 @@ class ChangeSpecialCharacterMixins(object):
         forbidden_words_list = forbidden_words.split()
         forbidden_list = []
         for word in forbidden_words_list:
-            if word:
-                if word in self.special_character_list:
-                    word = '{}{}'.format(self.transference_character, word)
-                forbidden_list.append(word)
+            if word and word in self.special_character_list:
+                word = '{}{}'.format(self.transference_character, word)
+            forbidden_list.append(word)
         return forbidden_list
 
     def reverse(self, forbidden_list):
@@ -56,7 +55,6 @@ class ChangeSpecialCharacterMixins(object):
         return forbiddens
 
 class InceptionConn(object):
-
     error_tag = 'error'
     model = InceptionConnection
 
@@ -69,48 +67,20 @@ class InceptionConn(object):
         obj = instance or self.model.objects.get_or_create(**inception_conn[0])[0]
         return 'mysql -h{} -P{}'.format(obj.host, obj.port)
 
-    def get_mysql_conn(self, params):
-        return 'mysql -h{} -P{} -u{} -p{} -e "use {}" '.format(
-            params.get('host'),
-            params.get('port'),
-            params.get('user'),
-            params.get('password'),
-            params.get('db')
-        )
-
-class CheckConn(InceptionConn):
-
+class CheckConn(InceptionConn, AutoQuery):
     conf = configparser.ConfigParser()
     file_path = settings.INCEPTION_SETTINGS.get('file_path')
 
-    def check(self, request):
+    def handle_get_databases(self, request):
         ret = res.get_ret()
-        request_data = request.data
-        check_type = request_data.get('check_type')
-        if check_type == 'inception_conn':
-            sub_cmd = "inception get variables"
-            cmd = self.get_cmd(sub_cmd)
-        else:
-            params = {}
-            if check_type == 'inception_backup':
-                self.conf.read(self.file_path)
-                password = self.conf.get('inception', 'inception_remote_system_password')
-                params = request_data
-                params['password'] = password
-                params['db'] = 'inception'
-            elif check_type == 'update_target_db':
-                db_id = request_data.get('id')
-                instance = Dbconf.objects.get(id=db_id)
-                params = {
-                    'db': instance.name,
-                    'host': instance.host,
-                    'port': instance.port,
-                    'user': instance.user,
-                    'password': prpcrypt.decrypt(instance.password)
-                }
-            elif check_type == 'create_target_db':
-                params = request_data
-            cmd = self.get_mysql_conn(params)
+        databases = self.get_databases(request.data)
+        ret['data'] = [item[0] for item in databases]
+        return ret
+
+    def inception_conn(self, *args):
+        ret = res.get_ret()
+        sub_cmd = "inception get variables"
+        cmd = self.get_cmd(sub_cmd)
         popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         lines = popen.stdout.readlines()
         last_item = lines[-1].decode('gbk') if len(lines) > 0 else ''
@@ -118,6 +88,28 @@ class CheckConn(InceptionConn):
             ret['status'] = -1
             ret['data'] = last_item
         return ret
+
+    def inception_backup(self, request):
+        self.conf.read(self.file_path)
+        password = self.conf.get('inception', 'inception_remote_system_password')
+        params = request.data
+        params['password'] = password
+        params['db'] = 'inception'
+        self.conn_database(params)
+        return res.get_ret()
+
+    def update_target_db(self, request):
+        pk = request.data.get('id')
+        instance = Dbconf.objects.get(pk=pk)
+        params = {
+            'db': instance.name,
+            'host': instance.host,
+            'port': instance.port,
+            'user': instance.user,
+            'password': prpcrypt.decrypt(instance.password)
+        }
+        self.conn_database(params)
+        return res.get_ret()
 
 class HandleInceptionSettingsMixins(InceptionConn):
     backup_variables = [
@@ -153,7 +145,60 @@ class HandleInceptionSettingsMixins(InceptionConn):
         cmd = self.get_cmd(sub_cmd)
         subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-class ActionMixins(PromptMixins, AppellationMixins):
+class CheckStatusMixins(HttpMixins, AppellationMixins, PromptMixins):
+
+    @property
+    def init(self):
+        status_map = \
+        {
+            self.urn_execute: {
+                'status_list': [-1, 3],
+                'warning': self.action_status_warning_execute
+            },
+            self.urn_reject: {
+                'status_list': [-2, -1, 3, 4, 6],
+                'warning': self.action_status_warning_reject
+            },
+            self.urn_approve: {
+                'status_list': [-1],
+                'warning': self.action_status_warning_approve
+            },
+            self.urn_disapprove: {
+                'status_list': [-1],
+                'warning': self.action_status_warning_approve
+            },
+            self.urn_rollback: {
+                'status_list': [0],
+                'warning': self.action_status_warning_rollback
+            },
+            self.urn_cron: {
+                'status_list': [-1, 3, 5],
+                'warning': self.action_status_warning_cron
+            },
+            self.urn_database_order_approve: {
+                'status_list': [0],
+                'warning': self.action_status_warning_database_order_manage
+            },
+            self.urn_database_order_disapprove: {
+                'status_list': [0],
+                'warning': self.action_status_warning_database_order_manage
+            },
+            self.urn_database_order_reject: {
+                'status_list': [0, 1, 2],
+                'warning': self.action_status_warning_database_order_reject
+            }
+
+        }
+        return status_map
+
+    def check_status(self, instance):
+        action = self.get_urls_action(self.request)
+        status_list = self.init[action]['status_list']
+        warning = self.init[action]['warning']
+        if instance.status not in status_list:
+            raise ParseError(warning)
+
+class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
 
     type_select_tag = 'select'
     action_type_execute = '--enable-execute'
@@ -179,26 +224,16 @@ class ActionMixins(PromptMixins, AppellationMixins):
         return current
 
     @property
-    def get_urls_action(self):
-        return self.request.META['PATH_INFO'].split('/')[-2]
-
-    @property
     def is_manual_review(self):
         instance = Strategy.objects.first()
         if not instance:
             instance = Strategy.objects.create()
         return instance.is_manual_review
 
-    def check_approve_status(self, instance):
-        step_instance = instance.workorder.step_set.all()[1]
-        if step_instance.status != 0:
-            raise ParseError(self.approve_warning)
-
     def handle_workflow(self, call_type, status, step_number, instance=None):
         instance = instance or self.get_object()
         if self.has_flow(instance):
             if call_type == 1:
-                self.check_approve_status(instance)
                 if status == 1:
                     self.save_instance(instance.workorder, True)
             step_instance = instance.workorder.step_set.order_by('id')[step_number]
@@ -222,11 +257,6 @@ class ActionMixins(PromptMixins, AppellationMixins):
         if status is not None:
             instance.status = status
         instance.save()
-
-    def check_status(self, instance):
-        action = self.get_urls_action
-        if action == 'execute' and instance.status not in [-1, 3]:
-            raise ParseError(self.action_status_warning_execute)
 
     def check_lock(self, instance):
         if not RedisLock.locked(instance.id):
@@ -265,7 +295,7 @@ class ActionMixins(PromptMixins, AppellationMixins):
         exception_sqls = []
         for sql_result in result:
             error_message = sql_result[4]
-            if error_message == 'None' or re.findall('Warning', error_message):
+            if error_message == 'None':
                 success_sqls.append(sql_result)
             else:
                 exception_sqls.append(error_message)
@@ -276,7 +306,7 @@ class ActionMixins(PromptMixins, AppellationMixins):
     def replace_remark(self, instance, action=None, user=None):
         user = user or self.request.user
         username = user.username
-        action = action or self.get_urls_action
+        action = action or self.get_urls_action(self.request)
         if username != instance.treater:
             instance.remark +=  '   [' + username + self.action_desc_map.get(action) + ']'
         if instance.workorder.status == True:
@@ -287,37 +317,77 @@ class ActionMixins(PromptMixins, AppellationMixins):
                 step_obj.user = user
                 self.save_instance(step_obj)
 
+class MailMixin(AppellationMixins):
+
     def get_extend_mail_list(self, user):
         mail_list_extend = user.mail_list_extend
         return mail_list_extend.split() if mail_list_extend else []
 
-    def mail(self, instance, mail_type, personnel):
+    def get_username(self, user):
+        if not isinstance(user, str):
+            user = user.username
+        return user
+
+    def get_mail_list(self, instance):
+        commiter = self.get_username(instance.commiter)
+        treater = self.get_username(instance.treater)
+        user = User.objects.get(username=commiter)
+        admin_mail = user.admin_mail.username if user.admin_mail else None
+        mail_users = [commiter, treater, admin_mail]
+        mail_list_extend = self.get_extend_mail_list(user)
+        mail_list = [u.email for u in User.objects.filter(username__in=mail_users)]
+        mail_list.extend(mail_list_extend)
+        mail_list = list(set(mail_list))
+        return mail_list
+
+    def mail(self, instance, mail_type, personnel, source_app):
         try:
             mail_action = MailActions.objects.get(name=mail_type)
-        except Exception:
-            return
+            mail_func = getattr(self, source_app)
+            mail_func(instance, mail_action, personnel, source_app)
+        except Exception as e:
+            return e
+
+    def mail_inception(self, instance, mail_action, personnel, source_app):
         if (instance.env == self.env_prd) and mail_action.value:
-            commiter = instance.commiter
-            treater = instance.treater
-            user = User.objects.get(username=commiter)
-            admin_mail = user.admin_mail.username if user.admin_mail else None
-            mail_users = [ commiter, treater, admin_mail]
-            mail_list_extend = self.get_extend_mail_list(user)
-            mail_list = [u.email for u in User.objects.filter(username__in = mail_users)]
-            mail_list.extend(mail_list_extend)
-            mail_list = list(set(mail_list))
-            send_mail.delay(mail_list, personnel.username, instance.id, instance.remark, mail_type, instance.sql_content, instance.db.name)
+            mail_list = self.get_mail_list(instance)
+            send_mail.delay(
+                mail_list=mail_list,
+                personnel=personnel.username,
+                instance_id=instance.id,
+                remark=instance.remark,
+                sql_content=instance.sql_content,
+                db_name=instance.db.name,
+                status=instance.status,
+                source_app=source_app,
+                desc_cn=mail_action.desc_cn
+            )
+
+    def mail_db_order(self, instance, mail_action, personnel, source_app):
+        mail_list = self.get_mail_list(instance)
+        data_dict = copy.deepcopy(instance.__dict__)
+        for field in ['_state', 'createtime', 'updatetime']:
+            data_dict.pop(field)
+        send_mail.delay(
+            mail_list=mail_list,
+            personnel=personnel.username,
+            instance_id=instance.id,
+            remark=instance.remark,
+            status=instance.status,
+            data_dict=data_dict,
+            source_app=source_app,
+            desc_cn=mail_action.desc_cn
+        )
 
 class Handle(ActionMixins):
 
     @timer
     def select(self, instance):
         sql_query = SqlQuery(instance.db)
-        data = sql_query.main(instance.sql_content)
-        affected_rows = len(data)
+        data = sql_query.get_select_result(instance.sql_content)
         instance.handle_result_execute = json.dumps([str(row) for row in data], cls=DateEncoder)
         instance.status = 0
-        return instance, affected_rows
+        return instance, len(data)
 
     @timer
     def execute(self, instance):
@@ -354,7 +424,9 @@ class Handle(ActionMixins):
             statement_sql = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
             rollback_statement = Inception(statement_sql, rollback_db).get_back_sql()
             if not rollback_statement:
-                raise ParseError(self.get_rollback_fail)
+                instance.status = 2
+                instance.handle_result_rollback = json.dumps([self.get_rollback_fail])
+                return instance, instance.affected_rows
             back_sqls += rollback_statement
         db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type_execute)
         execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')

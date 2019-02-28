@@ -51,12 +51,12 @@ class Inception(object):
         return {'result': result, 'status': status}
 
     def manual(self):
-        conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
-        conn.autocommit(True)
-        cur = conn.cursor()
         try:
+            conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
+            conn.autocommit(True)
+            cur = conn.cursor()
             cur.execute(self.sql)
-        except pymysql.err.ProgrammingError:
+        except Exception:
             return []
         return cur.fetchall()
 
@@ -71,8 +71,8 @@ class Inception(object):
         return back_sql
 
     def get_index_list(self):
-        res = self.manual()[3:]
-        return [index_info[0] for index_info in res]
+        data = self.manual()[3:]
+        return [index_info[0] for index_info in data]
 
 class SoarParams(object):
     allow_online = '-allow-online-as-test'
@@ -80,55 +80,94 @@ class SoarParams(object):
     fingerprint = '-report-type=fingerprint'
     pretty = '-report-type=pretty'
 
-class SqlQuery(object):
+class HandleConn(object):
 
-    def __init__(self, instance):
-        self.db = instance
-        self.password = prpcrypt.decrypt(self.db.password)
-        self.soar_cli = settings.OPTIMIZE_SETTINGS.get('soar_cli')
-        self.sqladvisor_cli = settings.OPTIMIZE_SETTINGS.get('sqladvisor_cli')
+    def __init__(self):
+        self.conn_conf = {
+            'use_unicode': True,
+            'charset': 'utf8'
+        }
 
-    def main(self, sql): 
+    @classmethod
+    def convert_params(cls, params):
+        params['port'] = int(params.get('port', 0))
+        return params
+
+    def main(self, params, sql):
+        params.update(self.conn_conf)
         try:
-            conn = pymysql.connect(host=self.db.host, port=int(self.db.port), user=self.db.user, passwd=self.password, db=self.db.name, charset='utf8')
+            params = self.convert_params(params)
+            conn = pymysql.connect(**params)
             conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(sql)
+            cur.close()
+            conn.close()
         except Exception as e:
             raise ParseError(e)
         return cur.fetchall()
 
-    def handle_sql(self, sql):
+class AutoQuery(HandleConn):
+
+    def get_databases(self, params):
+        sql = 'SHOW DATABASES;'
+        return self.main(params, sql)
+
+    def conn_database(self, params):
+        sql = 'USE {}'.format(params.get('db'))
+        return self.main(params, sql)
+
+class SqlQuery(HandleConn):
+
+    def __init__(self, instance):
+        super(SqlQuery, self).__init__()
+        self.db = instance
+        self.password = prpcrypt.decrypt(self.db.password)
+        self.soar_cli = settings.OPTIMIZE_SETTINGS.get('soar_cli')
+        self.sqladvisor_cli = settings.OPTIMIZE_SETTINGS.get('sqladvisor_cli')
+        self.params = {
+            'host': self.db.host,
+            'port': self.db.port,
+            'user': self.db.user,
+            'passwd': self.password,
+            'db': self.db.name
+        }
+
+    def convert_sql(self, sql):
         return sql.replace('"', '\'')
 
     def get_tables(self):
         sql = 'SHOW TABLES;'.format(self.db.name)
-        res = self.main(sql)
-        tables = [i[0] for i in res]
+        data = self.main(self.params, sql)
+        tables = [i[0] for i in data]
         return tables
+
+    def get_select_result(self, sql):
+        data = self.main(self.params, sql)
+        return data
 
     def get_table_info(self, table_name):
         sql = 'SHOW CREATE TABLE {}'.format(table_name)
-        table_info = self.main(sql)[0][1]
+        table_info = self.main(self.params, sql)[0][1]
         return table_info
 
     def get_user_drop_priv(self):
         sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, self.db.host)
         try:
-            priv = self.main(sql)[0][0]
+            priv = self.main(self.params, sql)[0][0]
         except Exception:
             priv = 'N'
         return '-online-dsn' if priv == 'N' else '-test-dsn'
 
     def cmd_res(self, cmd):
-        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        return res.stdout.read()
+        data = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        return data.stdout.read()
 
     def sql_advisor(self, sql):
-        cmd = '{} -h {} -P {} -u {} -p "{}" -d {} -q "{};" -v 1'.format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, self.handle_sql(sql))
+        cmd = '{} -h {} -P {} -u {} -p "{}" -d {} -q "{};" -v 1'.format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, self.convert_sql(sql))
         return self.cmd_res(cmd)
 
     def sql_soar(self, sql, soar_type):
         dsn = self.get_user_drop_priv()
-        cmd = 'echo "{}" | {} {}="{}:{}@{}:{}/{}" {}'.format(self.handle_sql(sql), self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
+        cmd = 'echo "{}" | {} {}="{}:{}@{}:{}/{}" {}'.format(self.convert_sql(sql), self.soar_cli, dsn, self.db.user, self.password, self.db.host, self.db.port, self.db.name, getattr(SoarParams, soar_type))
         return self.cmd_res(cmd)

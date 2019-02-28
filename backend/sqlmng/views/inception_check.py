@@ -5,11 +5,11 @@ from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from workflow.serializers import WorkorderSerializer, StepSerializer
-from sqlmng.mixins import ChangeSpecialCharacterMixins, ActionMixins
+from sqlmng.mixins import ChangeSpecialCharacterMixins, ActionMixins, MailMixin
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, BaseView):
+class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, MailMixin, BaseView):
     '''
         SQL语法审核
     '''
@@ -90,5 +90,5 @@ class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, BaseView):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         self.create_step(instance, request_data['users'])
-        self.mail(instance, self.action_type_check, request.user)
+        self.mail(instance, self.action_type_check, request.user, self.name_mail_inception)
         return Response(res.get_ret())

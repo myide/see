@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
-import time
-from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import ParseError
 from utils.basemixins import AppellationMixins, PromptMixins, SetEncryptMixins
 from .mixins import HandleInceptionSettingsMixins
 from .models import *
@@ -162,3 +161,26 @@ class MailActionsSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = MailActions
         fields = '__all__'
+
+class DbWorkOrderSerializer(PromptMixins, serializers.ModelSerializer):
+
+    class Meta:
+        model = DatabaseWorkOrder
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super(DbWorkOrderSerializer, self).to_representation(instance)
+        ret['commiter'] = instance.commiter.username
+        ret['treater'] = instance.treater.username
+        return ret
+
+    def create(self, validated_data):
+        request = self.context['request']
+        admin_mail = request.user.admin_mail
+        if not admin_mail:
+            raise ParseError(self.not_exists_admin_mail)
+        validated_data.setdefault('commiter_id', request.user.id)
+        validated_data.setdefault('treater_id', admin_mail.id)
+        instance = super(DbWorkOrderSerializer, self).create(validated_data)
+        instance.save()
+        return instance

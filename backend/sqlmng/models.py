@@ -8,15 +8,16 @@ from utils.basemodels import Basemodel
 from workflow.models import Workorder
 # Create your models here.
 
+ENVS = (
+    ('prd', u'生产环境'),
+    ('test', u'测试环境')
+)
+
 class Cluster(Basemodel):
     class Meta:
         unique_together = ['name']
 
 class Dbconf(Basemodel):
-    ENVS = (
-        ('prd', u'生产环境'),
-        ('test', u'测试环境')
-    )
     related_user = models.ManyToManyField(User, null=True, blank=True)
     cluster = models.ForeignKey(Cluster, null=True, blank=True, on_delete=models.SET_NULL)
     user = models.CharField(max_length=128)
@@ -40,10 +41,6 @@ class Inceptsql(Basemodel):
         (4, u'审批驳回'),
         (5, u'已定时'),
         (6, u'执行中')
-    )
-    ENVS = (
-        ('prd', u'生产环境'),
-        ('test', u'测试环境')
     )
     users = models.ManyToManyField(User)
     group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
@@ -86,10 +83,6 @@ class AuthRules(Basemodel):
         ('developer_manager', u'经理'),
         ('developer', u'研发'),
     )
-    ENVS = (
-        ('prd', u'生产环境'),
-        ('test', u'测试环境')
-    )
     is_manual_review = models.BooleanField(verbose_name='有流程')
     role = models.CharField(max_length=32, choices=ROLES)
     env = models.CharField(max_length=8, choices=ENVS)
@@ -112,5 +105,21 @@ class InceptionConnection(Basemodel):
     port = models.CharField(max_length=5, null=True, blank=True, default=6669)
 
 class MailActions(Basemodel):
-    value = models.BooleanField(default=False, verbose_name='是否发送')
+    value = models.BooleanField(default=True, verbose_name='是否发送')
     desc_cn = models.CharField(max_length=128, null=True, blank=True)
+
+class DatabaseWorkOrder(Basemodel):
+    STATUS = (
+        (0, u'待审核'),
+        (1, u'审核通过'),
+        (2, u'审核驳回'),
+        (3, u'放弃')
+    )
+    commiter = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name='commiter')
+    treater = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name='treater')
+    status = models.IntegerField(default=0, choices=STATUS)
+    env = models.CharField(max_length=8, null=True, blank=True, choices=ENVS)
+    db_cluster = models.ForeignKey(Cluster, null=True, blank=True, on_delete=models.SET_NULL)
+    db_host = models.CharField(max_length=64, null=True, blank=True)
+    db_port = models.CharField(max_length=5, null=True, blank=True)
+    db_list = models.TextField(default='', null=True, blank=True)

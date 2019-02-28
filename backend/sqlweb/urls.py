@@ -25,9 +25,9 @@ from rest_framework_jwt.views import obtain_jwt_token
 schema_view = get_schema_view(title='Users API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('api/docs/', schema_view),  # swagger doc
     path('api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),  # wagger login
-    path('admin/', admin.site.urls),
     path('api/api-token-auth/', obtain_jwt_token),
     path('api/media/', include('media.urls')),
     path('api/sqlmng/', include('sqlmng.urls')),

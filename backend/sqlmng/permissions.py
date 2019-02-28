@@ -2,15 +2,17 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
 from utils.permissions import SAFE_METHODS
-from utils.basemixins import AppellationMixins, PromptMixins
+from utils.basemixins import HttpMixins, AppellationMixins, PromptMixins
 from sqlmng.serializers import AuthRulesSerializer
+from sqlmng.mixins import ActionMixins
+from sqlmng.data import step_rules
 from sqlmng.models import *
 
 reject_perms = ['reject']
 approve_perms = ['approve', 'disapprove']
 handle_perms = ['execute', 'rollback', 'cron']
 
-class IsHandleAble(AppellationMixins, permissions.BasePermission):
+class IsHandleAble(HttpMixins, AppellationMixins, permissions.BasePermission):
 
     def __init__(self):
         pass
@@ -30,7 +32,7 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
         env = obj.env
         is_manual_review = obj.is_manual_review
         role = self.admin if user.is_superuser else user.role
-        action = request.META['PATH_INFO'].split('/')[-2]
+        action = self.get_urls_action(request)
         if (request.method in SAFE_METHODS and action not in reject_perms + approve_perms + handle_perms) or env == self.env_test:
             return True
         if obj.is_manual_review == True:
@@ -50,5 +52,5 @@ class IsHandleAble(AppellationMixins, permissions.BasePermission):
             perm_obj = AuthRules.objects.get(env=env, is_manual_review=is_manual_review, role=role)
             perm_serializer = AuthRulesSerializer(perm_obj)
             return perm_serializer.data.get(action)
-        except Exception:
+        except Exception as e:
             return False
