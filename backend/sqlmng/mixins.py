@@ -1,4 +1,4 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 import re
 import copy
 import time
@@ -8,7 +8,7 @@ import configparser
 from rest_framework.exceptions import ParseError
 from django.conf import settings
 from utils.tasks import send_mail
-from utils.basemixins import HttpMixins, AppellationMixins, PromptMixins
+from utils.basemixins import HttpMixin, AppellationMixin, PromptMixin
 from utils.dbcrypt import prpcrypt
 from utils.basecomponent import DateEncoder
 from utils.baseviews import ReturnFormatMixin as res
@@ -18,7 +18,7 @@ from utils.wrappers import timer
 from .data import inception_conn
 from .models import *
 
-class FixedDataMixins(object):
+class FixedDataMixin(object):
 
     def get_queryset(self):
         model = self.serializer_class.Meta.model
@@ -26,12 +26,12 @@ class FixedDataMixins(object):
         queryset = objects.all()
         if queryset.count() != len(self.source_data):
             queryset.delete()
-            datas = [model(**data) for data in self.source_data]
-            objects.bulk_create(datas)
+            data = [model(**row) for row in self.source_data]
+            objects.bulk_create(data)
             queryset = objects.all()
         return queryset
 
-class ChangeSpecialCharacterMixins(object):
+class ChangeSpecialCharacterMixin(object):
     special_character_list = ['*']
     transference_character = '\\'
 
@@ -45,14 +45,14 @@ class ChangeSpecialCharacterMixins(object):
         return forbidden_list
 
     def reverse(self, forbidden_list):
-        forbiddens = []
+        fb_words = []
         for word in forbidden_list:
             if self.transference_character in word:
                 word = word.replace(self.transference_character, '')
-            forbiddens.append(word)
-        if len(forbiddens) == 1:
-            return forbiddens[0]
-        return forbiddens
+            fb_words.append(word)
+        if len(fb_words) == 1:
+            return fb_words[0]
+        return fb_words
 
 class InceptionConn(object):
     error_tag = 'error'
@@ -81,8 +81,8 @@ class CheckConn(InceptionConn, AutoQuery):
         ret = res.get_ret()
         sub_cmd = "inception get variables"
         cmd = self.get_cmd(sub_cmd)
-        popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        lines = popen.stdout.readlines()
+        result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        lines = result.stdout.readlines()
         last_item = lines[-1].decode('gbk') if len(lines) > 0 else ''
         if self.error_tag in last_item.lower():
             ret['status'] = -1
@@ -100,7 +100,7 @@ class CheckConn(InceptionConn, AutoQuery):
 
     def update_target_db(self, request):
         pk = request.data.get('id')
-        instance = Dbconf.objects.get(pk=pk)
+        instance = DbConf.objects.get(pk=pk)
         params = {
             'db': instance.name,
             'host': instance.host,
@@ -111,7 +111,7 @@ class CheckConn(InceptionConn, AutoQuery):
         self.conn_database(params)
         return res.get_ret()
 
-class HandleInceptionSettingsMixins(InceptionConn):
+class HandleInceptionSettingsMixin(InceptionConn):
     backup_variables = [
         'inception_remote_backup_host',
         'inception_remote_backup_port',
@@ -126,16 +126,16 @@ class HandleInceptionSettingsMixins(InceptionConn):
         filter_words = [variable_name, '\t', '\n']
         sub_cmd = "inception get variables '{}'".format(variable_name)
         cmd = self.get_cmd(sub_cmd)
-        popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        lines = popen.stdout.readlines()
+        result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        lines = result.stdout.readlines()
         if not lines:
             return None
-        res = lines[-1].decode('gbk')
-        if self.error_tag in res.lower():
+        ret = lines[-1].decode('gbk')
+        if self.error_tag in ret.lower():
             return None
         for word in filter_words:
-            res = res.replace(word, '')
-        return res
+            ret = ret.replace(word, '')
+        return ret
 
     def set_variable(self, request):
         request_data = request.data
@@ -145,7 +145,7 @@ class HandleInceptionSettingsMixins(InceptionConn):
         cmd = self.get_cmd(sub_cmd)
         subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-class CheckStatusMixins(HttpMixins, AppellationMixins, PromptMixins):
+class CheckStatusMixin(HttpMixin, AppellationMixin, PromptMixin):
 
     @property
     def init(self):
@@ -198,7 +198,7 @@ class CheckStatusMixins(HttpMixins, AppellationMixins, PromptMixins):
         if instance.status not in status_list:
             raise ParseError(warning)
 
-class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
+class ActionMixin(HttpMixin, AppellationMixin, PromptMixin):
 
     type_select_tag = 'select'
     action_type_execute = '--enable-execute'
@@ -211,12 +211,11 @@ class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
             if user.is_superuser:
                 return 1 if instance.commiter == user.username else 2
             else:
-                role = user.role
-                return self.reject_steps.get(role)
+                return self.reject_steps.get(user.role)
 
     @staticmethod
     def get_current_step(instance):
-        steps = instance.workorder.step_set.all()
+        steps = instance.work_order.step_set.all()
         current = 0
         for step in steps:
             if step.status not in [-1, 0]:
@@ -235,22 +234,21 @@ class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
         if self.has_flow(instance):
             if call_type == 1:
                 if status == 1:
-                    self.save_instance(instance.workorder, True)
-            step_instance = instance.workorder.step_set.order_by('id')[step_number]
+                    self.save_instance(instance.work_order, True)
+            step_instance = instance.work_order.step_set.order_by('id')[step_number]
             self.save_instance(step_instance, status)
             if call_type == 3:
-                steps = instance.workorder.step_set.all()
+                steps = instance.work_order.step_set.all()
                 steps_behind = steps.filter(id__gt=step_instance.id)
                 for step in steps_behind:
                     self.save_instance(step, -1)
 
-    def get_db_addr(self, user, password, host, port, actiontype):
+    def get_db_conf(self, user, password, host, port, actiontype):
         password = prpcrypt.decrypt(password)
-        dbaddr = '--user={}; --password={}; --host={}; --port={}; {};'.format(user, password, host, port, actiontype)
-        return dbaddr
+        return '--user={}; --password={}; --host={}; --port={}; {};'.format(user, password, host, port, actiontype)
 
     def has_flow(self, instance):
-        return instance.is_manual_review == True and instance.env == self.env_prd
+        return instance.is_manual_review is True and instance.env == self.env_prd
 
     @classmethod
     def save_instance(cls, instance, status=None):
@@ -263,8 +261,7 @@ class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
             raise ParseError(self.task_locked.format(instance.id))
 
     def filter_select_type(self, instance):
-        type = instance.type
-        if type == self.type_select_tag:
+        if instance.type == self.type_select_tag:
             raise ParseError(self.type_warning)
 
     def check_valid_date(self, cron_time):
@@ -277,31 +274,31 @@ class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
     def filter_date(self, queryset):
         date_range = self.request.GET.get('daterange')
         if date_range:
-            return queryset.filter(createtime__range = date_range.split(','))
+            return queryset.filter(createtime__range=date_range.split(','))
         return queryset
 
-    def check_rollbackable(self, instance):
+    def check_rollback_able(self, instance):
         if not instance.rollback_able:
             raise ParseError(self.not_rollback_able)
 
     def check_execute_sql(self, db_id, sql_content, action_type):
-        dbobj = Dbconf.objects.get(id=db_id)
-        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, action_type)
-        sql_review = Inception(sql_content, dbobj.name).inception_handle(db_addr)
+        db_instance = DbConf.objects.get(id=db_id)
+        db_conf = self.get_db_conf(db_instance.user, db_instance.password, db_instance.host, db_instance.port, action_type)
+        sql_review = Inception(sql_content, db_instance.name).inception_handle(db_conf)
         result, status = sql_review.get('result'), sql_review.get('status')
         if status == -1 or len(result) == 1:
             raise ParseError({self.connect_error: result})
-        success_sqls = []
-        exception_sqls = []
+        success_sql_list = []
+        exception_sql_list = []
         for sql_result in result:
             error_message = sql_result[4]
             if error_message == 'None':
-                success_sqls.append(sql_result)
+                success_sql_list.append(sql_result)
             else:
-                exception_sqls.append(error_message)
-        if exception_sqls and action_type == self.action_type_check:
-            raise ParseError({self.exception_sqls: exception_sqls})
-        return success_sqls, exception_sqls, json.dumps(result)
+                exception_sql_list.append(error_message)
+        if exception_sql_list and action_type == self.action_type_check:
+            raise ParseError({self.exception_sql_list: exception_sql_list})
+        return success_sql_list, exception_sql_list, json.dumps(result)
 
     def replace_remark(self, instance, action=None, user=None):
         user = user or self.request.user
@@ -309,15 +306,15 @@ class ActionMixins(HttpMixins, AppellationMixins, PromptMixins):
         action = action or self.get_urls_action(self.request)
         if username != instance.treater:
             instance.remark +=  '   [' + username + self.action_desc_map.get(action) + ']'
-        if instance.workorder.status == True:
-            steps = instance.workorder.step_set.all()
+        if instance.work_order.status is True:
+            steps = instance.work_order.step_set.all()
             step_obj_second = steps[1]
             if user and not (user == step_obj_second.user and action == 'reject'):
                 step_obj = steps[0]
                 step_obj.user = user
                 self.save_instance(step_obj)
 
-class MailMixin(AppellationMixins):
+class MailMixin(AppellationMixin):
 
     def get_extend_mail_list(self, user):
         mail_list_extend = user.mail_list_extend
@@ -379,7 +376,7 @@ class MailMixin(AppellationMixins):
             desc_cn=mail_action.desc_cn
         )
 
-class Handle(ActionMixins):
+class Handle(ActionMixin):
 
     @timer
     def select(self, instance):
@@ -392,20 +389,21 @@ class Handle(ActionMixins):
     @timer
     def execute(self, instance):
         affected_rows = 0
-        opids = []
-        rollback_able = False
+        opid_list = []
         instance.status = 0
-        success_sqls, exception_sqls, handle_result_execute = self.check_execute_sql(instance.db.id, instance.sql_content, self.action_type_execute)
-        for success_sql in success_sqls:
-            instance.rollback_db = success_sql[8]
+        success_sql_num = 0
+        success_sql_list, exception_sql_list, handle_result_execute = self.check_execute_sql(instance.db.id, instance.sql_content, self.action_type_execute)
+        for success_sql in success_sql_list:
             affected_rows += success_sql[6]
             if re.findall(self.success_tag, success_sql[3]):
-                rollback_able = True
-                opids.append(success_sql[7].replace("'", ""))
-        if exception_sqls:
+                success_sql_num += 1
+                opid_list.append(success_sql[7].replace("'", ""))
+        rollback_able = True if success_sql_num == len(success_sql_list) - 1 else False
+        if exception_sql_list:
             instance.status = 2
-            instance.execute_errors = exception_sqls
-        instance.rollback_opid = opids
+            instance.execute_errors = exception_sql_list
+        instance.rollback_db = success_sql[8]
+        instance.rollback_opid = opid_list
         instance.rollback_able = rollback_able
         instance.handle_result_execute = handle_result_execute
         return instance, affected_rows
@@ -413,11 +411,11 @@ class Handle(ActionMixins):
     @timer
     def rollback(self, instance):
         self.filter_select_type(instance)
-        self.check_rollbackable(instance)
-        dbobj = instance.db
+        self.check_rollback_able(instance)
+        db_instance = instance.db
         rollback_opid_list = instance.rollback_opid
         rollback_db = instance.rollback_db
-        back_sqls = ''
+        back_sql_list = ''
         for opid in eval(rollback_opid_list):
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
@@ -427,9 +425,9 @@ class Handle(ActionMixins):
                 instance.status = 2
                 instance.handle_result_rollback = json.dumps([self.get_rollback_fail])
                 return instance, instance.affected_rows
-            back_sqls += rollback_statement
-        db_addr = self.get_db_addr(dbobj.user, dbobj.password, dbobj.host, dbobj.port, self.action_type_execute)
-        execute_results = Inception(back_sqls, dbobj.name).inception_handle(db_addr).get('result')
+            back_sql_list += rollback_statement
+        db_conf = self.get_db_conf(db_instance.user, db_instance.password, db_instance.host, db_instance.port, self.action_type_execute)
+        execute_results = Inception(back_sql_list, db_instance.name).inception_handle(db_conf).get('result')
         status = -3
         for result in execute_results:
             if result[4] != 'None':

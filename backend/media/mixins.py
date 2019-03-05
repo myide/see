@@ -1,19 +1,19 @@
-import os, json
+# -*- coding: utf-8 -*-
+import os
+import json
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
 from django.http import StreamingHttpResponse
-from utils.basemixins import PromptMixins
+from utils.basemixins import PromptMixin
 
 class RenderFile(object):
-
     path = settings.MEDIA.get('sql_file_path')
 
     def create_file(self, params, content):
         pk, sfx = params.get('pk'), params.get('sfx')
         file_name = '{}.{}'.format(pk, sfx)
-        isExists = os.path.exists(self.path)
-        if not isExists:
+        if not os.path.exists(self.path):
             os.makedirs(self.path)
         path = os.path.join(self.path, file_name)
         with open(path, 'w') as f:
@@ -37,7 +37,7 @@ class RenderFile(object):
                 else:
                     break
 
-class DownloadBaseView(PromptMixins, RenderFile, APIView):
+class DownloadBaseView(PromptMixin, RenderFile, APIView):
 
     def check_content(self):
         content = self.get_content()

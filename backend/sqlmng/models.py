@@ -1,12 +1,11 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.db import models
 from account.models import User
 from django.contrib.auth.models import Group
 from utils.basemodels import Basemodel
-from workflow.models import Workorder
-# Create your models here.
+from workflow.models import WorkOrder
 
 ENVS = (
     ('prd', u'生产环境'),
@@ -17,7 +16,7 @@ class Cluster(Basemodel):
     class Meta:
         unique_together = ['name']
 
-class Dbconf(Basemodel):
+class DbConf(Basemodel):
     related_user = models.ManyToManyField(User, null=True, blank=True)
     cluster = models.ForeignKey(Cluster, null=True, blank=True, on_delete=models.SET_NULL)
     user = models.CharField(max_length=128)
@@ -29,7 +28,7 @@ class Dbconf(Basemodel):
         unique_together = ('name', 'host', 'env', 'cluster')
         ordering = ['-id']
 
-class Inceptsql(Basemodel):
+class InceptionWorkOrder(Basemodel):
     STATUS = (
         (-3, u'回滚成功'),
         (-2, u'已暂停'),
@@ -40,12 +39,13 @@ class Inceptsql(Basemodel):
         (3, u'审批通过'),
         (4, u'审批驳回'),
         (5, u'已定时'),
-        (6, u'执行中')
+        (6, u'执行中'),
+        (7, u'回滚中')
     )
     users = models.ManyToManyField(User)
     group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    db = models.ForeignKey(Dbconf, on_delete=models.CASCADE)
-    workorder = models.OneToOneField(Workorder, on_delete=models.CASCADE)
+    db = models.ForeignKey(DbConf, on_delete=models.CASCADE)
+    work_order = models.OneToOneField(WorkOrder, on_delete=models.CASCADE)
     is_manual_review = models.BooleanField(default=False, verbose_name='有流程')
     commiter = models.CharField(max_length=64, null=True, blank=True)
     sql_content = models.TextField()
@@ -67,7 +67,7 @@ class Inceptsql(Basemodel):
     handle_result_rollback = models.TextField(default='', null=True, blank=True, verbose_name='回滚详情')
 
 class Suggestion(Basemodel):
-    work_order = models.ForeignKey(Inceptsql, on_delete=models.CASCADE)
+    work_order = models.ForeignKey(InceptionWorkOrder, on_delete=models.CASCADE)
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
 
 class Strategy(Basemodel):

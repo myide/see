@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-
     ROLES = (
         ('developer_supremo', u'总监'),
         ('developer_manager', u'经理'),

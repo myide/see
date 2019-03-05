@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 from utils.dbcrypt import prpcrypt
 
-class HttpMixins(object):
+class HttpMixin(object):
 
     def get_urls_action(self, request):
         return request.META['PATH_INFO'].split('/')[-2]
 
-class AppellationMixins(object):
+class AppellationMixin(object):
     dev = 'developer'
     admin = 'admin'
     dev_spm = 'developer_supremo'
@@ -43,10 +44,10 @@ class AppellationMixins(object):
         dev_spm: 2
     }
 
-class PromptMixins(object):
+class PromptMixin(object):
     connect_error = 'MySQL连接异常 '
     forbidden_words = '禁用关键字 '
-    exception_sqls = 'SQL语法错误 '
+    exception_sql_list = 'SQL语法错误 '
     not_exists_group = '用户的组不存在 '
     executed = 'SQL已执行过'
     approve_warning = '无法重复审批'
@@ -77,16 +78,16 @@ class PromptMixins(object):
     not_exists_admin_mail = '请先设置 管理员组收件人'
     not_edit_status = '此状态无法修改工单'
 
-class SetEncryptMixins(object):
+class SetEncryptMixin(object):
     parameter = 'password'
 
     def create(self, validated_data):
         password = validated_data.get(self.parameter)
         validated_data[self.parameter] = prpcrypt.encrypt(password)
-        return super(SetEncryptMixins, self).create(validated_data)
+        return super(SetEncryptMixin, self).create(validated_data)
 
     def update(self, instance, validated_data):
         password = validated_data.get(self.parameter)
         if password != instance.password:
             validated_data[self.parameter] = prpcrypt.encrypt(password)
-        return super(SetEncryptMixins, self).update(instance, validated_data)
+        return super(SetEncryptMixin, self).update(instance, validated_data)

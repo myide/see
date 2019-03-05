@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 from django.contrib.auth.models import Group, Permission
 from collections import OrderedDict
-from django.forms.models import model_to_dict
 from rest_framework import serializers
 from .models import User
 
@@ -14,8 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super(UserSerializer, self).to_representation(instance)
         if not isinstance(instance, OrderedDict):
-            groupobj = instance.groups.first()
-            groups = {'id':groupobj.id, 'name':groupobj.name} if groupobj else {}
+            group_instance = instance.groups.first()
+            groups = {'id':group_instance.id, 'name':group_instance.name} if group_instance else {}
             perm_list = instance.user_permissions.all()
             perms = [{'id':perm.id, 'name':perm.name} for perm in perm_list]
             ret['groups'] = groups
@@ -43,16 +42,15 @@ class GroupSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super(GroupSerializer, self).to_representation(instance)
         if not isinstance(instance, OrderedDict):
-            qs_perms = instance.permissions.all()
-            perms = [{'id':perm.id, 'name':perm.name} for perm in qs_perms]
-            qs_members = instance.user_set.all()
-            members = [{'id':user.id, 'name':user.username, 'role':user.role} for user in qs_members]
+            perm_set = instance.permissions.all()
+            perms = [{'id':perm.id, 'name':perm.name} for perm in perm_set]
+            member_set = instance.user_set.all()
+            members = [{'id':user.id, 'name':user.username, 'role':user.role} for user in member_set]
             ret['perms'] = perms
             ret['members'] = members
         return ret
 
 class PermissionSerializer(serializers.ModelSerializer):
-
     perm_name = serializers.SerializerMethodField()
 
     class Meta:

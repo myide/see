@@ -1,28 +1,28 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 import re
 from rest_framework.response import Response
 from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
-from workflow.serializers import WorkorderSerializer, StepSerializer
-from sqlmng.mixins import ChangeSpecialCharacterMixins, ActionMixins, MailMixin
+from workflow.serializers import WorkOrderSerializer, StepSerializer
+from sqlmng.mixins import ChangeSpecialCharacterMixin, ActionMixin, MailMixin
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, MailMixin, BaseView):
+class InceptionCheckView(ChangeSpecialCharacterMixin, ActionMixin, MailMixin, BaseView):
     '''
         SQL语法审核
     '''
-    queryset = Inceptsql.objects.all()
+    queryset = InceptionWorkOrder.objects.all()
     serializer_class = InceptionSerializer
-    serializer_order = WorkorderSerializer
+    serializer_order = WorkOrderSerializer
     serializer_step = StepSerializer
 
     def check_forbidden_words(self, sql_content):
         forbidden_instance = SqlSettings.objects.first()
         if forbidden_instance:
-            forbidden_word_list = [fword for fword in self.convert(forbidden_instance.forbidden_words)]
-            forbidden_words = [fword for fword in forbidden_word_list if re.search(re.compile(fword, re.I), sql_content)]
+            forbidden_word_list = [word for word in self.convert(forbidden_instance.forbidden_words)]
+            forbidden_words = [word for word in forbidden_word_list if re.search(re.compile(word, re.I), sql_content)]
             if forbidden_words:
                 raise ParseError({self.forbidden_words: self.reverse(forbidden_words)})
 
@@ -37,7 +37,7 @@ class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, MailMixin, 
             users_id.append(None)
             for index, uid in enumerate(users_id):
                 status = 1 if index == 0 else 0
-                step_serializer = self.serializer_step(data={'work_order':instance.workorder_id, 'user':uid, 'status':status})
+                step_serializer = self.serializer_step(data={'work_order':instance.work_order_id, 'user':uid, 'status':status})
                 step_serializer.is_valid(raise_exception=True)
                 step_serializer.save()
 
@@ -49,7 +49,7 @@ class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, MailMixin, 
 
     def check_db(self, request_data):
         db = request_data.get('db')
-        if not Dbconf.objects.filter(id=db):
+        if not DbConf.objects.filter(id=db):
             raise ParseError(self.not_exists_target_db)
 
     def check_count(self, request_data):
@@ -81,11 +81,11 @@ class InceptionCheckView(ChangeSpecialCharacterMixins, ActionMixins, MailMixin, 
             request_data['type'] = self.type_select_tag
         else:
             handle_result_check = self.check_execute_sql(request_data.get('db'), sql_content, self.action_type_check)[-1]
-        workorder_serializer = self.serializer_order(data={})
-        workorder_serializer.is_valid()
-        workorder_instance = workorder_serializer.save()
+        work_order_serializer = self.serializer_order(data={})
+        work_order_serializer.is_valid()
+        work_order_instance = work_order_serializer.save()
         request_data['handle_result_check'] = handle_result_check
-        request_data['workorder'] = workorder_instance.id
+        request_data['work_order'] = work_order_instance.id
         serializer = self.serializer_class(data=request_data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()

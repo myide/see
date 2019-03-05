@@ -1,16 +1,15 @@
 # -*- coding:utf-8 -*-
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
-from utils.basemixins import AppellationMixins, PromptMixins, SetEncryptMixins
-from .mixins import HandleInceptionSettingsMixins
+from utils.basemixins import AppellationMixin, PromptMixin, SetEncryptMixin
+from .mixins import HandleInceptionSettingsMixin
 from .models import *
 
-class InceptionSerializer(PromptMixins, serializers.ModelSerializer):
-
+class InceptionSerializer(PromptMixin, serializers.ModelSerializer):
     admin = 'Admin'
 
     class Meta:
-        model = Inceptsql
+        model = InceptionWorkOrder
         fields = '__all__'
 
     def get_step_user_group(self, user_instance):
@@ -21,7 +20,7 @@ class InceptionSerializer(PromptMixins, serializers.ModelSerializer):
 
     def get_step(self, instance):
         data = []
-        steps = instance.workorder.step_set.order_by('id')
+        steps = instance.work_order.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
             updatetime = step.updatetime if step.status != 0 else ''
@@ -44,10 +43,10 @@ class InceptionSerializer(PromptMixins, serializers.ModelSerializer):
         ret['steps'] = self.get_step(instance)
         return ret
 
-class DbSerializer(SetEncryptMixins, serializers.ModelSerializer):
+class DbSerializer(SetEncryptMixin, serializers.ModelSerializer):
 
     class Meta:
-        model = Dbconf
+        model = DbConf
         fields = '__all__'
 
     def to_representation(self, instance):
@@ -68,7 +67,7 @@ class StrategySerializer(serializers.ModelSerializer):
         model = Strategy
         fields = '__all__'
 
-class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
+class PersonalSerializer(AppellationMixin, serializers.ModelSerializer):
     username = serializers.CharField(required=False)
     password = serializers.CharField(required=False)
 
@@ -80,8 +79,8 @@ class PersonalSerializer(AppellationMixins, serializers.ModelSerializer):
         return {'id':instance.id, 'username':instance.username}
 
     def get_leader(self, env, instance):
-        leader_obj = instance.leader if env == self.env_prd else instance
-        leader = {'id':leader_obj.id, 'username':leader_obj.username} if leader_obj else {}
+        leader_instance = instance.leader if env == self.env_prd else instance
+        leader = {'id':leader_instance.id, 'username':leader_instance.username} if leader_instance else {}
         return leader
 
     def get_db_list(self, instance):
@@ -139,7 +138,7 @@ class DbClusterSerializer(serializers.ModelSerializer):
         ret['dbs'] = [db.id for db in instance.dbconf_set.all()]
         return ret
 
-class InceptionVariablesSerializer(HandleInceptionSettingsMixins, serializers.ModelSerializer):
+class InceptionVariablesSerializer(HandleInceptionSettingsMixin, serializers.ModelSerializer):
 
     class Meta:
         model = InceptionVariables
@@ -162,13 +161,14 @@ class MailActionsSettingsSerializer(serializers.ModelSerializer):
         model = MailActions
         fields = '__all__'
 
-class DbWorkOrderSerializer(PromptMixins, serializers.ModelSerializer):
+class DbWorkOrderSerializer(PromptMixin, serializers.ModelSerializer):
 
     class Meta:
         model = DatabaseWorkOrder
         fields = '__all__'
 
     def to_representation(self, instance):
+        print('--- === ', instance, instance.treater)
         ret = super(DbWorkOrderSerializer, self).to_representation(instance)
         ret['commiter'] = instance.commiter.username
         ret['treater'] = instance.treater.username

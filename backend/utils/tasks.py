@@ -1,5 +1,4 @@
-#coding=utf-8
-
+# -*- coding: utf-8 -*-
 from celery import task
 from .mail import Mail
 

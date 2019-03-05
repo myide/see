@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 from django.dispatch import receiver
 from django.db.models.signals import post_migrate
 from .models import *
 from .data import *
 
-class AppMap:
+class AppMap(object):
 
     @property
     def data_list(self):

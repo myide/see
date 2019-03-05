@@ -1,4 +1,4 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework_bulk.drf3.mixins import BulkCreateModelMixin
@@ -6,7 +6,7 @@ from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import SqlQuery
 from utils.permissions import IsSuperUser
-from sqlmng.mixins import CheckStatusMixins, ActionMixins, MailMixin
+from sqlmng.mixins import CheckStatusMixin, MailMixin
 from sqlmng.serializers import *
 from sqlmng.models import *
 
@@ -20,8 +20,8 @@ class DbViewSet(BulkCreateModelMixin, BaseView):
     ret = res.get_ret()
 
     def get_queryset(self):
+        queryset = DbConf.objects.all()
         env = self.request.GET.get('env')
-        queryset = Dbconf.objects.all()
         if env:
             queryset = queryset.filter(env=env)
         return queryset
@@ -58,7 +58,7 @@ class DbViewSet(BulkCreateModelMixin, BaseView):
         self.ret['results'] = table_info
         return Response(self.ret)
 
-class DbWorkOrderViewSet(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
+class DbWorkOrderViewSet(CheckStatusMixin, MailMixin, BaseView):
     '''
         数据库工单CURD
     '''

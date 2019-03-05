@@ -1,4 +1,4 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
 import configparser
 import subprocess
 import pymysql
@@ -9,9 +9,9 @@ from sqlmng.models import InceptionConnection
 
 class Inception(object):
 
-    def __init__(self, sql, dbname = ''):
+    def __init__(self, sql, db_name = ''):
         self.sql = sql
-        self.dbname = dbname
+        self.db_name = db_name
 
     @property
     def get_inception_conn(self):
@@ -36,8 +36,8 @@ class Inception(object):
     def inception_handle(self, dbaddr):
         status = 0
         sql = '/* {} */\
-          inception_magic_start;\
-          use {}; {} inception_magic_commit;'.format(dbaddr, self.dbname, self.sql)
+            inception_magic_start;\
+            use {}; {} inception_magic_commit;'.format(dbaddr, self.db_name, self.sql)
         try:
             conn = pymysql.connect(user='', passwd='', db='', use_unicode=True, charset="utf8", **self.get_inception_conn)
             cur = conn.cursor()
@@ -52,7 +52,7 @@ class Inception(object):
 
     def manual(self):
         try:
-            conn = pymysql.connect(db=self.dbname, charset='utf8', **self.get_inception_backup)
+            conn = pymysql.connect(db=self.db_name, charset='utf8', **self.get_inception_backup)
             conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(self.sql)

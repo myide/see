@@ -1,8 +1,8 @@
-#coding:utf-8
-
+# -*- coding: utf-8 -*-
 import redis
 import time
 from django.conf import settings
+from utils.wrappers import catch_exception
 
 locals().update(settings.LOCK)
 
@@ -17,6 +17,7 @@ class RedisLock(object):
         cls.redis_client.delete(key)
 
     @classmethod
+    @catch_exception
     def set_lock(cls, key, value):
         return cls.redis_client.setnx(key, value)
 
@@ -25,9 +26,8 @@ class RedisLock(object):
         now = int(time.time())
         if cls.set_lock(key, now):
             return True
-        else:
-            lock_time = cls.redis_client.get(key)
-            if now > int(lock_time) + cls.timeout:
-                cls.delete_lock(key)
-                return cls.set_lock(key, now)
-            return False
+        lock_time = cls.redis_client.get(key)
+        if now > int(lock_time) + cls.timeout:
+            cls.delete_lock(key)
+            return cls.set_lock(key, now)
+        return False

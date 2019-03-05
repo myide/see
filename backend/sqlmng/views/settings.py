@@ -1,18 +1,16 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import ParseError
 from utils.baseviews import BaseView
-from utils.basemixins import PromptMixins
-from utils.sqltools import AutoQuery
+from utils.basemixins import PromptMixin
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
-from sqlmng.mixins import FixedDataMixins, CheckConn, HandleInceptionSettingsMixins
+from sqlmng.mixins import FixedDataMixin, CheckConn, HandleInceptionSettingsMixin
 from sqlmng.data import *
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class SqlSettingsViewSet(FixedDataMixins, BaseView):
+class SqlSettingsViewSet(FixedDataMixin, BaseView):
     '''
         设置SQL语句的属性（数量，拦截的字段）
     '''
@@ -28,7 +26,7 @@ class StrategyViewSet(BaseView):
     serializer_class = StrategySerializer
     permission_classes = [IsSuperUser]
 
-class PersonalSettingsViewSet(PromptMixins, BaseView):
+class PersonalSettingsViewSet(PromptMixin, BaseView):
     '''
         审核工单的用户个性化设置
     '''
@@ -57,7 +55,7 @@ class PersonalSettingsViewSet(PromptMixins, BaseView):
                 user.dbconf_set.add(db_id)
         return Response(res.get_ret())
 
-class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, BaseView):
+class InceptionVariablesViewSet(FixedDataMixin, HandleInceptionSettingsMixin, BaseView):
     '''
         Inception 变量
     '''
@@ -70,7 +68,7 @@ class InceptionVariablesViewSet(FixedDataMixins, HandleInceptionSettingsMixins, 
         self.set_variable(request)
         return Response(res.get_ret())
 
-class MailActionsSettingsViewSet(FixedDataMixins, BaseView):
+class MailActionsSettingsViewSet(FixedDataMixin, BaseView):
     '''
         发邮件对应的动作
     '''
@@ -92,7 +90,7 @@ class InceptionConnectionViewSet(BaseView):
     serializer_class = InceptionConnectionSerializer
     permission_classes = [IsSuperUser]
 
-class InceptionBackupView(HandleInceptionSettingsMixins, APIView):
+class InceptionBackupView(HandleInceptionSettingsMixin, APIView):
     '''
         Inception备份信息
     '''
@@ -113,7 +111,7 @@ class ConnectionCheckView(CheckConn, APIView):
 
 class ShowDatabasesView(CheckConn, APIView):
     '''
-        获取host地址的所有数据库
+        获取host地址的数据库
     '''
     def post(self, request, *args, **kwargs):
         ret = self.handle_get_databases(request)

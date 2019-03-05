@@ -1,11 +1,12 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
 import time
 from celery import task
 from django.conf import settings
 from account.models import User
 from utils.lock import RedisLock
 from utils.wrappers import close_old_conn
-from .models import Inceptsql
+from utils.basemixins import AppellationMixin
+from .models import InceptionWorkOrder
 from .mixins import Handle, MailMixin
 
 locals().update(settings.CELERY_BUSINESS_PARAMS)
@@ -13,7 +14,7 @@ locals().update(settings.CELERY_BUSINESS_PARAMS)
 class HandleAction(MailMixin, Handle):
 
     def __init__(self, instance=None):
-        self.steps = instance.workorder.step_set.all()
+        self.steps = instance.work_order.step_set.all()
 
     def get_user(self, user_id):
         return User.objects.get(id=user_id)
@@ -31,8 +32,9 @@ class HandleAction(MailMixin, Handle):
 
 @task
 def task_worker(pk, step_number, _type, user_id):
-    instance = Inceptsql.objects.get(pk=pk)
-    Handle.save_instance(instance, 6)
+    instance = InceptionWorkOrder.objects.get(pk=pk)
+    status = 7 if _type == AppellationMixin.urn_rollback else 6
+    Handle.save_instance(instance, status)
     action = HandleAction(instance)
     handle = getattr(action, _type)
     (instance, affected_rows), timer = handle(instance)
@@ -41,7 +43,7 @@ def task_worker(pk, step_number, _type, user_id):
 @task
 def cron_task():
     current_time = time.strftime(date_format, time.localtime(time.time()))
-    crontab_tasks = Inceptsql.objects.filter(cron_time=current_time, status=5)
+    crontab_tasks = InceptionWorkOrder.objects.filter(cron_time=current_time, status=5)
     if not crontab_tasks:
         return
     cron_user, _ = User.objects.get_or_create(username=username)

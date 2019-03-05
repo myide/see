@@ -1,17 +1,17 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from utils.baseviews import BaseView
 from workflow.serializers import StepSerializer
-from sqlmng.mixins import CheckStatusMixins, ActionMixins, MailMixin
+from sqlmng.mixins import CheckStatusMixin, ActionMixin, MailMixin
 from sqlmng.permissions import IsHandleAble
 from sqlmng.serializers import *
 from sqlmng.models import *
 from sqlmng.tasks import task_worker
 
-class InceptionMainView(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
+class InceptionMainView(CheckStatusMixin, ActionMixin, MailMixin, BaseView):
     '''
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
@@ -21,11 +21,13 @@ class InceptionMainView(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
     search_fields = ['commiter', 'sql_content', 'env', 'treater', 'remark']
 
     def get_queryset(self):
-        userobj = self.request.user
-        if userobj.is_superuser:
-            return self.filter_date(Inceptsql.objects.all())
-        query_set = userobj.groups.first().inceptsql_set.all() if userobj.role == self.dev_spm else userobj.inceptsql_set.all()
-        return self.filter_date(query_set)
+        user_instance = self.request.user
+        group_instance = user_instance.groups.first()
+        if user_instance.is_superuser:
+            return self.filter_date(InceptionWorkOrder.objects.all())
+        instance = group_instance if user_instance.role == self.dev_spm else user_instance
+        queryset = instance.inceptionworkorder_set.all()
+        return self.filter_date(queryset)
 
     @detail_route()
     def execute(self, request, *args, **kwargs):
@@ -69,6 +71,7 @@ class InceptionMainView(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
     def rollback(self, request, *args, **kwargs):
         instance = self.get_object()
         self.check_status(instance)
+        self.check_lock(instance)
         handle_type = self.rollback.__name__
         task_worker.delay(instance.id, 2, handle_type, request.user.id)
         return Response(self.serializer_class(instance).data)
@@ -81,13 +84,13 @@ class InceptionMainView(CheckStatusMixins, ActionMixins, MailMixin, BaseView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        last_step = instance.workorder.step_set.first()
+        last_step = instance.work_order.step_set.first()
         username = settings.CELERY_BUSINESS_PARAMS.get('username')
         cron_user, _ = User.objects.get_or_create(username=username)
         if last_step and (not last_step.user == cron_user):
             last_step.user = request.user
             self.save_instance(last_step, 1)
-            step_serializer = self.serializer_step(data={'work_order': instance.workorder.id, 'user': cron_user.id})
+            step_serializer = self.serializer_step(data={'work_order': instance.work_order.id, 'user': cron_user.id})
             step_serializer.is_valid(raise_exception=True)
             step_serializer.save()
         self.save_instance(instance, 5)
