@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-import time,logging
+import time
+import logging
+from functools import wraps
 from django.db import close_old_connections
 from rest_framework.exceptions import ParseError
 
 def timer(func):
+    @wraps(func)
     def wrapper(*args,**kwargs):
         start = time.time()
         try:
@@ -16,6 +19,7 @@ def timer(func):
     return wrapper
 
 def close_old_conn(func):
+    @wraps(func)
     def wrapper(*args,**kwargs):
         try:
             close_old_connections()
@@ -24,10 +28,11 @@ def close_old_conn(func):
             logging.error('programe running err:{}',format(e))
     return wrapper
 
-def catch_exception(fun):
+def catch_exception(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            return fun(*args, **kwargs)
+            return func(*args, **kwargs)
         except Exception as e:
             raise ParseError(e)
     return wrapper

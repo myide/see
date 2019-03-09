@@ -43,7 +43,6 @@ class Inception(object):
             cur = conn.cursor()
             cur.execute(sql)
             result = cur.fetchall()
-            cur.close()
             conn.close()
         except pymysql.Error as e:
             status = -1
@@ -53,9 +52,9 @@ class Inception(object):
     def manual(self):
         try:
             conn = pymysql.connect(db=self.db_name, charset='utf8', **self.get_inception_backup)
-            conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(self.sql)
+            conn.close()
         except Exception:
             return []
         return cur.fetchall()
@@ -93,19 +92,19 @@ class HandleConn(object):
         params['port'] = int(params.get('port', 0))
         return params
 
-    def main(self, params, sql):
+    def main(self, params, sql, select=False):
         params.update(self.conn_conf)
         try:
             params = self.convert_params(params)
             conn = pymysql.connect(**params)
-            conn.autocommit(True)
             cur = conn.cursor()
             cur.execute(sql)
-            cur.close()
             conn.close()
         except Exception as e:
+            if select:
+                return 2, [e]
             raise ParseError(e)
-        return cur.fetchall()
+        return 0, cur.fetchall()
 
 class AutoQuery(HandleConn):
 
@@ -143,7 +142,7 @@ class SqlQuery(HandleConn):
         return tables
 
     def get_select_result(self, sql):
-        data = self.main(self.params, sql)
+        data = self.main(self.params, sql, select=True)
         return data
 
     def get_table_info(self, table_name):

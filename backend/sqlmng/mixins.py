@@ -381,9 +381,9 @@ class Handle(ActionMixin):
     @timer
     def select(self, instance):
         sql_query = SqlQuery(instance.db)
-        data = sql_query.get_select_result(instance.sql_content)
+        status, data = sql_query.get_select_result(instance.sql_content)
         instance.handle_result_execute = json.dumps([str(row) for row in data], cls=DateEncoder)
-        instance.status = 0
+        instance.status = status
         return instance, len(data)
 
     @timer
