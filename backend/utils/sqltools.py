@@ -110,7 +110,7 @@ class AutoQuery(HandleConn):
 
     def get_databases(self, params):
         sql = 'SHOW DATABASES;'
-        return self.main(params, sql)
+        return self.main(params, sql)[1]
 
     def conn_database(self, params):
         sql = 'USE {}'.format(params.get('db'))
