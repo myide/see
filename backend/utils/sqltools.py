@@ -147,7 +147,6 @@ class SqlQuery(HandleConn):
 
     def get_table_info(self, table_name):
         sql = 'SHOW CREATE TABLE {}'.format(table_name)
-        print(self.main(self.params, sql))
         table_info = self.main(self.params, sql)[1][0][1]
         return table_info
 
