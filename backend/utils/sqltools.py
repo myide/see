@@ -37,7 +37,7 @@ class Inception(object):
         status = 0
         sql = '/* {} */\
             inception_magic_start;\
-            use {}; {} inception_magic_commit;'.format(dbaddr, self.db_name, self.sql)
+            use `{}`; {} inception_magic_commit;'.format(dbaddr, self.db_name, self.sql)
         try:
             conn = pymysql.connect(user='', passwd='', db='', use_unicode=True, charset="utf8", **self.get_inception_conn)
             cur = conn.cursor()
@@ -147,6 +147,7 @@ class SqlQuery(HandleConn):
 
     def get_table_info(self, table_name):
         sql = 'SHOW CREATE TABLE {}'.format(table_name)
+        print(self.main(self.params, sql))
         table_info = self.main(self.params, sql)[1][0][1]
         return table_info
 
