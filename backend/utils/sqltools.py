@@ -153,7 +153,7 @@ class SqlQuery(HandleConn):
     def get_user_drop_priv(self):
         sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, self.db.host)
         try:
-            priv = self.main(self.params, sql)[0][0]
+            priv = self.main(self.params, sql)[1][0][0]
         except Exception:
             priv = 'N'
         return '-online-dsn' if priv == 'N' else '-test-dsn'
