@@ -44,7 +44,7 @@ sh inception_build.sh builddir linux
 ```
 
 ##### 2.2 修改配置
-编辑文件 /etc/inc.cnf ,内容如下 
+创建文件 /etc/inc.cnf ,内容如下 
 ```ini
 [inception]
 general_log=1
