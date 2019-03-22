@@ -151,7 +151,7 @@ class SqlQuery(HandleConn):
         return table_info
 
     def get_user_drop_priv(self):
-        sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, self.db.host)
+        sql = "SELECT Drop_priv FROM mysql.user WHERE User='{}' AND Host='{}'".format(self.db.user, 'localhost')
         try:
             priv = self.main(self.params, sql)[1][0][0]
         except Exception:
