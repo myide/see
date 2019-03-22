@@ -160,7 +160,7 @@ class SqlQuery(HandleConn):
 
     def cmd_res(self, cmd):
         data = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        return data.stdout.read()
+        return data.stdout.read().decode('utf-8')
 
     def sql_advisor(self, sql):
         cmd = '{} -h {} -P {} -u {} -p "{}" -d {} -q "{};" -v 1'.format(self.sqladvisor_cli, self.db.host, self.db.port, self.db.user, self.password, self.db.name, self.convert_sql(sql))
