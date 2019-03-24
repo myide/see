@@ -1,19 +1,19 @@
-import axios from '../../libs/http'
+import axios from '../../libs/http';
 
-const variablesUrl = '/api/sqlmng/inception/variables/'
-const connectionUrl = '/api/sqlmng/inception/connection/'
-const backupUrl = '/api/sqlmng/inception/backup/'
-const checkConnUrl = '/api/sqlmng/inception/conncheck/'
+const variablesUrl = '/api/sqlmng/inception/variables/';
+const connectionUrl = '/api/sqlmng/inception/connection/';
+const backupUrl = '/api/sqlmng/inception/backup/';
+const checkConnUrl = '/api/sqlmng/inception/conncheck/';
 
-export function GetInceptionVariables(params) {
+export function GetInceptionVariables (params) {
     return axios({
         url: variablesUrl,
         method: 'get',
         params
-    })
+    });
 }
 
-export function SetInceptionVariables(data) {
+export function SetInceptionVariables (data) {
     return axios({
         url: variablesUrl,
         method: 'post',
@@ -21,7 +21,7 @@ export function SetInceptionVariables(data) {
     });
 }
 
-export function CheckConn(data) {
+export function CheckConn (data) {
     return axios({
         url: checkConnUrl,
         method: 'post',
@@ -29,7 +29,7 @@ export function CheckConn(data) {
     });
 }
 
-export function GetInceptionBackup(params) {
+export function GetInceptionBackup (params) {
     return axios({
         url: backupUrl,
         method: 'get',
@@ -37,15 +37,15 @@ export function GetInceptionBackup(params) {
     })
 }
 
-export function GetInceptionConnection(params) {
+export function GetInceptionConnection (params) {
     return axios({
         url: connectionUrl,
         method: 'get',
         params
-    })
+    });
 }
 
-export function UpdateInceptionConnection(id, data) {
+export function UpdateInceptionConnection (id, data) {
     return axios({
         url: connectionUrl + id + '/',
         method: 'put',
@@ -53,7 +53,7 @@ export function UpdateInceptionConnection(id, data) {
     });
 }
 
-export function CreateInceptionConnection(data) {
+export function CreateInceptionConnection (data) {
     return axios({
         url: connectionUrl,
         method: 'post',

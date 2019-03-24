@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-
     ROLES = (
         ('developer_supremo', u'总监'),
         ('developer_manager', u'经理'),
@@ -12,6 +11,7 @@ class User(AbstractUser):
     leader = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE, related_name='leader_devs')
     admin_mail = models.ForeignKey('User', null=True, blank=True, on_delete=models.CASCADE, related_name='admin_devs')
     role = models.CharField(max_length=32, default='developer', choices=ROLES)
+    mail_list_extend = models.TextField(null=True, blank=True)
     remark = models.CharField(max_length=128, default='', blank=True)
 
     class Meta:

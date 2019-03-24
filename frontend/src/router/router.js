@@ -107,7 +107,8 @@ export const appRouter = [{
         title: '平台设置',
         name: 'settings',
         component: Main,
-        children: [{
+        children: [
+            {
                 path: 'authrules',
                 title: '权限规则',
                 name: 'authrules',
@@ -127,8 +128,7 @@ export const appRouter = [{
                 name: 'inception',
                 component: () =>
                     import ('@/views/sql/inceptionSettings.vue')
-            },   
-            
+            }
         ]
     },
 
@@ -138,7 +138,15 @@ export const appRouter = [{
         title: '目标库管理',
         name: 'target',
         component: Main,
-        children: [{
+        children: [
+            {
+                path: 'apply',
+                title: '申请',
+                name: 'apply',
+                component: () =>
+                    import ('@/views/sql/dbworkorder.vue')
+            },
+            {
                 path: 'cluster',
                 title: '集群',
                 name: 'cluster',
@@ -151,7 +159,7 @@ export const appRouter = [{
                 name: 'dblist',
                 component: () =>
                     import ('@/views/sql/dbList.vue')
-            },
+            }
         ]
     },
 
@@ -161,7 +169,8 @@ export const appRouter = [{
         title: '用户管理',
         name: 'accountmng',
         component: Main,
-        children: [{
+        children: [
+            {
                 path: 'user',
                 title: '用户',
                 name: 'user',
@@ -174,8 +183,7 @@ export const appRouter = [{
                 name: 'group',
                 component: () =>
                     import ('@/views/account/group.vue')
-            },
-
+            }
         ]
     },
 

@@ -1,12 +1,12 @@
-from sqlmng.models import Inceptsql
+# -*- coding: utf-8 -*-
+from sqlmng.models import InceptionWorkOrder
 from .mixins import DownloadBaseView
 
-# Create your views here.
 class SqlFileView(DownloadBaseView):
     '''
         文件下载
     '''
-    model = Inceptsql
+    model = InceptionWorkOrder
 
     def get_content(self):
         pk = self.kwargs.get('pk')

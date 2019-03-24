@@ -1,7 +1,5 @@
-#coding=utf-8
+# -*- coding: utf-8 -*-
 from cryptography.fernet import Fernet
-
-##  key = base64.urlsafe_b64encode(os.urandom(32))  生成key
 
 class prpcrypt:
 
@@ -9,14 +7,14 @@ class prpcrypt:
 
     @classmethod
     def encrypt(cls, password):
-        f = Fernet(cls.key)
-        passwd_encode = password.encode()
-        token = f.encrypt(passwd_encode)
+        fn = Fernet(cls.key)
+        password_encode = password.encode()
+        token = fn.encrypt(password_encode)
         return token.decode()
 
     @classmethod
     def decrypt(cls, password):
-        f = Fernet(cls.key)
-        passwd_encode = password.encode()
-        token = f.decrypt(passwd_encode)
+        fn = Fernet(cls.key)
+        password_encode = password.encode()
+        token = fn.decrypt(password_encode)
         return token.decode()

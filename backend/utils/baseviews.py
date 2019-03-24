@@ -1,6 +1,7 @@
-#coding=utf8
+# -*- coding: utf-8 -*-
 from rest_framework import viewsets
 from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
 class ReturnFormatMixin(object):
@@ -23,9 +24,7 @@ class MaxSizePagination(BasePagination):
 class BaseView(viewsets.ModelViewSet):
     queryset = None
     serializer_class = None
-    permission_classes = []
-    # 分页
+    permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
-    # 搜索
     filter_backends = [filters.SearchFilter]
     search_fields = []

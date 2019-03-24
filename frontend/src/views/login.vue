@@ -80,8 +80,9 @@ export default {
                 if (valid) {
                     if (this.loginType == 'unified') {
                         this.Unified(this.form.userName, this.form.password) 
+                    } else {
+                        this.login(this.form.userName, this.form.password) 
                     }
-                    this.login(this.form.userName, this.form.password) 
                 }
             });
         },
@@ -122,7 +123,7 @@ export default {
             const data = { username: user, password: password }
             UnifiedAuth(data)
             .then(response => {
-
+                this.login(user, password) 
             })
         }
 

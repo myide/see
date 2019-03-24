@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 auth_rules = [
 	{
@@ -5,6 +6,7 @@ auth_rules = [
 		'role':'developer',
 		'env':'prd',
 		'reject':True,
+		'cron':False,
 		'execute':False,
 		'rollback':False,
 		'approve':False,
@@ -15,6 +17,7 @@ auth_rules = [
 		'role':'developer_manager',
 		'env':'prd',
 		'reject':True,
+		'cron': False,
 		'execute':False,
 		'rollback':False,
 		'approve':True,
@@ -25,6 +28,7 @@ auth_rules = [
 		'role':'developer_supremo',
 		'env':'prd',
 		'reject':True,
+		'cron': False,
 		'execute':False,
 		'rollback':False,
 		'approve':True,
@@ -35,6 +39,7 @@ auth_rules = [
 		'role':'admin',
 		'env':'prd',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':True,
@@ -46,6 +51,7 @@ auth_rules = [
 		'role':'developer',
 		'env':'prd',
 		'reject':True,
+		'cron': False,
 		'execute':False,
 		'rollback':False,
 		'approve':False,
@@ -56,6 +62,7 @@ auth_rules = [
 		'role':'developer_manager',
 		'env':'prd',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -66,6 +73,7 @@ auth_rules = [
 		'role':'developer_supremo',
 		'env':'prd',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -76,6 +84,7 @@ auth_rules = [
 		'role':'admin',
 		'env':'prd',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -87,6 +96,7 @@ auth_rules = [
 		'role':'developer',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -97,6 +107,7 @@ auth_rules = [
 		'role':'developer_manager',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -107,6 +118,7 @@ auth_rules = [
 		'role':'developer_supremo',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -117,6 +129,7 @@ auth_rules = [
 		'role':'admin',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -128,6 +141,7 @@ auth_rules = [
 		'role':'developer',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -138,6 +152,7 @@ auth_rules = [
 		'role':'developer_manager',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -148,6 +163,7 @@ auth_rules = [
 		'role':'developer_supremo',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -158,6 +174,7 @@ auth_rules = [
 		'role':'admin',
 		'env':'test',
 		'reject':True,
+		'cron': True,
 		'execute':True,
 		'rollback':True,
 		'approve':False,
@@ -361,8 +378,12 @@ mail_actions = [
 		'desc_cn':'审核'
 	},
 	{
-		'name': '--enable-execute',
+		'name': 'execute',
         'desc_cn':'执行'
+	},
+	{
+		'name': 'select',
+        'desc_cn':'查询'
 	},
 	{
 		'name': 'approve',
@@ -370,7 +391,7 @@ mail_actions = [
 	},
 	{
 		'name': 'disapprove',
-        'desc_cn':'审批拒绝'
+        'desc_cn':'审批驳回'
 	},
 	{
 		'name': 'reject',
@@ -380,6 +401,22 @@ mail_actions = [
 		'name': 'rollback',
         'desc_cn':'回滚'
 	},
+	{
+		'name': 'db_order_apply',
+        'desc_cn':'申请数据库工单'
+	},
+	{
+		'name': 'db_order_approve',
+        'desc_cn':'审核数据库工单'
+	},
+	{
+		'name': 'db_order_disapprove',
+        'desc_cn':'驳回数据库工单'
+	},
+	{
+		'name': 'db_order_reject',
+        'desc_cn':'放弃数据库工单'
+	}
 ]
 
 inception_conn = [

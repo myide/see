@@ -44,7 +44,7 @@ sh inception_build.sh builddir linux
 ```
 
 ##### 2.2 修改配置
-编辑文件 /etc/inc.cnf ,内容如下 
+创建文件 /etc/inc.cnf ,内容如下 
 ```ini
 [inception]
 general_log=1
@@ -90,8 +90,9 @@ yum install -y cmake libaio-devel libffi-devel glib2 glib2-devel bison
 yum remove -y mysql-community-client mysql-community-server mysql-community-common mysql-community-libs
 cd /usr/lib64/ 
 ln -s libperconaserverclient_r.so.18 libperconaserverclient_r.so 
-yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
-yum install Percona-Server-shared-56
+wget http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm -O /tmp/percona-release-0.1-3.noarch.rpm
+rpm -ivh /tmp/percona-release-0.1-3.noarch.rpm
+yum install -y Percona-Server-shared-56
 cd /usr/local/src/SQLAdvisor/
 cmake -DBUILD_CONFIG=mysql_release -DCMAKE_BUILD_TYPE=debug -DCMAKE_INSTALL_PREFIX=/usr/local/sqlparser ./
 make && make install
@@ -329,8 +330,9 @@ redis-server /etc/redis.conf
 /usr/local/nginx/sbin/nginx
 
 # see  8090端口
+source /usr/local/seevenv/bin/activate
 cd /usr/local/seevenv/see-master/backend
-nohup python manage.py celery worker -c 4 --loglevel=info &
+nohup python manage.py celery worker -c 10 -B --loglevel=info &
 gunicorn -c sqlweb/gunicorn_config.py sqlweb.wsgi
 ```
 

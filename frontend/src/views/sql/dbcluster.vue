@@ -78,7 +78,7 @@
 
     <Modal
         v-model="showContent.modal"
-        width="600"
+        width="800"
         :title="showContent.title">
         <div class="modalcontent">
           <Table :columns="columnsDbList" :data="showContent.data" size="small"></Table>
@@ -228,11 +228,13 @@
           },
           {
               title: '端口',
-              key: 'port'
+              key: 'port',
+              width: 80
           },
           {
               title: '用户名',
-              key: 'user'
+              key: 'user',
+              width: 120
           },
           {
             title: '环境',
