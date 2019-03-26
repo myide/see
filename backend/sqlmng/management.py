@@ -30,13 +30,14 @@ class AppMap(object):
             self.handle_data(item[0], item[1][0], 1)
 
     def auth(self):
-        content_type = ContentType.objects.get(model=self.content_type)
-        data = {
-            'name': 'Can manage target database',
-            'content_type': content_type,
-            'codename': self.perm
-            }
-        self.handle_data(Permission, data, 1)
+        content_type = ContentType.objects.filter(model=self.content_type)
+        if content_type:
+            data = {
+                'name': 'Can manage target database',
+                'content_type': content_type[0],
+                'codename': self.perm
+                }
+            self.handle_data(Permission, data, 1)
 
 @receiver(post_migrate)
 def callback(sender, **kwargs):
