@@ -5,20 +5,31 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 from rest_framework.response import Response
 from utils.permissions import IsSuperUser
-from utils.basemixins import PromptMixin
+from utils.basemixins import PromptMixin, AppellationMixin
 from utils.baseviews import MaxSizePagination, BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.unitaryauth import UnitaryAuth
+from utils.wrappers import permission_admin
+from sqlmng.models import DbConf
 from .serializers import *
 
-class PermissionViewSet(BaseView):
+class PermissionViewSet(AppellationMixin, BaseView):
     '''
         系统权限CURD
     '''
     pagination_class = MaxSizePagination
-    queryset = Permission.objects.all()
+    queryset = DbConf.objects.all()
     serializer_class = PermissionSerializer
     permission_classes = [IsSuperUser]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = user.role
+        if role in [self.dev_mng, self.dev_spm]:
+            perms = user.userobjectpermission_set.all()
+            db_id_list = [int(perm.object_pk) for perm in perms if perm]
+            return self.queryset.filter(id__in=db_id_list)
+        return self.queryset
 
 class GroupViewSet(BaseView):
     '''
@@ -29,18 +40,24 @@ class GroupViewSet(BaseView):
     permission_classes = [IsSuperUser]
     search_fields = ['name']
 
+    def perform_create(self, serializer):
+        serializer.create(self.request.data)
+
+    def perform_update(self, serializer):
+        serializer.update(self.get_object(), self.request.data)
+
 class UserViewSet(BaseView):
     '''
         系统用户CURD
     '''
     queryset = User.objects.order_by('-id')
     serializer_class = UserSerializer
-    permission_classes = [IsSuperUser]
     search_fields = ['username']
 
     def perform_update(self, serializer):
         serializer.update(self.get_object(), self.request.data)
 
+    @permission_admin
     def perform_create(self, serializer):
         serializer.create(self.request.data)
 

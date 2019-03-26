@@ -1,64 +1,101 @@
 # -*- coding:utf-8 -*-
 from django.contrib.auth.models import Group, Permission
+from guardian.models import UserObjectPermission, GroupObjectPermission
 from collections import OrderedDict
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+from utils.basemixins import AppellationMixin, PromptMixin
+from sqlmng.models import DbConf
 from .models import User
+from .mixins import SetPerm
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(AppellationMixin, PromptMixin, SetPerm, serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['user_permissions']
 
     def to_representation(self, instance):
         ret = super(UserSerializer, self).to_representation(instance)
         if not isinstance(instance, OrderedDict):
             group_instance = instance.groups.first()
             groups = {'id':group_instance.id, 'name':group_instance.name} if group_instance else {}
-            perm_list = instance.user_permissions.all()
-            perms = [{'id':perm.id, 'name':perm.name} for perm in perm_list]
             ret['groups'] = groups
-            ret['perms'] = perms
+            ret['perms'] = self.get_perms(instance.userobjectpermission_set.all())
         return ret
 
+    def check_permission(self, validated_data):
+        user = self.context['request'].user
+        if user.is_superuser:
+            return
+        username = validated_data.get('username')
+        validated_user = User.objects.get(username=username)
+        role = user.role
+        if role == self.dev_mng:
+            if user != validated_user.leader:
+                raise PermissionDenied(self.permission_leader.format(username))
+        if role == self.dev_spm:
+            group = user.groups.first()
+            if group != validated_user.groups.first():
+                raise PermissionDenied(self.permission_group.format(username))
+        if role == self.dev:
+            raise PermissionDenied
+
     def create(self, validated_data):
+        db_id_list = validated_data.pop('db_id_list', [])
         instance = super(UserSerializer, self).create(validated_data)
         instance.set_password(validated_data['password'])
         instance.save()
+        self.create_perm(instance, db_id_list, UserObjectPermission)
         return instance
 
     def update(self, instance, validated_data):
+        self.check_permission(validated_data)
+        db_id_list = validated_data.pop('db_id_list', [])
         password = validated_data.pop('password', None)
         if instance.password != password:
             instance.set_password(password)
+        UserObjectPermission.objects.filter(user=instance).delete()
+        self.create_perm(instance, db_id_list, UserObjectPermission)
         return super(UserSerializer, self).update(instance, validated_data)
 
-class GroupSerializer(serializers.ModelSerializer):
+class GroupSerializer(SetPerm, serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = '__all__'
+        exclude = ['permissions']
 
     def to_representation(self, instance):
         ret = super(GroupSerializer, self).to_representation(instance)
         if not isinstance(instance, OrderedDict):
-            perm_set = instance.permissions.all()
-            perms = [{'id':perm.id, 'name':perm.name} for perm in perm_set]
             member_set = instance.user_set.all()
             members = [{'id':user.id, 'name':user.username, 'role':user.role} for user in member_set]
-            ret['perms'] = perms
+            ret['perms'] = self.get_perms(instance.groupobjectpermission_set.all())
             ret['members'] = members
         return ret
 
-class PermissionSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        db_id_list = validated_data.pop('db_id_list', [])
+        instance = super(GroupSerializer, self).create(validated_data)
+        instance.save()
+        self.create_perm(instance, db_id_list, GroupObjectPermission)
+        return instance
+
+    def update(self, instance, validated_data):
+        db_id_list = validated_data.pop('db_id_list', [])
+        GroupObjectPermission.objects.filter(group=instance).delete()
+        self.create_perm(instance, db_id_list, GroupObjectPermission)
+        return super(GroupSerializer, self).update(instance, validated_data)
+
+class PermissionSerializer(AppellationMixin, serializers.ModelSerializer):
     perm_name = serializers.SerializerMethodField()
 
     class Meta:
-        model = Permission
+        model = DbConf
         fields = '__all__'
 
     def get_perm_name(self, instance):
-        return ' '.join((instance.content_type.app_label, instance.content_type.model, instance.name))
+        return ' | '.join((instance.cluster.name, self.env_desc_map.get(instance.env), instance.name))
 
 class PersonalCenterSerializer(serializers.ModelSerializer):
 

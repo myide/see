@@ -50,6 +50,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'rest_framework.authentication.TokenAuthentication',
     'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 # jwt setting
@@ -102,6 +103,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_swagger',
+    'guardian',
     'account',
     'sqlmng',
     'workflow'
@@ -239,7 +241,7 @@ INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 
-#optimize设置
+# optimize设置
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
     'soar_cli': '/usr/local/SOAR/bin/soar'
@@ -255,14 +257,17 @@ MAIL = {
     'see_addr': 'http://xxx.xxx.xxx.xxx:81',  # see项目访问地址
 }
 
+# Object Permissson
+PERM_DATABASE = 'perm_database'
+
 # CELERY
 import djcelery
 from celery import platforms
 from celery.schedules import crontab
 platforms.C_FORCE_ROOT = True
 djcelery.setup_loader()
-BROKER_URL = 'redis://127.0.0.1:6379/0'  # redis broker
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'  # redis backend
+BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
@@ -271,7 +276,7 @@ CELERY_IMPORTS = ('utils.tasks', 'sqlmng.tasks')
 CELERYBEAT_SCHEDULE = {
     'cron_task': {
         'task': 'sqlmng.tasks.cron_task',
-        'schedule': crontab(),  # 每分钟执行一次
+        'schedule': crontab(),
     }
 }
 CELERY_BUSINESS_PARAMS = {
@@ -284,78 +289,66 @@ CELERY_BUSINESS_PARAMS = {
 BASE_LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 LOGGING = {
-    'version': 1,  # 保留字
-    'disable_existing_loggers': False,  # 禁用已经存在的logger实例
-    # 日志文件的格式
+    'version': 1,
+    'disable_existing_loggers': False,
     'formatters': {
-        # 详细的日志格式
         'standard': {
             'format': '[%(asctime)s][%(threadName)s:%(thread)d][task_id:%(name)s][%(filename)s:%(lineno)d]'
                       '[%(levelname)s][%(message)s]'
         },
-        # 简单的日志格式
         'simple': {
             'format': '[%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d]%(message)s'
         },
-        # 定义一个特殊的日志格式
         'collect': {
             'format': '%(message)s'
         }
     },
-    # 过滤器
     'filters': {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
-    # 处理器
     'handlers': {
-        # 在终端打印
         'console': {
             'level': 'DEBUG',
-            'filters': ['require_debug_true'],  # 只有在Django debug为True时才在屏幕打印日志
-            'class': 'logging.StreamHandler',  #
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        # 默认的
         'default': {
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_LOG_DIR, "see.info.log"),  # 日志文件
-            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
-            'backupCount': 3,  # 最多备份几个
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, "see.info.log"),
+            'maxBytes': 1024 * 1024 * 50,
+            'backupCount': 3,
             'formatter': 'standard',
             'encoding': 'utf-8',
         },
-        # 专门用来记错误日志
         'error': {
             'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
-            'filename': os.path.join(BASE_LOG_DIR, "see.error.log"),  # 日志文件
-            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_LOG_DIR, "see.error.log"),
+            'maxBytes': 1024 * 1024 * 50,
             'backupCount': 5,
             'formatter': 'standard',
             'encoding': 'utf-8',
         },
-        # 专门定义一个收集特定信息的日志
         'collect': {
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',  # 保存到文件，自动切
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_LOG_DIR, "see.collect.log"),
-            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+            'maxBytes': 1024 * 1024 * 50,
             'backupCount': 5,
             'formatter': 'collect',
             'encoding': "utf-8"
         }
     },
     'loggers': {
-       # 默认的logger应用如下配置
         '': {
-            'handlers': ['default', 'console', 'error'],  # 上线之后可以把'console'移除
+            'handlers': ['default', 'console', 'error'],
             'level': 'DEBUG',
-            'propagate': True,  # 向不向更高级别的logger传递
+            'propagate': True,
         },
-        # 名为 'collect'的logger还单独处理
         'collect': {
             'handlers': ['console', 'collect'],
             'level': 'INFO',
