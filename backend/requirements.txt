@@ -13,3 +13,4 @@ celery-with-redis==3.0
 uwsgi==2.0.17.1
 gunicorn==19.9.0
 djangorestframework-bulk==0.2.1
+django-guardian==1.4.9
