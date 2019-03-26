@@ -216,6 +216,7 @@ pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mir
 mysql -uroot -p123456 -e "create database sqlweb CHARACTER SET utf8;"
 python manage.py makemigrations
 python manage.py migrate
+python manage.py migrate
 
 ```
 
