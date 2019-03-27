@@ -26,7 +26,7 @@ class UserSerializer(AppellationMixin, PromptMixin, SetPerm, serializers.ModelSe
 
     def check_permission(self, validated_data):
         if not self.context:
-            return        
+            raise PermissionDenied        
         user = self.context['request'].user
         if user.is_superuser:
             return
@@ -97,7 +97,8 @@ class PermissionSerializer(AppellationMixin, serializers.ModelSerializer):
         fields = '__all__'
 
     def get_perm_name(self, instance):
-        return ' | '.join((instance.cluster.name, self.env_desc_map.get(instance.env), instance.name))
+        name = instance.cluster.name if instance.cluster else ''
+        return ' | '.join((name, self.env_desc_map.get(instance.env), instance.name))
 
 class PersonalCenterSerializer(serializers.ModelSerializer):
 
