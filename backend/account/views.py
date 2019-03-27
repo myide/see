@@ -61,6 +61,10 @@ class UserViewSet(BaseView):
     def perform_create(self, serializer):
         serializer.create(self.request.data)
 
+    @permission_admin
+    def perform_destroy(self, instance):
+        instance.delete()
+            
 class PersonalCenterViewSet(PromptMixin, BaseView):
     '''
         个人中心
