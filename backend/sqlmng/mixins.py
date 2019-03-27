@@ -36,12 +36,13 @@ class ChangeSpecialCharacterMixin(object):
     transference_character = '\\'
 
     def convert(self, forbidden_words):
-        forbidden_words_list = forbidden_words.split()
+        forbidden_words_list = forbidden_words.split('/')
         forbidden_list = []
         for word in forbidden_words_list:
-            if word and word in self.special_character_list:
-                word = '{}{}'.format(self.transference_character, word)
-            forbidden_list.append(word)
+            if word:
+                if word in self.special_character_list:
+                    word = '{}{}'.format(self.transference_character, word)
+                forbidden_list.append(word)
         return forbidden_list
 
     def reverse(self, forbidden_list):
