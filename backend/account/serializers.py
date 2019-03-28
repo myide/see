@@ -26,7 +26,7 @@ class UserSerializer(AppellationMixin, PromptMixin, SetPerm, serializers.ModelSe
 
     def check_permission(self, validated_data):
         if not self.context:
-            raise PermissionDenied        
+            return
         user = self.context['request'].user
         if user.is_superuser:
             return
