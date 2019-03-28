@@ -42,7 +42,7 @@
         <FormItem label="权限：">          
           <Transfer
             :data="permissionList"
-            :target-keys="createGroupForm.permissions"
+            :target-keys="createGroupForm.db_id_list"
             filterable
             :filter-method="filterMethod"
             @on-change="handleChangecreate"
@@ -70,7 +70,7 @@
         <FormItem label="权限：">          
           <Transfer
             :data="updateGroupForm.sourcePerms"
-            :target-keys="updateGroupForm.permissions"
+            :target-keys="updateGroupForm.db_id_list"
             filterable
             :filter-method="filterMethod"
             @on-change="handleChangeupdate"
@@ -86,11 +86,11 @@
         width="450"
         :title="showContent.title">
         <div class="modalcontent">
-          <div v-for="item in showContent.data" :value="item.id" :key="item.id">
+          <div v-for="item in showContent.data" :value="item.label" :key="item.label">
             <p v-if="item.role == 'developer'"> {{ item.name }} ( 研发 ) </p>
             <p v-else-if="item.role == 'developer_manager'"> {{ item.name }} ( 研发经理 ) </p>
             <p v-else-if="item.role == 'developer_supremo'"> {{ item.name }} ( 研发总监 ) </p>
-            <p v-else> {{ item.name }} </p>
+            <p v-else> {{ item.label }} </p>
           </div>
         </div>
     </Modal>      
@@ -121,11 +121,11 @@
         createModal:false,
         updateModal:false,
         // 创建穿梭框        
-        listStyle: {
+        listStyle:{
           width: '300px',
           height: '300px'
         },
-        transferTitles: ['系统权限', '组权限'],
+        transferTitles:['系统权限', '组权限'],
         permissionList:[],
         groupList:[],
         // 显示组权限或成员
@@ -137,7 +137,7 @@
         // 创建组数据
         createGroupForm:{
           name:'',
-          permissions:[],
+          db_id_list:[],
         },
         ruleCreateGroupForm:{
           name: [{ required: true, message: '组名不能为空', trigger: 'blur' }],
@@ -147,7 +147,7 @@
           id: '',
           name:'',
           sourcePerms:[],
-          permissions:[]
+          db_id_list:[]
         },
         ruleUpdateGroupForm:{
           name: [{ required: true, message: '组名不能为空', trigger: 'blur' }],
@@ -179,7 +179,16 @@
                           click: () => {
                             this.showContent.modal = true
                             this.showContent.title = params.row.name + ' 权限'
-                            this.showContent.data = data
+                            let permissions= []
+                            for (let perm of data) {
+                              for (let p of this.permissionList) {
+                                if (perm.id == p.key) {
+                                  permissions.push(p)
+                                }
+                              }
+                            }
+                            this.showContent.data = permissions
+                            console.log(permissions)
                           }
                         }
                     }, '权限')
@@ -241,13 +250,13 @@
                           let perms = []
                           const groupperms = params.row.perms
                           groupperms.map( (item) => {
-                             perms.push(item.id)
+                            perms.push(item.id)
                           })
-                          this.updateGroupForm.permissions = perms
+                          this.updateGroupForm.db_id_list = perms
                           // 系统的权限数据
                           let sourceperms = []
                           this.permissionList.map( (item) => {
-                            if (contains(groupperms, item.id) == false ){
+                            if (contains(groupperms, item.id) == false){
                               sourceperms.push(item)
                             }
                           })
@@ -328,11 +337,11 @@
       },
 
       handleChangecreate (newTargetKeys) {
-        this.createGroupForm.permissions = newTargetKeys;
+        this.createGroupForm.db_id_list = newTargetKeys;
       },
 
       handleChangeupdate (newTargetKeys) {
-        this.updateGroupForm.permissions = newTargetKeys;
+        this.updateGroupForm.db_id_list = newTargetKeys;
       },
 
       filterMethod (data, query) {

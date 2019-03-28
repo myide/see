@@ -17,7 +17,7 @@
                 <Slider v-model="sqlsettings.sql_count_limit" :max="10000"></Slider>
               </FormItem>
               <FormItem label="SQL语句禁用词">
-                <Input v-model="sqlsettings.forbidden_words" :readonly="readonly" type="textarea" :rows="3" placeholder="SQL语句里不允许出现的词，多个以空格分隔" />
+                <Input v-model="sqlsettings.forbidden_words" :readonly="readonly" type="textarea" :rows="3" placeholder="SQL语句里不允许出现的词，多个以/分隔" />
               </FormItem>
               <FormItem label="操作">
                 <div>
@@ -33,12 +33,13 @@
             <Alert type="warning" show-icon closable>
               <b>SQL审核设置</b>
             <template slot="desc">
-                <p class="left20">
-                  <b>1</b>. 限制每个工单的SQL语句数量；默认1000，最大可设置10000。
-                </p>
-                <p class="left20">
-                  <b>2</b>. 可指定不允许语句中出现的词，对包含禁词的SQL语句，后端会做拦截处理。
-                </p>
+                <div class="left20">
+                  <p><b>1</b>. 限制每个工单的SQL语句数量；默认1000，最大可设置10000。</p>
+                </div>
+                <div class="left20">
+                  <p><b>2</b>. 可指定不允许语句中出现的词（多个以/分隔），对包含禁词的SQL语句，后端会做拦截处理。</p>
+                  <p> 示例：*/drop test1/^test2 </p>
+                </div>
             </template>
             </Alert>
           </div>

@@ -274,7 +274,10 @@
                 return h('div', [h(Tag,{props:{color:'blue'}}, '已定时')])
               } else if (status == 6) {
                 return h('div', [h(Tag,{props:{color:'yellow'}}, '执行中')])
+              } else if (status == 7) {
+                return h('div', [h(Tag,{props:{color:'yellow'}}, '回滚中')])
               } 
+
             }
           },
           {
@@ -445,7 +448,7 @@
           let id = response.data.id
           let execute_time = response.data.execute_time
           let affected_rows = response.data.affected_rows
-          if (status != 6) {  // 停止的条件
+          if (status == -3 || status == 0 || status == 2) {  // 停止的条件
             clearInterval(this.intervalTask),function() {  // 停止定时任务
     　　		   qy();
     　　		 }

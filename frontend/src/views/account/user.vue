@@ -62,7 +62,7 @@
         </Row>
         <Row>
           <Col span="24">      
-            <FormItem label="权限：">          
+            <FormItem label="数据库权限：">          
               <Transfer
                 filterable
                 :data="permissionList"
@@ -131,7 +131,7 @@
         </Row>
         <Row>
           <Col span="24">
-            <FormItem label="权限：">          
+            <FormItem label="数据库权限：">          
               <Transfer
                 :data="updateUserForm.permissionList"
                 :target-keys="targetKeysupdate"
@@ -168,7 +168,7 @@
         width="450"
         :title="showPermisson.title">
         <div class="modalcontent">
-          <p v-for="item in showPermisson.permissions" :value="item.id" :key="item.id">{{ item.name }}</p>
+          <p v-for="item in showPermisson.permissions" :value="item.label" :key="item.label">{{ item.label }}</p>
         </div>
     </Modal>      
 
@@ -205,7 +205,7 @@
           width: '300px',
           height: '300px'
         },
-        transferTitles: ['系统权限', '用户权限'],
+        transferTitles: ['可选', '已选'],
         permissionList:[],
         groupList:[],
         roleList:[
@@ -308,10 +308,18 @@
                         },
                         on: {
                           click: () => {
-                            console.log(params.row)
                             this.showPermisson.modal = true
                             this.showPermisson.title = params.row.username + ' 用户权限'
-                            this.showPermisson.permissions = params.row.perms
+                            let perms = params.row.perms
+                            let permissions= []
+                            for (let perm of perms) {
+                              for (let p of this.permissionList) {
+                                if (perm.id == p.key) {
+                                  permissions.push(p)
+                                }
+                              }
+                            }
+                            this.showPermisson.permissions = permissions 
                           }
                         }
                     }, '查看')
@@ -388,7 +396,7 @@
                           let sourceperms = []
                           let permissionList = this.permissionList
                           for ( let i in permissionList) {
-                            if (contains(userperms, permissionList[i].id) == false ){
+                            if (contains(userperms, permissionList[i].id) == false ) {
                               sourceperms.push(permissionList[i])
                             }
                           }
@@ -510,7 +518,7 @@
           let sysaccount = this.createSysaccount
           let data = this.createUserForm
           data = this.getSysaccount(sysaccount, data)
-          data.user_permissions = this.targetKeysCreate
+          data.db_id_list = this.targetKeysCreate
           CreateUser(data)
           .then(response => {
             let httpstatus = response.status
@@ -531,7 +539,7 @@
           let sysaccount = this.updateSysaccount
           let data = this.updateUserForm
           data = this.getSysaccount(sysaccount, data)
-          data.user_permissions = this.targetKeysupdate
+          data.db_id_list = this.targetKeysupdate
           delete data.permissionList
           UpdateUser(this.updateUserForm.id, data)
           .then(response => {
