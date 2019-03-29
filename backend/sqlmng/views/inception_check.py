@@ -14,7 +14,7 @@ class InceptionCheckView(ChangeSpecialCharacterMixin, ActionMixin, MailMixin, Ba
         SQL语法审核
     '''
     queryset = InceptionWorkOrder.objects.all()
-    serializer_class = InceptionSerializer
+    serializer_class = CheckInceptionSerializer
     serializer_order = WorkOrderSerializer
     serializer_step = StepSerializer
 
