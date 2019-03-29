@@ -274,7 +274,7 @@ class ActionMixin(HttpMixin, AppellationMixin, PromptMixin):
 
     def filter_date(self, queryset):
         date_range = self.request.GET.get('daterange')
-        if date_range:
+        if queryset and date_range:
             return queryset.filter(createtime__range=date_range.split(','))
         return queryset
 
