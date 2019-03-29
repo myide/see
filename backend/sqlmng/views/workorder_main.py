@@ -15,11 +15,16 @@ class InceptionMainView(CheckStatusMixin, ActionMixin, MailMixin, BaseView):
     '''
         查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
-    serializer_class = InceptionSerializer
+    serializer_class = ListInceptionSerializer
     serializer_step = StepSerializer
     permission_classes = [IsAuthenticated, IsHandleAble]
     search_fields = ['commiter', 'sql_content', 'env', 'treater', 'remark']
 
+    def get_serializer_class(self):
+        if self.kwargs.get('pk'):
+            return DetailInceptionSerializer
+        return ListInceptionSerializer
+    
     def get_queryset(self):
         user_instance = self.request.user
         group_instance = user_instance.groups.first()
