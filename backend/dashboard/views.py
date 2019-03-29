@@ -16,7 +16,7 @@ class ChartViewSet(HandleData, BaseView):
     queryset = InceptionWorkOrder.objects.all()
     serializer_user = UserSerializer
     serializer_group = GroupSerializer
-    serializer_class = InceptionSerializer
+    serializer_class = ListInceptionSerializer
 
     def list(self, request, *args, **kwargs):
         ret = res.get_ret()
