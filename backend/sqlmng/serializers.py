@@ -1,11 +1,11 @@
-# -*- coding:utf-8 -*-
+ -*- coding:utf-8 -*-
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 from utils.basemixins import AppellationMixin, PromptMixin, SetEncryptMixin
 from .mixins import HandleInceptionSettingsMixin
 from .models import *
 
-class InceptionSerializer(PromptMixin, serializers.ModelSerializer):
+class BaseInceptionSerializer(PromptMixin, serializers.ModelSerializer):
     admin = 'Admin'
 
     class Meta:
@@ -23,7 +23,7 @@ class InceptionSerializer(PromptMixin, serializers.ModelSerializer):
         steps = instance.work_order.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
-            updatetime = step.updatetime if step.status != 0 else ''
+            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
             group = self.get_step_user_group(step.user)
             data.append(
                 {
@@ -38,10 +38,25 @@ class InceptionSerializer(PromptMixin, serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        ret = super(InceptionSerializer, self).to_representation(instance)
+        ret = super(BaseInceptionSerializer, self).to_representation(instance)
         ret['db_name'] = instance.db.name
         ret['steps'] = self.get_step(instance)
         return ret
+
+class DetailInceptionSerializer(BaseInceptionSerializer):
+    pass
+
+class ListInceptionSerializer(BaseInceptionSerializer):
+
+    class Meta:
+        model = InceptionWorkOrder
+        exclude = ('handle_result', 'handle_result_check', 'handle_result_execute', 'handle_result_rollback')
+
+class CheckInceptionSerializer(BaseInceptionSerializer):
+
+    class Meta:
+        model = InceptionWorkOrder
+        exclude = ('handle_result', 'handle_result_execute', 'handle_result_rollback')
 
 class DbSerializer(SetEncryptMixin, serializers.ModelSerializer):
 
@@ -168,7 +183,6 @@ class DbWorkOrderSerializer(PromptMixin, serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        print('--- === ', instance, instance.treater)
         ret = super(DbWorkOrderSerializer, self).to_representation(instance)
         ret['commiter'] = instance.commiter.username
         ret['treater'] = instance.treater.username
