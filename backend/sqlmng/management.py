@@ -36,7 +36,7 @@ class AppMap(object):
                 'name': 'Can manage target database',
                 'content_type': content_type[0],
                 'codename': self.perm
-                }
+            }
             self.handle_data(Permission, data, 1)
 
 @receiver(post_migrate)

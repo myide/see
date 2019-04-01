@@ -6,6 +6,7 @@ from account.models import User
 from django.contrib.auth.models import Group
 from utils.basemodels import Basemodel
 from workflow.models import WorkOrder
+# Create your models here.
 
 ENVS = (
     ('prd', u'生产环境'),

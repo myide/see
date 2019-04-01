@@ -49,7 +49,7 @@ class Inception(object):
             result = "Mysql Error {}: {}".format(e.args[0], e.args[1])
         return {'result': result, 'status': status}
 
-    def manual(self):
+    def manual(self):  # 查询回滚库/表
         try:
             conn = pymysql.connect(db=self.db_name, charset='utf8', **self.get_inception_backup)
             cur = conn.cursor()
@@ -92,7 +92,7 @@ class HandleConn(object):
         params['port'] = int(params.get('port', 0))
         return params
 
-    def main(self, params, sql, select=False):
+    def main(self, params, sql, select=False):   # 查询目标库/表结构
         params.update(self.conn_conf)
         try:
             params = self.convert_params(params)

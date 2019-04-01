@@ -24,12 +24,11 @@ class PermissionViewSet(AppellationMixin, BaseView):
 
     def get_queryset(self):
         user = self.request.user
-        role = user.role
-        if role in [self.dev_mng, self.dev_spm]:
-            perms = user.userobjectpermission_set.all()
-            db_id_list = [int(perm.object_pk) for perm in perms if perm]
-            return self.queryset.filter(id__in=db_id_list)
-        return self.queryset
+        if user.is_superuser:
+            return self.queryset
+        perms = user.userobjectpermission_set.all()
+        db_id_list = [int(perm.object_pk) for perm in perms if perm]
+        return self.queryset.filter(id__in=db_id_list)
 
 class GroupViewSet(BaseView):
     '''
@@ -50,7 +49,7 @@ class UserViewSet(BaseView):
     '''
         系统用户CURD
     '''
-    queryset = User.objects.order_by('-id')
+    queryset = User.objects.filter(is_staff=True).order_by('-id')
     serializer_class = UserSerializer
     search_fields = ['username']
 
@@ -64,7 +63,7 @@ class UserViewSet(BaseView):
     @permission_admin
     def perform_destroy(self, instance):
         instance.delete()
-            
+
 class PersonalCenterViewSet(PromptMixin, BaseView):
     '''
         个人中心

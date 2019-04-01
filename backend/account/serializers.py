@@ -25,21 +25,23 @@ class UserSerializer(AppellationMixin, PromptMixin, SetPerm, serializers.ModelSe
         return ret
 
     def check_permission(self, validated_data):
+        update_able = False
         if not self.context:
             return
         user = self.context['request'].user
         if user.is_superuser:
             return
-        username = validated_data.get('username')
-        validated_user = User.objects.get(username=username)
+        validated_user = User.objects.get(id=validated_data.get('id'))
         role = user.role
         if role == self.dev_mng:
             if user != validated_user.leader:
-                raise PermissionDenied(self.permission_leader.format(username))
+                raise PermissionDenied(self.permission_leader.format(validated_user.username))
+            return update_able
         if role == self.dev_spm:
             group = user.groups.first()
-            if group != validated_user.groups.first():
-                raise PermissionDenied(self.permission_group.format(username))
+            if not group or group != validated_user.groups.first():
+                raise PermissionDenied(self.permission_group.format(validated_user.username))
+            return update_able
         if role == self.dev:
             raise PermissionDenied
 
@@ -52,13 +54,16 @@ class UserSerializer(AppellationMixin, PromptMixin, SetPerm, serializers.ModelSe
         return instance
 
     def update(self, instance, validated_data):
-        self.check_permission(validated_data)
-        db_id_list = validated_data.pop('db_id_list', [])
+        update_able = self.check_permission(validated_data)
+        db_id_list = validated_data.pop('db_id_list', None)
         password = validated_data.pop('password', None)
         if instance.password != password:
             instance.set_password(password)
-        UserObjectPermission.objects.filter(user=instance).delete()
-        self.create_perm(instance, db_id_list, UserObjectPermission)
+        if db_id_list is not None:
+            UserObjectPermission.objects.filter(user=instance).delete()
+            self.create_perm(instance, db_id_list, UserObjectPermission)
+        if update_able is False:
+            return
         return super(UserSerializer, self).update(instance, validated_data)
 
 class GroupSerializer(SetPerm, serializers.ModelSerializer):

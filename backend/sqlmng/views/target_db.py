@@ -6,11 +6,11 @@ from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import SqlQuery
 from utils.permissions import IsSuperUser
-from sqlmng.mixins import CheckStatusMixin, MailMixin
+from sqlmng.mixins import GuardianPermission, CheckStatusMixin, MailMixin
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class DbViewSet(BulkCreateModelMixin, BaseView):
+class DbViewSet(GuardianPermission, BulkCreateModelMixin, BaseView):
     '''
         目标数据库CURD
     '''
@@ -18,6 +18,10 @@ class DbViewSet(BulkCreateModelMixin, BaseView):
     permission_classes = [IsSuperUser]
     search_fields = ['name','host','port','user','remark']
     ret = res.get_ret()
+
+    def perform_destroy(self, instance):
+        self.delete_relation(instance)
+        instance.delete()
 
     def get_queryset(self):
         queryset = DbConf.objects.all()
@@ -44,18 +48,24 @@ class DbViewSet(BulkCreateModelMixin, BaseView):
         return Response(self.ret)
 
     @detail_route()
-    def tables(self, request, *args, **kwargs ):
+    def tables(self, request, *args, **kwargs):
         instance = self.get_object()
         tables = SqlQuery(instance).get_tables()
         self.ret['results'] = tables
         return Response(self.ret)
 
     @detail_route()
-    def table_info(self, request, *args, **kwargs ):
+    def table_info(self, request, *args, **kwargs):
         instance = self.get_object()
         table_name = request.GET.get('table_name')
         table_info = SqlQuery(instance).get_table_info(table_name)
         self.ret['results'] = table_info
+        return Response(self.ret)
+
+    @detail_route()
+    def relate_permission(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.ret['results'] = self.get_related_status(instance)
         return Response(self.ret)
 
 class DbWorkOrderViewSet(CheckStatusMixin, MailMixin, BaseView):

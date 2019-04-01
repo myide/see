@@ -3,6 +3,7 @@ import time
 import logging
 from functools import wraps
 from django.db import close_old_connections
+from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import PermissionDenied
 
 def timer(func):
@@ -34,6 +35,7 @@ def catch_exception(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
+            print('----- ', e)
             raise ParseError(e)
     return wrapper
 

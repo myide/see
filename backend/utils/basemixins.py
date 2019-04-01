@@ -83,8 +83,8 @@ class PromptMixin(object):
     not_exists_admin_mail = '请先设置 管理员组收件人'
     not_edit_status = '此状态无法修改工单'
     permission_warning = '数据库 {} 无权限'
-    permission_leader = '您不是用户 {} 的工单核准人'
-    permission_group = '用户 {} 和您不同组'
+    permission_leader = '无权限：您不是用户 {} 的工单核准人'
+    permission_group = '无权限：用户 {} 和您不同组'
 
 class SetEncryptMixin(object):
     parameter = 'password'

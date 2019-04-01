@@ -17,12 +17,12 @@ class Mail(object):
         return status_map.get(status, None)
 
     @classmethod
-    def send(cls, kwargs):
+    def send(cls, kwargs):  # mail_list：收件人；sub：主题；content：邮件内容
         source_app = kwargs.get('source_app')
         func = getattr(cls, source_app)
         title, content_html, sql_html, mail_list, personnel, remark = func(kwargs)
-        msg = MIMEText(content_html + sql_html, _subtype='html', _charset='utf-8')
-        msg['Subject'] = '{} {} {}'.format(personnel, title, remark)
+        msg = MIMEText(content_html + sql_html, _subtype='html', _charset='utf-8')  # 创建一个实例，这里设置为html格式邮件
+        msg['Subject'] = '{} {} {}'.format(personnel, title, remark)  # 设置主题
         msg['From'] = cls.mail_user
         msg['To'] = ";".join(mail_list)
         try:
@@ -32,8 +32,8 @@ class Mail(object):
             server = smtplib.SMTP(cls.smtp_host, cls.smtp_port, timeout=cls.timeout)
             server.starttls()
         try:
-            server.login(cls.mail_user, cls.mail_pass)
-            server.sendmail(cls.mail_user, mail_list, msg.as_string())
+            server.login(cls.mail_user, cls.mail_pass)  # 登陆服务器
+            server.sendmail(cls.mail_user, mail_list, msg.as_string())  # 发送邮件
             server.quit()
         except Exception as e:
             print(e)

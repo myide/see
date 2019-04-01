@@ -47,12 +47,15 @@ class PersonalSettingsViewSet(PromptMixin, BaseView):
         return [int(perm.object_pk) for perm in perms if perm]
 
     def create(self, request, *args, **kwargs):
+        # save user
         user = request.user
         user_serializer = self.serializer_class(user, data=request.data)
         user_serializer.is_valid()
         user_serializer.save()
+        # save dbconf
         cluster, dbs, env = self.check_data(request.data)
         if cluster and dbs:
+            # check permission
             group = user.groups.first()
             permission_user = self.get_permission_objects(user.userobjectpermission_set.all())
             permission_group = self.get_permission_objects(group.groupobjectpermission_set.all()) if group else []

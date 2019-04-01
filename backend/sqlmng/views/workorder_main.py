@@ -13,7 +13,7 @@ from sqlmng.tasks import task_worker
 
 class InceptionMainView(CheckStatusMixin, ActionMixin, MailMixin, BaseView):
     '''
-        查询：根据登录者身份返回相关的SQL，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
+        查询：根据登录者身份返回相关的工单，支持日期/模糊搜索。操作：执行（execute）, 回滚（rollback）,放弃（reject操作）
     '''
     serializer_class = ListInceptionSerializer
     serializer_step = StepSerializer
@@ -24,11 +24,11 @@ class InceptionMainView(CheckStatusMixin, ActionMixin, MailMixin, BaseView):
         if self.kwargs.get('pk'):
             return DetailInceptionSerializer
         return ListInceptionSerializer
-    
+
     def get_queryset(self):
         user_instance = self.request.user
         group_instance = user_instance.groups.first()
-        if user_instance.is_superuser:
+        if user_instance.is_superuser:  # 管理员
             return self.filter_date(InceptionWorkOrder.objects.all())
         instance = group_instance if user_instance.role == self.dev_spm else user_instance
         queryset = instance.inceptionworkorder_set.all() if instance else []

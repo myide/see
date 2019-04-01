@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 from utils.basemixins import AppellationMixin, PromptMixin, SetEncryptMixin
@@ -23,7 +23,7 @@ class BaseInceptionSerializer(PromptMixin, serializers.ModelSerializer):
         steps = instance.work_order.step_set.order_by('id')
         for step in steps:
             username = step.user.username if step.user else self.admin
-            updatetime = step.updatetime if step.status != 0 else ''  # 不取 待执行状态step的updatetime
+            updatetime = step.updatetime if step.status != 0 else ''
             group = self.get_step_user_group(step.user)
             data.append(
                 {
@@ -51,12 +51,6 @@ class ListInceptionSerializer(BaseInceptionSerializer):
     class Meta:
         model = InceptionWorkOrder
         exclude = ('handle_result', 'handle_result_check', 'handle_result_execute', 'handle_result_rollback')
-
-class CheckInceptionSerializer(BaseInceptionSerializer):
-
-    class Meta:
-        model = InceptionWorkOrder
-        exclude = ('handle_result', 'handle_result_execute', 'handle_result_rollback')
 
 class DbSerializer(SetEncryptMixin, serializers.ModelSerializer):
 

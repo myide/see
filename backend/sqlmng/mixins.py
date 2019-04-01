@@ -5,18 +5,35 @@ import time
 import json
 import subprocess
 import configparser
-from rest_framework.exceptions import ParseError
 from django.conf import settings
+from rest_framework.exceptions import ParseError
+from guardian.models import UserObjectPermission, GroupObjectPermission
 from utils.tasks import send_mail
 from utils.basemixins import HttpMixin, AppellationMixin, PromptMixin
 from utils.dbcrypt import prpcrypt
 from utils.basecomponent import DateEncoder
 from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import Inception, SqlQuery, AutoQuery
+from utils.exceptions import NotValid
 from utils.lock import RedisLock
 from utils.wrappers import timer
 from .data import inception_conn
 from .models import *
+
+class GuardianPermission(object):
+
+    permission_models = [UserObjectPermission, GroupObjectPermission]
+
+    def get_related_status(self, instance):
+        for model in self.permission_models:
+            if model.objects.filter(object_pk=instance.id):
+                return 1
+        return 0
+
+    def delete_relation(self, instance):
+        for model in self.permission_models:
+            queryset_permission = model.objects.filter(object_pk=instance.id)
+            queryset_permission.delete()
 
 class FixedDataMixin(object):
 
@@ -298,7 +315,7 @@ class ActionMixin(HttpMixin, AppellationMixin, PromptMixin):
             else:
                 exception_sql_list.append(error_message)
         if exception_sql_list and action_type == self.action_type_check:
-            raise ParseError({self.exception_sql_list: exception_sql_list})
+            raise NotValid(exception_sql_list)
         return success_sql_list, exception_sql_list, json.dumps(result)
 
     def replace_remark(self, instance, action=None, user=None):
@@ -335,7 +352,7 @@ class MailMixin(AppellationMixin):
         mail_list_extend = self.get_extend_mail_list(user)
         mail_list = [u.email for u in User.objects.filter(username__in=mail_users)]
         mail_list.extend(mail_list_extend)
-        mail_list = list(set(mail_list))
+        mail_list = list(set(mail_list))  # 去重
         return mail_list
 
     def mail(self, instance, mail_type, personnel, source_app):
@@ -415,11 +432,14 @@ class Handle(ActionMixin):
         self.check_rollback_able(instance)
         db_instance = instance.db
         rollback_opid_list = instance.rollback_opid
-        rollback_db = instance.rollback_db
-        back_sql_list = ''
+        rollback_db = instance.rollback_db  # 回滚库
+        # 拼接回滚语句
+        back_sql_list = ''  # 回滚语句
         for opid in eval(rollback_opid_list):
+            # 1 从回滚总表中获取表名
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
+            # 2 从回滚子表中获取回滚语句
             statement_sql = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
             rollback_statement = Inception(statement_sql, rollback_db).get_back_sql()
             if not rollback_statement:
