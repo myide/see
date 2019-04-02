@@ -35,7 +35,6 @@ def catch_exception(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            print('----- ', e)
             raise ParseError(e)
     return wrapper
 
