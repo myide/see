@@ -7,7 +7,15 @@ class SetPerm(object):
     perm = settings.PERM_DATABASE
 
     def get_perms(self, perm_list):
-        perms = [{'id': int(perm.object_pk), 'name': DbConf.objects.get(pk=perm.object_pk).name} for perm in perm_list]
+        perms = []
+        for perm in perm_list:
+            db_instance = DbConf.objects.filter(pk=perm.object_pk)
+            if db_instance:
+                item = {
+                    'id': int(perm.object_pk),
+                    'name': db_instance[0].name
+                }
+                perms.append(item)
         return perms
 
     def create_perm(self, instance, db_id_list, user_group):
