@@ -239,7 +239,7 @@ python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 ((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
 ```
 
-##### 6.6 前端打包
+##### 6.6 前端打包 (非必需操作)
 Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
 ```bash
 cnpm install
