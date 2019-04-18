@@ -89,10 +89,19 @@ class CheckConn(InceptionConn, AutoQuery):
     conf = configparser.ConfigParser()
     file_path = settings.INCEPTION_SETTINGS.get('file_path')
 
-    def handle_get_databases(self, request):
-        ret = res.get_ret()
+    def get_target_databases(self, request):
         databases = self.get_databases(request.data)
-        ret['data'] = [item[0] for item in databases]
+        return [db[0] for db in databases]
+
+    def get_alive_databases(self):
+        return [db.name for db in DbConf.objects.all()]
+
+    def get_db_list(self, request):
+        ret = res.get_ret()
+        target_databases = self.get_target_databases(request)
+        alive_databases = self.get_alive_databases()
+        databases = set(target_databases) - set(alive_databases)
+        ret['data'] = databases
         return ret
 
     def inception_conn(self, *args):
@@ -352,7 +361,7 @@ class MailMixin(AppellationMixin):
         mail_list_extend = self.get_extend_mail_list(user)
         mail_list = [u.email for u in User.objects.filter(username__in=mail_users)]
         mail_list.extend(mail_list_extend)
-        mail_list = list(set(mail_list))  # 去重
+        mail_list = list(set(mail_list))
         return mail_list
 
     def mail(self, instance, mail_type, personnel, source_app):
@@ -432,14 +441,11 @@ class Handle(ActionMixin):
         self.check_rollback_able(instance)
         db_instance = instance.db
         rollback_opid_list = instance.rollback_opid
-        rollback_db = instance.rollback_db  # 回滚库
-        # 拼接回滚语句
-        back_sql_list = ''  # 回滚语句
+        rollback_db = instance.rollback_db
+        back_sql_list = ''
         for opid in eval(rollback_opid_list):
-            # 1 从回滚总表中获取表名
             back_source = 'select tablename from $_$Inception_backup_information$_$ where opid_time = "{}" '.format(opid)
             back_table = Inception(back_source, rollback_db).get_back_table()
-            # 2 从回滚子表中获取回滚语句
             statement_sql = 'select rollback_statement from {} where opid_time = "{}" '.format(back_table, opid)
             rollback_statement = Inception(statement_sql, rollback_db).get_back_sql()
             if not rollback_statement:
