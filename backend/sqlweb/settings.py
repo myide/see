@@ -223,10 +223,16 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
+# Redis config
+REDIS_HOST = '127.0.0.1'  # redis地址
+REDIS_PORT = 6379  # redis端口
+REDIS_PASSWORD = ''  # redis密码
+
 # Lock
 LOCK = {
-    'host': '127.0.0.1',
-    'port': 6379,
+    'host': REDIS_HOST,
+    'port': REDIS_PORT,
+    'password': REDIS_PASSWORD,
     'db': 3,
     'timeout':600
 }
@@ -266,8 +272,8 @@ from celery import platforms
 from celery.schedules import crontab
 platforms.C_FORCE_ROOT = True
 djcelery.setup_loader()
-BROKER_URL = 'redis://127.0.0.1:6379/0'  # redis broker
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'  # redis backend
+BROKER_URL = 'redis://:{}@{}:{}/0'.format(REDIS_PASSWORD, REDIS_HOST, REDIS_PORT)  # redis broker
+CELERY_RESULT_BACKEND = 'redis://:{}@{}:{}/1'.format(REDIS_PASSWORD, REDIS_HOST, REDIS_PORT)  # redis backend
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
