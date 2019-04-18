@@ -298,7 +298,7 @@ chmod +x /usr/local/SOAR/bin/soar
 ### 9 设置
 打开文件 /usr/local/seevenv/see-master/backend/sqlweb/settings.py,找到以下设置并修改
 
-#### MySQL
+#### 9.1 MySQL
 ```bash
 DATABASES = {
 	'default': {
@@ -313,21 +313,21 @@ DATABASES = {
 }
 ```
 
-#### Redis
+#### 9.2 Redis
 ```bash
 REDIS_HOST = '127.0.0.1'  # redis地址
 REDIS_PORT = 6379  # redis端口
 REDIS_PASSWORD = ''  # redis密码
 ```
 
-#### Inception配置文件
+#### 9.3 Inception配置文件
 ```bash
 INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 ```
 
-#### SQLAdvisor和SOAR的路径
+#### 9.4 SQLAdvisor和SOAR的路径
 ```bash
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
@@ -335,7 +335,7 @@ OPTIMIZE_SETTINGS = {
 }
 ```
 
-#### 邮件
+#### 9.5 邮件
 ```bash
 MAIL = {
     'smtp_host': 'smtp.163.com',  # 邮件服务器
