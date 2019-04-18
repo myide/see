@@ -8,7 +8,7 @@ locals().update(settings.LOCK)
 
 class RedisLock(object):
 
-    pool = redis.ConnectionPool(host=host, port=port, db=db)
+    pool = redis.ConnectionPool(host=host, port=port, db=db, password=password)
     redis_client = redis.Redis(connection_pool=pool)
     timeout = timeout
 
