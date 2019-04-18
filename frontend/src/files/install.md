@@ -313,21 +313,21 @@ DATABASES = {
 }
 ```
 
-### Redis
+#### Redis
 ```bash
 REDIS_HOST = '127.0.0.1'  # redis地址
 REDIS_PORT = 6379  # redis端口
 REDIS_PASSWORD = ''  # redis密码
 ```
 
-### Inception配置文件
+#### Inception配置文件
 ```bash
 INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 ```
 
-# SQLAdvisor和SOAR的路径
+#### SQLAdvisor和SOAR的路径
 ```bash
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
