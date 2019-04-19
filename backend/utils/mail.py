@@ -48,7 +48,6 @@ class Mail(object):
         db_name = kwargs.get('db_name')
         status = kwargs.get('status')
         desc_cn = kwargs.get('desc_cn')
-        mail_list.append(cls.mail_user)
         title = '{} SQL工单-{}'.format(desc_cn, instance_id)
         sql_html = ''
         for s in sql_content[0:1024].split(';'):
@@ -70,7 +69,6 @@ class Mail(object):
         remark = kwargs.get('remark')
         desc_cn = kwargs.get('desc_cn')
         data_dict = kwargs.get('data_dict')
-        mail_list.append(cls.mail_user)
         title = '{}-{}'.format(desc_cn, instance_id)
         content_html = '<div><p>[配置信息]</p><p>环境：{}</p> <p>主机：{}</p> <p>端口：{}</p> <p>数据库列表：{}</p> <p>备注：{}</p></div>'.format(
             data_dict.get('env'),
