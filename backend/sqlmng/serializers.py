@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 from utils.basemixins import AppellationMixin, PromptMixin, SetEncryptMixin
-from .mixins import HandleInceptionSettingsMixin
+from .mixins import HandleInceptionSettingsMixin, PermissionDatabases
 from .models import *
 
 class BaseInceptionSerializer(PromptMixin, serializers.ModelSerializer):
@@ -76,7 +76,7 @@ class StrategySerializer(serializers.ModelSerializer):
         model = Strategy
         fields = '__all__'
 
-class PersonalSerializer(AppellationMixin, serializers.ModelSerializer):
+class PersonalSerializer(AppellationMixin, PermissionDatabases, serializers.ModelSerializer):
     username = serializers.CharField(required=False)
     password = serializers.CharField(required=False)
 
@@ -93,7 +93,7 @@ class PersonalSerializer(AppellationMixin, serializers.ModelSerializer):
         return leader
 
     def get_db_list(self, instance):
-        db_queryset = instance.dbconf_set.all()
+        db_queryset = self.filter_databases(instance.dbconf_set.all(), instance)
         db_list = []
         if db_queryset:
             for db in db_queryset:

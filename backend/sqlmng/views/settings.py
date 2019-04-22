@@ -7,7 +7,7 @@ from utils.baseviews import BaseView
 from utils.basemixins import PromptMixin
 from utils.baseviews import ReturnFormatMixin as res
 from utils.permissions import IsSuperUser
-from sqlmng.mixins import FixedDataMixin, CheckConn, HandleInceptionSettingsMixin
+from sqlmng.mixins import FixedDataMixin, CheckConn, HandleInceptionSettingsMixin, PermissionDatabases
 from sqlmng.data import *
 from sqlmng.serializers import *
 from sqlmng.models import *
@@ -43,24 +43,13 @@ class PersonalSettingsViewSet(PromptMixin, BaseView):
         env = request_data.get('env')
         return cluster, dbs, env
 
-    def get_permission_objects(self, perms):
-        return [int(perm.object_pk) for perm in perms if perm]
-
     def create(self, request, *args, **kwargs):
         user = request.user
         user_serializer = self.serializer_class(user, data=request.data)
         user_serializer.is_valid()
         user_serializer.save()
         cluster, dbs, env = self.check_data(request.data)
-        if cluster and dbs:
-            group = user.groups.first()
-            permission_user = self.get_permission_objects(user.userobjectpermission_set.all())
-            permission_group = self.get_permission_objects(group.groupobjectpermission_set.all()) if group else []
-            permission_user.extend(permission_group)
-            permission_db_list = list(set(permission_user))
-            no_permission = [DbConf.objects.get(pk=pk).name for pk in dbs if pk not in permission_db_list]
-            if no_permission:
-                raise ParseError(self.permission_warning.format(no_permission))
+        if cluster:
             alter_qs = user.dbconf_set.filter(cluster=cluster, env=env)
             for obj in alter_qs:
                 user.dbconf_set.remove(obj)

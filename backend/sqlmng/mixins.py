@@ -463,3 +463,18 @@ class Handle(ActionMixin):
         instance.status = status
         instance.handle_result_rollback = json.dumps(execute_results)
         return instance, instance.affected_rows
+
+class PermissionDatabases(object):
+
+    def get_permission_databases(self, user):
+        group = user.groups.first()
+        user_perms = user.userobjectpermission_set.all()
+        group_perms = group.groupobjectpermission_set.all() if group else []
+        user_perms_set = set([perm.object_pk for perm in user_perms])
+        group_perms_set = set([perm.object_pk for perm in group_perms])
+        return user_perms_set | group_perms_set
+
+    def filter_databases(self, db_list, user=None):
+        user = user or self.request.user
+        perm_dbs = self.get_permission_databases(user)
+        return [db for db in db_list if str(db.id) in perm_dbs]

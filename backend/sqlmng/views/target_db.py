@@ -6,11 +6,11 @@ from utils.baseviews import BaseView
 from utils.baseviews import ReturnFormatMixin as res
 from utils.sqltools import SqlQuery
 from utils.permissions import IsSuperUser
-from sqlmng.mixins import GuardianPermission, CheckStatusMixin, MailMixin
+from sqlmng.mixins import GuardianPermission, CheckStatusMixin, MailMixin, PermissionDatabases
 from sqlmng.serializers import *
 from sqlmng.models import *
 
-class DbViewSet(GuardianPermission, BulkCreateModelMixin, BaseView):
+class DbViewSet(PermissionDatabases, GuardianPermission, BulkCreateModelMixin, BaseView):
     '''
         目标数据库CURD
     '''
@@ -24,11 +24,14 @@ class DbViewSet(GuardianPermission, BulkCreateModelMixin, BaseView):
         instance.delete()
 
     def get_queryset(self):
+        user = self.request.user
         queryset = DbConf.objects.all()
         env = self.request.GET.get('env')
         if env:
             queryset = queryset.filter(env=env)
-        return queryset
+        if user.is_superuser:
+            return queryset
+        return self.filter_databases(queryset)
 
     @detail_route(methods=['post'], permission_classes=[])
     def sql_advisor(self, request, *args, **kwargs):

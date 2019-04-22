@@ -22,17 +22,11 @@ class IsHandleAble(HttpMixin, AppellationMixin, permissions.BasePermission):
         return approve_step_instance.user
 
     def has_object_permission(self, request, view, obj):
-        """
-            在调get_object()时检查该权限（get_object -- check_object_permissions -- has_object_permission）
-        """
         user = request.user
         env = obj.env
         is_manual_review = obj.is_manual_review
         role = self.admin if user.is_superuser else user.role
         action = self.get_urls_action(request)
-        '''
-            验证规则
-        '''
         if (request.method in SAFE_METHODS and action not in reject_perms + approve_perms + handle_perms) or env == self.env_test:
             return True
         if obj.is_manual_review is True:
@@ -53,4 +47,5 @@ class IsHandleAble(HttpMixin, AppellationMixin, permissions.BasePermission):
             perm_serializer = AuthRulesSerializer(perm_obj)
             return perm_serializer.data.get(action)
         except Exception as e:
+            print(e)
             return False

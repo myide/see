@@ -28,7 +28,7 @@ class InceptionMainView(CheckStatusMixin, ActionMixin, MailMixin, BaseView):
     def get_queryset(self):
         user_instance = self.request.user
         group_instance = user_instance.groups.first()
-        if user_instance.is_superuser:  # 管理员
+        if user_instance.is_superuser:
             return self.filter_date(InceptionWorkOrder.objects.all())
         instance = group_instance if user_instance.role == self.dev_spm else user_instance
         queryset = instance.inceptionworkorder_set.all() if instance else []
