@@ -309,7 +309,7 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
-### 10 设置（可以不修改，使用以下的默认配置）
+### 10 设置（非必需操作）
 打开文件 /usr/local/seevenv/see-master/backend/sqlweb/settings.py,找到以下设置并修改
 
 #### 10.1 MySQL
