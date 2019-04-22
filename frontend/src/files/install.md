@@ -7,12 +7,12 @@
 
 ### 部署清单
      1. Mysql
-     2. Inception
-     3. Sqladvisor
-     4. Redis
-     5. Nginx
-     6. See项目
-
+     2. pt-online-schema-change
+     3. Inception
+     4. Sqladvisor
+     5. Redis
+     6. Nginx
+     7. See项目
 
 ### 1 Mysql
 ##### 1.1 安装过程略
