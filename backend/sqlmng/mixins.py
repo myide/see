@@ -227,7 +227,7 @@ class CheckStatusMixin(HttpMixin, AppellationMixin, PromptMixin):
 
 class ActionMixin(HttpMixin, AppellationMixin, PromptMixin):
 
-    type_select_tag = '^select'
+    type_select_tag = 'select'
     action_type_execute = '--enable-execute'
     action_type_check = '--enable-check'
     success_tag = 'Execute Successfully\nBackup successfully'
