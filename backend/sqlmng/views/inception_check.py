@@ -72,7 +72,7 @@ class InceptionCheckView(ChangeSpecialCharacterMixin, ActionMixin, MailMixin, Ba
         request_data['treater'] = request_data.pop('treater_username')
         request_data['is_manual_review'] = self.get_strategy_is_manual_review(request_data.get('env'))
         sql_content = request_data.get('sql_content')
-        select = re.search(self.type_select_tag, sql_content, re.IGNORECASE)
+        select = re.search('^'+self.type_select_tag, sql_content, re.IGNORECASE)
         self.check_forbidden_words(sql_content)
         if bool(select):
             if sql_list_count > 1:
