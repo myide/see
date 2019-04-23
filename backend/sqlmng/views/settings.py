@@ -117,5 +117,4 @@ class ShowDatabasesView(CheckConn, APIView):
     '''
     def post(self, request, *args, **kwargs):
         ret = self.get_db_list(request)
-        print(ret)
         return Response(ret)
