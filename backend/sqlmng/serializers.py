@@ -39,6 +39,7 @@ class BaseInceptionSerializer(PromptMixin, serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super(BaseInceptionSerializer, self).to_representation(instance)
+        ret['cluster'] = instance.db.cluster.name
         ret['db_name'] = instance.db.name
         ret['steps'] = self.get_step(instance)
         return ret
