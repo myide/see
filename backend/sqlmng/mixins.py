@@ -477,4 +477,4 @@ class PermissionDatabases(object):
     def filter_databases(self, db_list, user=None):
         user = user or self.request.user
         perm_dbs = self.get_permission_databases(user)
-        return [db for db in db_list if str(db.id) in perm_dbs]
+        return db_list.filter(pk__in=[int(pk) for pk in perm_dbs])
