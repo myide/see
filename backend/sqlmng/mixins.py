@@ -93,13 +93,18 @@ class CheckConn(InceptionConn, AutoQuery):
         databases = self.get_databases(request.data)
         return [db[0] for db in databases]
 
-    def get_alive_databases(self):
-        return [db.name for db in DbConf.objects.all()]
+    def get_alive_databases(self, cluster, env):
+        queryset = DbConf.objects.filter(env=env)
+        if cluster:
+            queryset = queryset.filter(cluster_id=cluster)
+        return [db.name for db in queryset]
 
     def get_db_list(self, request):
         ret = res.get_ret()
+        cluster = request.data.pop('cluster')
+        env = request.data.pop('env')
         target_databases = self.get_target_databases(request)
-        alive_databases = self.get_alive_databases()
+        alive_databases = self.get_alive_databases(cluster, env)
         databases = set(target_databases) - set(alive_databases)
         ret['data'] = databases
         return ret
@@ -171,6 +176,13 @@ class HandleInceptionSettingsMixin(InceptionConn):
         sub_cmd = "inception set {}={}".format(variable_name, variable_value)
         cmd = self.get_cmd(sub_cmd)
         subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    def get_osc_data(self, request):
+        sha = request.GET.get('sha')
+        sub_cmd = "inception get osc_percent '{}'".format(sha)
+        cmd = self.get_cmd(sub_cmd)
+        data = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        return data.stdout.readlines()
 
 class CheckStatusMixin(HttpMixin, AppellationMixin, PromptMixin):
 
@@ -478,3 +490,22 @@ class PermissionDatabases(object):
         user = user or self.request.user
         perm_dbs = self.get_permission_databases(user)
         return db_list.filter(pk__in=[int(pk) for pk in perm_dbs])
+
+class OSC(object):
+
+    @classmethod
+    def get_osc_status(cls, handle_result_check):
+        handle_result_check = json.loads(handle_result_check)
+        status = False
+        for i in handle_result_check:
+            sha = i[-1]
+            if sha:
+                status = True
+                break
+        return status
+
+    @classmethod
+    def get_osc_sha(cls, instance):
+        handle_result_check = json.loads(instance.handle_result_check)
+        data = [{'sql':i[5], 'sha':i[-1]} for i in handle_result_check if i[-1]]
+        return data
