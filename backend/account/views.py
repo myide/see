@@ -103,6 +103,7 @@ class UnitaryAuthView(UnitaryAuth, APIView):
     def post(self, request, *args, **kwargs):
         if not self.authenticate:
             raise AuthenticationFailed
+        request.data.update({'is_staff':True})
         serializer = self.serializer_class(data=request.data)
         user_query = self.serializer_class.Meta.model.objects.filter(username=request.data.get('username'))
         if user_query:
