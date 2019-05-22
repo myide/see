@@ -37,7 +37,7 @@ class IsHandleAble(HttpMixin, AppellationMixin, permissions.BasePermission):
                 if approve_user == user:
                     raise PermissionDenied(PromptMixin.require_different)
             elif action in approve_perms:
-                if approve_user != user:
+                if approve_user != user and role != self.dev_spm:
                     raise PermissionDenied(PromptMixin.require_same)
         return self.check_perm(env, is_manual_review, role, action)
 
