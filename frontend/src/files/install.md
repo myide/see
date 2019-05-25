@@ -263,7 +263,7 @@ cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392
 npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即是打包后产生的前端文件，用于nginx部署
 ```
 
-##### 7.7 创建管理员用户
+##### 7.7 创建管理员用户 (可用于页面的用户登录)
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
