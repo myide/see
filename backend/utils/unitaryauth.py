@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import requests
+from utils.ldaptools import LdapSee
 
 class UnitaryAuth(object):
 
@@ -11,14 +11,7 @@ class UnitaryAuth(object):
             :return: True/False
         '''
         data = self.request.data
-
-        '''
-            请求认证接口, 示例如下:
-        '''
-        auth_data = {
-            'username':data.get('username'),
-            'password':data.get('password')
-        }
-        url ='http://127.0.0.1:8090/api/api-token-auth/'
-        res = requests.post(url, json=auth_data)
-        return True if res.ok else False
+        ldap = LdapSee()
+        ret = ldap.check(data.get('username'), data.get('password'))
+        status = ret['status']
+        return True if status == 0 else False

@@ -176,7 +176,7 @@ WSGI_APPLICATION = 'sqlweb.wsgi.application'
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
-	'default': {
+    'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sqlweb',
         'USER': 'root',
@@ -184,7 +184,7 @@ DATABASES = {
         'HOST':'127.0.0.1',
         'PORT':'3306',
         'OPTIONS': {'charset':'utf8mb4'},
-	},
+    },
 }
 
 # Password validation
@@ -223,8 +223,14 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
-# Redis config
-REDIS_HOST = '127.0.0.1'  # redis地址
+# LDAP
+LDAP = {
+    'host': "127.0.0.1",  # LDAP服务器地址
+    'port': 389  # LDAP端口
+}
+
+# Redis
+REDIS_HOST = '127.0.0.1'  # redis服务器地址
 REDIS_PORT = 6379  # redis端口
 REDIS_PASSWORD = ''  # redis密码
 
