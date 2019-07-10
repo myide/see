@@ -185,7 +185,7 @@ daemonize yes
 ##### 7.1 安装依赖
 
 ```bash
-yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel
+yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel openldap-clients openldap-devel openssl-devel
 ```
 
 ##### 7.2 下载并安装python3.6
