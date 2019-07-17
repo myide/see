@@ -94,7 +94,7 @@ class CheckConn(InceptionConn, AutoQuery):
         return [db[0] for db in databases]
 
     def get_alive_databases(self, cluster, env):
-        queryset = DbConf.objects.filter(env=env)
+        queryset = DbConf.objects.filter(env=env, host=host)
         if cluster:
             queryset = queryset.filter(cluster_id=cluster)
         return [db.name for db in queryset]
@@ -103,8 +103,9 @@ class CheckConn(InceptionConn, AutoQuery):
         ret = res.get_ret()
         cluster = request.data.pop('cluster')
         env = request.data.pop('env')
+        host = request.data.get('host')
         target_databases = self.get_target_databases(request)
-        alive_databases = self.get_alive_databases(cluster, env)
+        alive_databases = self.get_alive_databases(cluster, env, host)
         databases = set(target_databases) - set(alive_databases)
         ret['data'] = databases
         return ret
