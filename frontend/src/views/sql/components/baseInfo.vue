@@ -73,7 +73,8 @@
             <p v-else-if="row.status == 3" > <Tag color="blue">审批通过</Tag> </p>
             <p v-else-if="row.status == 4" > <Tag color="yellow">审批驳回</Tag> </p>
             <p v-else-if="row.status == 5" > <Tag color="blue">已定时</Tag> </p>
-            <p v-else-if="row.status == 6" > <Tag color="blue">执行中</Tag> </p>
+            <p v-else-if="row.status == 6" > <Tag color="yellow">执行中</Tag> </p>
+            <p v-else-if="row.status == 7" > <Tag color="yellow">回滚中</Tag> </p>
           </Col>
         </Row>
         <Row>

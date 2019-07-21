@@ -7,12 +7,12 @@
 
 ### 部署清单
      1. Mysql
-     2. pt-online-schema-change
-     3. Inception
-     4. Sqladvisor
-     5. Redis
-     6. Nginx
-     7. See项目
+     2. Inception
+     3. Sqladvisor
+     4. Redis
+     5. Nginx
+     6. See项目
+
 
 ### 1 Mysql
 ##### 1.1 安装过程略
@@ -24,22 +24,8 @@ log_bin = mysql-bin
 binlog_format = row  # 或 MIXED
 ```
 
-### 2 pt-online-schema-change
-##### 在线修改表结构的工具
-```bash
-yum install -y perl-DBI perl-DBD-mysql perl-Time-HiRes
-wget https://www.percona.com/get/percona-toolkit.tar.gz
-tar -zxvf percona-toolkit.tar.gz
-cd percona-toolkit-3.0.13
-perl Makefile.PL
-make
-make install
-ln -s /usr/local/bin/pt-online-schema-change /usr/bin/
-
-```
-
-### 3 Inception
-##### 3.1 安装
+### 2 Inception
+##### 2.1 安装
 ```bash
 yum -y install cmake libncurses5-dev libssl-dev g++ bison gcc gcc-c++ openssl-devel ncurses-devel mysql MySQL-python
 wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
@@ -57,7 +43,7 @@ sh inception_build.sh builddir linux
 
 ```
 
-##### 3.2 修改配置
+##### 2.2 修改配置
 创建文件 /etc/inc.cnf ,内容如下 
 ```ini
 [inception]
@@ -84,20 +70,20 @@ inception_enable_blob_type=1
 inception_check_column_default_value=1 
 ```
 
-##### 3.3 启动服务
+##### 2.3 启动服务
 ```bash
 nohup /usr/local/inception-master/builddir/mysql/bin/Inception --defaults-file=/etc/inc.cnf &
 ```
 
-### 4 Sqladvisor
+### 3 Sqladvisor
 
-##### 4.1 克隆代码
+##### 3.1 克隆代码
 ```bash
 cd /usr/local/src/
 git clone https://github.com/Meituan-Dianping/SQLAdvisor.git
 ```
 
-##### 4.2 安装依赖
+##### 3.2 安装依赖
 ```bash
 yum install -y cmake libaio-devel libffi-devel glib2 glib2-devel bison
 # 移除mysql-community库(无用途且和Percona-Server有冲突)
@@ -113,39 +99,39 @@ make && make install
 
 ```
 
-##### 4.3 编译sqladvisor(源码目录)
+##### 3.3 编译sqladvisor(源码目录)
 ```bash
 cd ./sqladvisor/
 cmake -DCMAKE_BUILD_TYPE=debug ./
 make
 ```
 
-##### 4.4 完成测试
+##### 3.4 完成测试
 ```bash
 cp /usr/local/src/SQLAdvisor/sqladvisor/sqladvisor /usr/bin/sqladvisor
 sqladvisor -h 127.0.0.1  -P 3306  -u root -p '123456' -d test -q "sql语句" -v 1
 ```
 
-##### 4.5 官方文档学习
+##### 3.5 官方文档学习
 ```bash
 https://github.com/Meituan-Dianping/SQLAdvisor/blob/master/doc/QUICK_START.md
 ```
 
-### 5 Redis
+### 4 Redis
 
-##### 5.1 安装
+##### 4.1 安装
 ```bash
 yum install -y redis
 ```
-##### 5.2 配置 /etc/redis.conf
+##### 4.2 配置 /etc/redis.conf
 ```ini
 daemonize yes
 ```
 
-### 6 Nginx
-##### 6.1 安装过程略
+### 5 Nginx
+##### 5.1 安装过程略
 
-##### 6.2 配置
+##### 5.2 配置
 修改Nginx配置文件 nginx.conf, 使server部分的内容如下
 ```
  server
@@ -180,15 +166,15 @@ daemonize yes
 
 ```
 
-### 7 See
+### 6 See
 
-##### 7.1 安装依赖
+##### 6.1 安装依赖
 
 ```bash
-yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel openldap-clients openldap-devel openssl-devel
+yum install -y readline readline-devel gcc gcc-c++ zlib zlib-devel openssl openssl-devel sqlite-devel python-devel
 ```
 
-##### 7.2 下载并安装python3.6
+##### 6.2 下载并安装python3.6
 
 ```bash
 wget https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tgz
@@ -209,7 +195,7 @@ echo '/usr/local/lib' >> /etc/ld.so.conf
 
 ```
 
-##### 7.3 安装Django及See后端
+##### 6.3 安装Django及See后端
 步骤
 ```bash
 cd /usr/local/
@@ -223,8 +209,8 @@ pip install -r requirements.txt --trusted-host mirrors.aliyun.com -i https://mir
 
 ```
 
-##### 7.4 创建数据库
-确保mysql的root密码为 123456 (如需修改，可参考步骤10.1)
+##### 6.4 创建数据库
+确保mysql的root密码为 123456
 
 ```bash
 mysql -uroot -p123456 -e "create database sqlweb CHARACTER SET utf8;"
@@ -235,8 +221,8 @@ python manage.py migrate
 
 ```
 
-##### 7.5 执行命令创建inception库
-###### 7.5.1 创建测试库，测试表
+##### 6.5 执行命令创建inception库
+###### 6.5.1 创建测试库，测试表
 ```
 mysql -uroot -p123456  # 登录数据库
 mysql> CREATE DATABASE pro1;
@@ -246,14 +232,14 @@ mysql> CREATE TABLE IF NOT EXISTS pro1.mytable1 (
    PRIMARY KEY ( `id` )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
-###### 7.5.2 执行测试脚本
+###### 6.5.2 执行测试脚本
 ```
 python /usr/local/seevenv/see-master/backend/utils/inception_test.py
 # 有类似如下返回即可
 ((1, 'RERUN', 0, 'Execute Successfully', 'None', 'use pro1', 0, "'1537264031_2_0'", 'None', '0.000', ''), (2, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_1'", '127_0_0_1_3306_pro1', '0.000', ''), (3, 'EXECUTED', 0, 'Execute Successfully\nBackup successfully', 'None', 'insert into mytable1 (myname) values ("xianyu1"),("xianyu2")', 2, "'1537264031_2_2'", '127_0_0_1_3306_pro1', '0.000', ''))
 ```
 
-##### 7.6 前端打包 (非必需操作)
+##### 6.6 前端打包 (非必需操作)
 Nginx配置里包含了已打包的前端文件，如需自己生成前端文件，可执行以下步骤
 ```bash
 cnpm install
@@ -263,13 +249,13 @@ cnpm install emmet@git+https://github.com/cloud9ide/emmet-core.git#41973fcc70392
 npm run build  # 打包, 目录 /usr/local/seevenv/see-master/frontend/dist 即是打包后产生的前端文件，用于nginx部署
 ```
 
-##### 7.7 创建管理员用户 (可用于页面的用户登录)
+##### 6.7 创建管理员用户
 ```bash
 python manage.py createsuperuser --username admin --email admin@domain.com
 ```
 
-### 8 解决python3下pymysql对inception支持的问题
-##### 8.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
+### 7 解决python3下pymysql对inception支持的问题
+##### 7.1 解决报错 ValueError: invalid literal for int() with base 10: 'Inception2'
 ```
 # 查找pymysql源码修改connections.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/connections.py
 
@@ -288,7 +274,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
             self.client_flag |= CLIENT.MULTI_RESULTS
 
 ```
-##### 8.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
+##### 7.2 解决 Inception始终反馈”Must start as begin statement”的语法错误
 ```
 # 查找pymysql源码修改cursors.py文件，/usr/local/seevenv/lib/python3.6/site-packages/pymysql/cursors.py
 
@@ -301,7 +287,7 @@ python manage.py createsuperuser --username admin --email admin@domain.com
         pass  
 ```
 
-### 9 安装SOAR
+### 8 安装SOAR
 ```bash
 mkdir -p /usr/local/SOAR/bin/
 cp /usr/local/seevenv/see-master/frontend/src/files/soar /usr/local/SOAR/bin
@@ -309,10 +295,10 @@ chmod +x /usr/local/SOAR/bin/soar
 
 ```
 
-### 10 设置（非必需操作）
+### 9 设置
 打开文件 /usr/local/seevenv/see-master/backend/sqlweb/settings.py,找到以下设置并修改
 
-#### 10.1 MySQL
+#### 9.1 MySQL
 ```bash
 DATABASES = {
 	'default': {
@@ -327,21 +313,21 @@ DATABASES = {
 }
 ```
 
-#### 10.2 Redis
+#### 9.2 Redis
 ```bash
 REDIS_HOST = '127.0.0.1'  # redis地址
 REDIS_PORT = 6379  # redis端口
 REDIS_PASSWORD = ''  # redis密码
 ```
 
-#### 10.3 Inception配置文件
+#### 9.3 Inception配置文件
 ```bash
 INCEPTION_SETTINGS = {
     'file_path': '/etc/inc.cnf'
 }
 ```
 
-#### 10.4 SQLAdvisor和SOAR的路径
+#### 9.4 SQLAdvisor和SOAR的路径
 ```bash
 OPTIMIZE_SETTINGS = {
     'sqladvisor_cli': '/usr/bin/sqladvisor',
@@ -349,7 +335,7 @@ OPTIMIZE_SETTINGS = {
 }
 ```
 
-#### 10.5 邮件
+#### 9.5 邮件
 ```bash
 MAIL = {
     'smtp_host': 'smtp.163.com',  # 邮件服务器
@@ -361,7 +347,7 @@ MAIL = {
 
 ```
 
-### 11 对接统一认证系统（非必需操作）
+### 10 对接统一认证系统
 ```bash
 需要自定义访问统一认证接口的方法, 详见文件 /usr/local/seevenv/see-master/backend/utils/unitaryauth.py,
 修改authenticate的内容为自定义的方法即可。
@@ -370,7 +356,7 @@ MAIL = {
 2. 根据请求接口的结果(成功/失败)，定义authenticate的返回值(True/False)即可
 ```
 
-### 12 启动所有服务
+### 11 启动所有服务
 ```bash
 # mysql  3306端口
 /etc/init.d/mysqld start
@@ -398,4 +384,3 @@ http://xxx.xxx.xxx.xxx:81/    # see 项目
 http://xxx.xxx.xxx.xxx:81/api/docs/  # see api 文档
 
 ##### 推荐用Chrome浏览器访问
-

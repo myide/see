@@ -56,20 +56,38 @@
                 您可以在设置里指定常用的数据库及leader，提交工单时只显示这些数据供您选择。
               </p>
               <p>
-                <b>1</b>.  关于工单核准人
+                <b>1</b>.  关于数据库
               </p>
               <p class="left20">
-                <b>1.1</b>. 研发角色：工单核准人是同组的经理（角色/组 在用户管理里设置）。
+                <b>1.1</b>. 根据选择的集群/环境，列出用户（或其所在的组）有权限的数据库。
+              </p>
+              <div class="left20">
+                <p>
+                  <b>1.2</b>. 如果在此没有您所需的数据库，需要做到：
+                </p>
+                <p class="left20">
+                  <b>1.2.1</b> 在目标库管理页添加该数据库。
+                </p>
+                <p class="left20">
+                  <b>1.2.2</b> 在用户管理页设置用户（或其所在的组）的数据库权限。
+                </p>
+              </div>
+              <p>
+                <b>2</b>.  关于工单核准人
               </p>
               <p class="left20">
-                <b>1.2</b>. 经理/总监/管理员角色：工单核准人是自己。
+                <b>2.1</b>. 研发角色：工单核准人是同组的经理（角色/组 在用户管理里设置）。
+              </p>
+              <p class="left20">
+                <b>2.2</b>. 经理/总监/管理员角色：工单核准人是自己。
               </p>
               <p>
-                <b>2</b>.  关于管理员组收件人
+                <b>3</b>.  关于管理员组收件人
               </p>
               <p class="left20">
-                <b>2.1</b>. 指定接收工单邮件的管理员。
+                <b>3.1</b>. 指定接收工单邮件的管理员。
               </p>
+
             </template>
             </Alert>
           </div>
@@ -105,6 +123,12 @@
           admin_mail:null,
           mail_list_extend:''
         },
+        getMaxParams:{
+          page:1,
+          pagesize:10000,
+          search:'',
+        }
+
       }
     },
 
@@ -139,9 +163,7 @@
       },
 
       handleInitData () {
-        this.handleSelect()
         this.handleGetClusterList()
-        this.handleGetPersonalSettings()
       },
 
       handleChange (e) {
@@ -152,11 +174,6 @@
         }
         this.handleSelect()
         this.handleGetPersonalSettings()
-      },
-
-      handleGetMailActions () {
-        
-
       },
 
       handleGetPersonalSettings () {
@@ -186,7 +203,7 @@
 
       handleGetClusterList () {
         this.spinShow = true
-        GetClusterList(this.getClusterParams)
+        GetClusterList(this.getMaxParams)
         .then(
           res => {
             this.spinShow = false
@@ -206,7 +223,8 @@
         this.personalSettings.cluster = this.queryParams.cluster
         this.personalSettings.env = this.queryParams.env
         const data = this.personalSettings
-        CreatePersonalSettings (data)  
+        console.log(this.personalSettings.dbs)
+        CreatePersonalSettings (data)
         .then(
           response => {
             let httpstatus = response.status

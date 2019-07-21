@@ -14,7 +14,7 @@
       </Row>
       </br>
       <Row>
-        <Col span="22">
+        <Col span="23">
           <Table :columns="columnsDbList" :data="dbList" size="small"></Table>
         </Col>
       </Row>
@@ -36,14 +36,14 @@
             <Col span="12">
               <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
                 <FormItem label="所属集群：" prop="cluster">
-                  <Select v-model="createDbForm.cluster" filterable>
+                  <Select v-model="createDbForm.cluster" filterable @on-change="clearDatabases">
                     <Option v-for="item in clusterList" :value="item.id" :key="item.id">{{ item.name }}</Option>
                   </Select>
                 </FormItem>
                 <FormItem label="环境：" prop="env">
                   <Select v-model="createDbForm.env">
-                    <Option value="prd" >生产</Option>
-                    <Option value="test" >测试</Option>
+                    <Option value="prd">生产</Option>
+                    <Option value="test">测试</Option>
                   </Select>
                 </FormItem>
                 <FormItem label="地址：" prop="host">
@@ -67,16 +67,24 @@
             <Col span="12">
               <Form ref="createDbForm" :model="createDbForm" :rules="ruleCreateDbForm" :label-width="100">
                 <FormItem label="数据库：" prop="cluster">
-                  <Select v-model="databases" filterable multiple :placeholder="selectPlaceholder">
-                    <Option v-for="item in databaseList" :value="item" :key="item">{{ item }}</Option>
-                  </Select>
+                  <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
+                    <Checkbox
+                      :indeterminate="indeterminate"
+                      :value="checkAll"
+                      @click.prevent.native="handleCheckAll">全选</Checkbox>
+                  </div>
+                  <div style="height:300px;overflow-x:auto">
+                    <CheckboxGroup v-model="databases" @on-change="checkAllGroupChange">
+                      <Checkbox v-for="item in databaseList" :value="item" :key="item" :label="item"></Checkbox>
+                    </CheckboxGroup>
+                  </div>
                 </FormItem>
               </Form>
             </Col>
             
           </Row>
         </div>
-      </Modal>      
+    </Modal>      
 
     <Modal
         v-model="updateModal"
@@ -127,7 +135,12 @@
         @on-ok="handleDeleteDb"
         @on-cancel="cancel">
         <div>
-          <p> 删除数据库配置 <b>{{dbName}}</b> ？</p>
+          <div v-if="permission_relate == 1">
+            <p> 数据库 <b>{{dbName}}</b> 已关联用户/组，是否继续删除 </p>
+          </div>
+          <div v-else>
+            <p> 删除数据库配置 <b>{{dbName}}</b> ？ </p>
+          </div>
         </div>
     </Modal>      
 
@@ -135,6 +148,7 @@
 </template>
 <script>
   import {Button, Table, Modal, Message, Tag} from 'iview';
+  import {GetTableRelatedStatus} from '@/api/sql/sqlquery'
   import {GetDbList, UpdateDb, CreateDb, DeleteDb, CheckConn, GetDatabases} from '@/api/sql/dbs'
   import {GetClusterList} from '@/api/sql/cluster'
   import copyright from '../my-components/public/copyright'
@@ -143,12 +157,16 @@
     components: {Button, Table, Modal, Message, Tag, copyright},
     data () {
       return {
-        spinShow: false,
-        deleteModal: false,
-        createModal: false,
-        updateModal: false,
-        search: '',
-        selectPlaceholder:'空',
+        spinShow:false,
+        deleteModal:false,
+        createModal:false,
+        updateModal:false,
+        search:'',
+        // 待选择的数据库
+        indeterminate: true,
+        checkAll: false,
+        // get permission relate
+        permission_relate:'',
         // 数据库配置数据
         databaseList:[],
         databases:[],
@@ -201,7 +219,8 @@
           },
           {
             title: '数据库地址',
-            key: 'host'
+            key: 'host',
+            width: 130,
           },
           {
             title: '端口',
@@ -271,6 +290,7 @@
                         this.deleteModal = true
                         this.deleteId = params.row.id
                         this.dbName = params.row.name
+                        this.getPermissionRelate(params.row.id)
                       }
                     }
                   }, '删除')
@@ -293,7 +313,7 @@
         },
         getClusterParams:{
           page:1,
-          pagesize:1000,
+          pagesize:10000,
           search:'',
         },
       }
@@ -304,6 +324,37 @@
     },
 
     methods: {
+
+      clearDatabases () {
+        this.databases = []
+      },
+
+      handleCheckAll () {
+        if (this.indeterminate) {
+          this.checkAll = false;
+        } else {
+          this.checkAll = !this.checkAll;
+        }
+        this.indeterminate = false;
+        if (this.checkAll) {
+          this.databases = this.databaseList;
+        } else {
+          this.databases = [];
+        }
+      },
+
+      checkAllGroupChange (data) {
+        if (data.length === this.databaseList.length) {
+          this.indeterminate = false;
+          this.checkAll = true;
+        } else if (data.length > 0) {
+          this.indeterminate = true;
+          this.checkAll = false;
+        } else {
+          this.indeterminate = false;
+          this.checkAll = false;
+        }
+      },
 
       initData () {
         this.handleGetClusterList()
@@ -320,16 +371,23 @@
         this.initData()
       },
 
+      getPermissionRelate (id) {
+        GetTableRelatedStatus (id)
+        .then(
+          res => {
+            this.permission_relate = res.data.results
+          })
+      },
+
       createCheckConn () {
-        console.log(111)
         this.$refs.createDbForm.validate((valid) => {
           if (!valid) {
             return
           }
-          console.log(222)
           const data = {
             //check_type: 'create_target_db',
-            //db: this.createDbForm.name,
+            cluster: this.createDbForm.cluster,
+            env: this.createDbForm.env,            
             host: this.createDbForm.host,
             port: this.createDbForm.port,
             user: this.createDbForm.user,
@@ -338,9 +396,7 @@
           GetDatabases(data)
           .then(
           res => {
-            console.log(res)
             this.databaseList = res.data.data
-            this.selectPlaceholder = "请选择"
           })
         })
       },
@@ -384,7 +440,6 @@
           }
           let data = []
           for (let dbName of this.databases) {
-            console.log(dbName)
             //let item = this.createDbForm
             let item = {}
             item.name = dbName
@@ -396,7 +451,6 @@
             item.password = this.createDbForm.password            
             data.push(item)
           }
-          console.log(data)
           CreateDb(data)  
           .then(
             res => {

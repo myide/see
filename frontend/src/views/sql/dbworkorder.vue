@@ -16,7 +16,7 @@
       </Row>
       </br>
       <Row>
-        <Col span="22">
+        <Col span="23">
           <Table :columns="columnsDbWorkOrderList" :data="dbWorkOrderList" size="small"></Table>
         </Col>
       </Row>
@@ -296,7 +296,7 @@
         dbList:[],
         getMaxParams:{
           page:1,
-          pagesize:1000,
+          pagesize:10000,
           search:'',
         },
         getMinParams:{

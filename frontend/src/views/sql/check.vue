@@ -1,3 +1,4 @@
+
 <style scoped>
   .parm_check_element {
     width: 400px;
@@ -5,6 +6,12 @@
   }
   .left20 {
     margin-left: 20px
+  }
+  .checkException {
+    background: black;
+    color:white;
+    max-height:360px; 
+    overflow-y:auto
   }
 
 </style>
@@ -85,6 +92,16 @@
     </Card>
     <copyright> </copyright>
 
+    <Modal
+        v-model="showException"
+        width="800"
+        :styles="{right: '10px'}"
+        title="SQL语法错误">
+        <div class="checkException">
+          <div v-for="item in exceptionList" :value="item" :key="item">{{ item }}</div>
+        </div>
+    </Modal>    
+
   </div>
 </template>
 <script>
@@ -97,7 +114,9 @@
     components: {editor, copyright},
     data () {
       return {
+        showException:false,
         readonly:true,
+        exceptionList:[],
         wordList:[],
         env_map: {
           prd:'生产',
@@ -239,6 +258,12 @@
                 this.warning('SQL审核不通过', msg)
               } 
             })
+            .catch(err => {
+              let exceptionSQL = err.response.request.response.replace('[', '').replace(']', '')
+              this.exceptionList = exceptionSQL.split(',')
+              this.showException = true
+            })
+
           })
         })
 

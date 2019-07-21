@@ -24,3 +24,7 @@ export function GetSqlSOAR (id, data) {
         data: data
     });
 }
+
+export function GetTableRelatedStatus (id) {
+    return axios.get(dbConfs + id + '/relate_permission/');
+}

@@ -16,7 +16,7 @@
       </Row>
       </br>
       <Row>
-        <Col span="22">
+        <Col span="23">
           <Table :columns="columnsClusterList" :data="clusterList" size="small"></Table>
         </Col>
       </Row>
@@ -260,7 +260,7 @@
         dbList:[],
         getDbParams:{
           page:1,
-          pagesize:1000,
+          pagesize:10000,
           search:'',
         },
         getClusterParams:{
@@ -346,7 +346,6 @@
         GetDbList(this.getDbParams)
         .then(
           res => {
-            console.log(res)
             this.spinShow = false
             this.dbList = res.data.results
           }
@@ -358,7 +357,6 @@
         GetClusterList(this.getClusterParams)
         .then(
           res => {
-            console.log(res)
             this.spinShow = false
             this.clusterList = res.data.results
             this.total = res.data.count

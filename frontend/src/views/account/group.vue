@@ -16,8 +16,8 @@
       </Row>
       </br>
       <Row>
-        <Col span="22">
-          <Table :columns="columnsUser" :data="groupList"></Table>
+        <Col span="23">
+          <Table :columns="columnsUser" :data="groupList" size="small"></Table>
         </Col>
       </Row>
       </br>
@@ -67,7 +67,7 @@
             </FormItem>
           </Col>
         </Row>
-        <FormItem label="权限：">          
+        <FormItem label="数据库权限：">          
           <Transfer
             :data="updateGroupForm.sourcePerms"
             :target-keys="updateGroupForm.db_id_list"
@@ -125,7 +125,7 @@
           width: '300px',
           height: '300px'
         },
-        transferTitles:['系统权限', '组权限'],
+        transferTitles:['可选', '已选'],
         permissionList:[],
         groupList:[],
         // 显示组权限或成员
@@ -178,7 +178,7 @@
                         on: {
                           click: () => {
                             this.showContent.modal = true
-                            this.showContent.title = params.row.name + ' 权限'
+                            this.showContent.title = params.row.name + ' 数据库权限'
                             let permissions= []
                             for (let perm of data) {
                               for (let p of this.permissionList) {

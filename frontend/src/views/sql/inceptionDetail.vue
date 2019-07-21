@@ -389,7 +389,7 @@
             let id = response.data.id
             let execute_time = response.data.execute_time
             let affected_rows = response.data.affected_rows
-            if (status != 6) {  // 停止的条件
+            if (status == -3 || status == 0 || status == 2) {  // 停止的条件
               clearInterval(this.intervalTask),function() {  // 停止定时任务
       　　		   qy();
       　　		 }
@@ -439,7 +439,6 @@
           let data = {cron_time:cron_time}
           let id = this.cronForm.id
           let action = 'cron'
-          console.log(11111)
           SetCron(id, action, data)
           .then(response => {
             const status = response.status

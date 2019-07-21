@@ -16,8 +16,8 @@
       </Row>
       </br>
       <Row>
-        <Col span="22">
-          <Table :columns="columnsUser" :data="userList"></Table>
+        <Col span="23">
+          <Table :columns="columnsUser" :data="userList" size="small"></Table>
         </Col>
       </Row>
       </br>
@@ -27,7 +27,7 @@
 
     <Modal
       v-model="createModal"
-      width="800"
+      width="900"
       title="创建用户"
       @on-ok="handleCreateUser"
       @on-cancel="cancel">
@@ -54,7 +54,7 @@
           </Col>
           <Col span="12">
             <FormItem label="属组：">
-              <Select v-model="createUserForm.groups[0]">
+              <Select v-model="createUserForm.groups[0]" filterable>
                 <Option v-for="item in groupList" :value="item.value" :key="item.value">{{ item.label }}</Option>
               </Select>
             </FormItem>
@@ -96,7 +96,7 @@
 
     <Modal
       v-model="updateModal"
-      width="800"
+      width="900"
       title="修改用户"
       @on-ok="handleUpdateUser"
       @on-cancel="cancel">
@@ -434,7 +434,13 @@
           page:1,
           pagesize:10,
           search:'',
-        }
+        },
+        getMaxParams:{
+          page:1,
+          pagesize:10000,
+          search:'',
+        },
+
       }
     },
 
@@ -510,6 +516,7 @@
         }
         return data
       },
+
       handleCreateUser () {
         this.$refs.createUserForm.validate((valid) => {
           if (!valid) {
@@ -531,6 +538,7 @@
           })
         })
       },
+      
       handleUpdateUser () {
         this.$refs.updateUserForm.validate((valid) => {
           if (!valid) {
@@ -587,7 +595,7 @@
       },
 
       handleGetGroupList () {
-        GetGroupList(this.getParams)
+        GetGroupList(this.getMaxParams)
         .then(response => {
           this.groupsFormat(response.data.results)
         })

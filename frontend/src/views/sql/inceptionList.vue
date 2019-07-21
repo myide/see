@@ -104,9 +104,7 @@
     computed:{
     },
     destroyed () {
-      clearInterval(this.intervalTask),function() {  // 停止定时任务
-  　　	qy();
-  　　}　
+      this.stopQueryTask()
     },
     data () {
       return {
@@ -146,7 +144,7 @@
         columnsSqlList: [
           {
             title: 'ID',
-            width: 60,
+            width: 80,
             render: (h, params) => {
               return h('router-link', {props:{to:'/inceptionsql/'+params.row.id}}, params.row.id)
             }
@@ -154,7 +152,7 @@
 
           {
             title: '提交时间',
-            width: 150,
+            width: 160,
             render: (h, params) => {
               return h('div', [
                 h('span', {}, params.row.createtime.split('.')[0].replace('T',' ')),
@@ -164,6 +162,7 @@
 
           {
             title: '发起人',
+            width: 160,
             key: 'commiter'
           },
 
@@ -181,8 +180,12 @@
           },
 
           {
-            title: '目标库',
-            key: 'db_name',
+            title: '集群/目标库',
+            render: (h, params) => {
+              const cluster = params.row.cluster
+              const db_name = params.row.db_name
+              return h('div', {}, cluster + ' / ' + db_name)
+            }
           },
 
           {
@@ -282,7 +285,7 @@
           },
           {
             title: '操作',
-            width: 150,
+            width: 130,
             align: 'center',
             render: (h, params) => {
               const id = params.row.id
@@ -337,6 +340,12 @@
     methods: {
       getColor(status){
         return this.stepStatusMap[status]['color']
+      },
+
+      stopQueryTask() {
+        clearInterval(this.intervalTask),function() {  // 停止定时任务
+　　		   qy();
+　　		 }
       },
 
       alertSuccess (title, paramId, execute_time, affected_rows) {
@@ -440,18 +449,16 @@
           that.querytask(id, action)
         }, 1000)
       },
+
       querytask (id, action) {
         GetSqlDetail(id)
         .then(response => {
-          console.log(response)
           let status = response.data.status
           let id = response.data.id
           let execute_time = response.data.execute_time
           let affected_rows = response.data.affected_rows
           if (status == -3 || status == 0 || status == 2) {  // 停止的条件
-            clearInterval(this.intervalTask),function() {  // 停止定时任务
-    　　		   qy();
-    　　		 }
+            this.stopQueryTask()
             if (action == 'execute') {
               if (status == 0) {
                 this.alertSuccess('执行成功', id, execute_time, affected_rows)

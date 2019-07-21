@@ -97,7 +97,7 @@
                   <Checkbox label="执行"></Checkbox>
                   <Checkbox label="回滚"></Checkbox>
                   <Checkbox label="审批通过"></Checkbox>
-                  <Checkbox label="审批拒绝"></Checkbox>
+                  <Checkbox label="审批驳回"></Checkbox>
                 </CheckboxGroup>
               </FormItem>
               <FormItem label="操作">
