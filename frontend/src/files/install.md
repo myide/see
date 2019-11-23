@@ -27,7 +27,7 @@ binlog_format = row  # 或 MIXED
 ### 2 pt-online-schema-change
 ##### 在线修改表结构的工具
 ```bash
-yum install -y perl-DBI perl-DBD-mysql perl-Time-HiRes
+yum install -y perl-DBI perl-DBD-mysql perl-Time-HiRes perl-ExtUtils-MakeMaker
 wget https://www.percona.com/get/percona-toolkit.tar.gz
 tar -zxvf percona-toolkit.tar.gz
 cd percona-toolkit-3.0.13
